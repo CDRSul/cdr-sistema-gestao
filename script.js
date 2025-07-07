@@ -6,7 +6,7 @@
 // ==================== CONFIGURAÇÕES ====================
 
 // URL do Google Apps Script
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxb999xR_nS_O4S2Tud3SjAZWhvU6Lhd8r_TmM595PU3lw0eBfedIxnsnsguJDc-FTA/exec';
 
 // Variáveis globais
 let currentUser = null;
@@ -82,8 +82,9 @@ async function login() {
         }
         
     } catch (error) {
-        console.error('Erro no login:', error);
-        showMessage('Erro de conexão. Tente novamente.', 'error');
+        console.error('ERRO DETALHADO NO LOGIN:', error);
+    // A linha abaixo vai mostrar o erro real na interface do site
+        showMessage(`Erro de Conexão: ${error.message}. Verifique o console (F12).`, 'error');
     }
 }
 
@@ -584,7 +585,7 @@ async function makeRequest(action, data) {
     
     console.log('Enviando requisição:', action, requestData);
     
-    const response = await fetch(APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec';, {
+    const response = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
