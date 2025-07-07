@@ -6,7 +6,7 @@
 // ==================== CONFIGURAÇÕES ====================
 
 // URL do Google Apps Script
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxb999xR_nS_O4S2Tud3SjAZWhvU6Lhd8r_TmM595PU3lw0eBfedIxnsnsguJDc-FTA/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwUmNhYU3M5WvqY1zrdPBzW-QmiuQ0_P83fBblLSxB5FrucepsA6w5j4VXmOB3PpziI/exec';
 
 // Variáveis globais
 let currentUser = null;
