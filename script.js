@@ -584,7 +584,7 @@ async function makeRequest(action, data) {
     
     console.log('Enviando requisição:', action, requestData);
     
-    const response = await fetch(APPS_SCRIPT_URL, {
+    const response = await fetch(APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec';, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
