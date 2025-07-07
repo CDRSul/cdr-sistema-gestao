@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão de Projetos CDR Sul</title>
+    <style>
+        /* ===== VARIÁVEIS CSS ===== */
+        :root {
+            --primary-color: #2c5530;
+            --secondary-color: #4a7c59;
+            --accent-color: #6fa8dc;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --warning-color: #ffc107;
+            --light-bg: #f8f9fa;
+            --dark-text: #333;
+            --border-color: #ddd;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --border-radius: 8px;
+        }
+
+        /* ===== RESET E BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-text);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* ===== CONTAINER PRINCIPAL ===== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .logo {
+            max-width: 120px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        /* ===== SEÇÕES ===== */
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        .section h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+
+        /* ===== FORMULÁRIOS ===== */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-text);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(111, 168, 220, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* ===== BOTÕES ===== */
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: var(--accent-color);
+        }
+
+        .btn-secondary:hover {
+            background: #5a9bd4;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* ===== NAVEGAÇÃO POR ABAS ===== */
+        .tabs {
+            display: flex;
+            background: var(--light-bg);
+            border-radius: var(--border-radius);
+            padding: 5px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            min-width: 120px;
+        }
+
+        .tab:hover {
+            background: rgba(44, 85, 48, 0.1);
+        }
+
+        .tab.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* ===== CARDS DE ESTATÍSTICAS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card h3 {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .stat-card p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* ===== TABELAS ===== */
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: var(--light-bg);
+        }
+
+        /* ===== MENSAGENS ===== */
+        .message {
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            font-weight: 600;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+            box-shadow: var(--shadow);
+        }
+
+        .message.success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .message.error {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .message.warning {
+            background: var(--warning-color);
+            color: var(--dark-text);
+        }
+
+        /* ===== LOADING ===== */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ===== MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1500;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: var(--error-color);
+        }
+
+        /* ===== USER INFO ===== */
+        .user-info {
+            background: var(--light-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .user-info h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .admin-badge {
+            background: var(--error-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        /* ===== ADMIN PANEL ===== */
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .admin-stat-card {
+            background: linear-gradient(135deg, var(--accent-color), #5a9bd4);
+            color: white;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+
+        .admin-stat-card h4 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .admin-stat-card p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .data-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 15px;
+        }
+
+        .data-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 10px;
+        }
+
+        .data-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: white;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            margin-top: 20px;
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        /* ===== RESPONSIVIDADE ===== */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                margin-bottom: 5px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+                padding: 20px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+
+        /* ===== UTILITÁRIOS ===== */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .flex-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <!-- NOVA LOGO ATUALIZADA -->
+            <img src="https://static.wixstatic.com/media/96b2d1_82005fa5efee493fb11c905fa9b56a83~mv2.png" alt="CDR Sul Tocantins" class="logo">
+            <h1>Sistema de Gestão de Projetos CDR Sul</h1>
+            <p>Tudo sobre o seu projeto, reunido em um só lugar</p>
+        </div>
+
+        <!-- Seção de Login -->
+        <div id="loginSection" class="section">
+            <h2>Acesso ao Sistema</h2>
+            <form onsubmit="event.preventDefault(); login();">
+                <div class="form-group">
+                    <label for="loginEmail">E-mail:</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Senha:</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-full">Entrar</button>
+            </form>
+            <div class="text-center mt-20">
+                <p>Não tem conta? <a href="#" onclick="showRegister()" style="color: var(--accent-color); font-weight: 600;">Cadastre-se aqui</a></p>
+            </div>
+        </div>
+
+        <!-- Seção de Cadastro -->
+        <div id="registerSection" class="section" style="display: none;">
+            <h2>Cadastro de Usuário</h2>
+            <form onsubmit="event.preventDefault(); register();">
+                <div class="form-group">
+                    <label for="registerName">Nome Completo:</label>
+                    <input type="text" id="registerName" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">E-mail:</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerInstitution">Instituição:</label>
+                    <input type="text" id="registerInstitution" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerProject">Nome do Projeto:</label>
+                    <input type="text" id="registerProject" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Senha:</label>
+                    <input type="password" id="registerPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerConfirmPassword">Confirmar Senha:</label>
+                    <input type="password" id="registerConfirmPassword" required>
+                </div>
+                <button type="submit" class="btn btn-full">Cadastrar</button>
+            </form>
+            <div class="text-center mt-20">
+                <p>Já tem conta? <a href="#" onclick="showLogin()" style="color: var(--accent-color); font-weight: 600;">Faça login aqui</a></p>
+            </div>
+        </div>
+
+        <!-- Dashboard Principal -->
+        <div id="dashboardSection" class="section" style="display: none;">
+            <!-- Informações do Usuário -->
+            <div class="user-info">
+                <h3>Bem-vindo, <span id="userName">Usuário</span>!</h3>
+                <p>Projeto: <span id="userProject">Projeto</span></p>
+                <button onclick="logout()" class="btn btn-secondary btn-small">Sair</button>
+            </div>
+
+            <!-- Navegação por Abas -->
+            <div class="tabs">
+                <button id="overviewTab" class="tab active" onclick="showTab('overview')">Visão Geral</button>
+                <button id="reportsTab" class="tab" onclick="showTab('reports')">Relatórios</button>
+                <button id="activitiesTab" class="tab" onclick="showTab('activities')">Atividades</button>
+                <button id="filesTab" class="tab" onclick="showTab('files')">Arquivos</button>
+                <button id="adminTab" class="tab" onclick="showTab('admin')" style="display: none;">Admin</button>
+            </div>
+
+            <!-- Aba: Visão Geral -->
+            <div id="overviewSection">
+                <h3>Resumo do Projeto</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="userReports">0</h3>
+                        <p>Relatórios Enviados</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="userActivities">0</h3>
+                        <p>Atividades Cadastradas</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="userFiles">0</h3>
+                        <p>Arquivos Enviados</p>
+                    </div>
+                </div>
+                <p><strong>Última atualização:</strong> <span id="lastUpdate">-</span></p>
+            </div>
+
+            <!-- Aba: Relatórios -->
+            <div id="reportsSection" style="display: none;">
+                <h3>Enviar Relatório</h3>
+                <form onsubmit="event.preventDefault(); submitReport();">
+                    <div class="form-group">
+                        <label for="reportType">Tipo de Relatório:</label>
+                        <select id="reportType" required>
+                            <option value="">Selecione...</option>
+                            <option value="parcial">Relatório Parcial</option>
+                            <option value="final">Relatório Final</option>
+                            <option value="atividade">Relatório de Atividade</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="reportDate">Data do Relatório:</label>
+                        <input type="date" id="reportDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="reportTitle">Título:</label>
+                        <input type="text" id="reportTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reportDescription">Descrição:</label>
+                        <textarea id="reportDescription" placeholder="Descreva as atividades realizadas..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="reportFiles">Arquivos (PDF, DOC, DOCX):</label>
+                        <input type="file" id="reportFiles" multiple accept=".pdf,.doc,.docx">
+                    </div>
+                    <button type="submit" class="btn btn-full">Enviar Relatório</button>
+                </form>
+            </div>
+
+            <!-- Aba: Atividades -->
+            <div id="activitiesSection" style="display: none;">
+                <h3>Cadastrar Atividade</h3>
+                <form onsubmit="event.preventDefault(); submitActivity();">
+                    <div class="form-group">
+                        <label for="activityDate">Data da Atividade:</label>
+                        <input type="date" id="activityDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="activityType">Tipo de Atividade:</label>
+                        <select id="activityType" required>
+                            <option value="">Selecione...</option>
+                            <option value="reuniao">Reunião</option>
+                            <option value="workshop">Workshop</option>
+                            <option value="palestra">Palestra</option>
+                            <option value="curso">Curso</option>
+                            <option value="evento">Evento</option>
+                            <option value="visita">Visita Técnica</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="activityTitle">Título da Atividade:</label>
+                        <input type="text" id="activityTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="activityDescription">Descrição:</label>
+                        <textarea id="activityDescription" placeholder="Descreva a atividade realizada..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="activityLocation">Local:</label>
+                        <input type="text" id="activityLocation" placeholder="Local onde foi realizada">
+                    </div>
+                    <div class="form-group">
+                        <label for="activityParticipants">Participantes:</label>
+                        <textarea id="activityParticipants" placeholder="Liste os participantes..."></textarea>
+                    </div>
+                    <!-- CAMPO DE ARQUIVOS PARA ATIVIDADES -->
+                    <div class="form-group">
+                        <label for="activityFiles">Arquivos da Atividade (Fotos, Documentos, etc.):</label>
+                        <input type="file" id="activityFiles" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif">
+                    </div>
+                    <button type="submit" class="btn btn-full">Cadastrar Atividade</button>
+                </form>
+            </div>
+
+            <!-- Aba: Arquivos -->
+            <div id="filesSection" style="display: none;">
+                <h3>Enviar Arquivos</h3>
+                <form onsubmit="event.preventDefault(); uploadFiles();">
+                    <div class="form-group">
+                        <label for="fileCategory">Categoria:</label>
+                        <select id="fileCategory" required>
+                            <option value="">Selecione...</option>
+                            <option value="documento">Documentos</option>
+                            <option value="foto">Fotos</option>
+                            <option value="relatorio">Relatórios</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fileDescription">Descrição:</label>
+                        <textarea id="fileDescription" placeholder="Descreva os arquivos..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="uploadFiles">Arquivos:</label>
+                        <input type="file" id="uploadFiles" multiple>
+                    </div>
+                    <button type="submit" class="btn btn-full">Enviar Arquivos</button>
+                </form>
+            </div>
+
+            <!-- Aba: Admin -->
+            <div id="adminSection" style="display: none;">
+                <h3>Painel Administrativo</h3>
+                
+                <!-- Estatísticas Gerais -->
+                <div class="admin-stats">
+                    <div class="admin-stat-card">
+                        <h4 id="totalUsers">0</h4>
+                        <p>Total de Usuários</p>
+                    </div>
+                    <div class="admin-stat-card">
+                        <h4 id="totalReports">0</h4>
+                        <p>Total de Relatórios</p>
+                    </div>
+                    <div class="admin-stat-card">
+                        <h4 id="totalActivities">0</h4>
+                        <p>Total de Atividades</p>
+                    </div>
+                    <div class="admin-stat-card">
+                        <h4 id="totalFiles">0</h4>
+                        <p>Total de Arquivos</p>
+                    </div>
+                </div>
+
+                <!-- Lista de Usuários -->
+                <h4>Usuários Cadastrados</h4>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>Instituição</th>
+                                <th>Projeto</th>
+                                <th>Relatórios</th>
+                                <th>Atividades</th>
+                                <th>Arquivos</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable">
+                            <tr>
+                                <td colspan="8">Carregando dados...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Relatórios Recentes -->
+                <h4 class="mt-20">Relatórios Recentes</h4>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Usuário</th>
+                                <th>Tipo</th>
+                                <th>Título</th>
+                                <th>Arquivos</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportsTable">
+                            <tr>
+                                <td colspan="5">Carregando dados...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Atividades Recentes -->
+                <h4 class="mt-20">Atividades Recentes</h4>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Usuário</th>
+                                <th>Tipo</th>
+                                <th>Título</th>
+                                <th>Local</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activitiesTable">
+                            <tr>
+                                <td colspan="5">Carregando dados...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Desenvolvido pela equipe do CDR Sul Tocantins - Versão 2.7 Final</p>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
+
