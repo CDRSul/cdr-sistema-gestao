@@ -1,8 +1,12 @@
 /**
  * Sistema de Gestão de Projetos CDR Sul - JavaScript Frontend
- * Versão 2.7 - FINAL CORRIGIDA
+ * Versão 3.1 - CORRIGIDA FINAL
  * 
- * IMPORTANTE: Substitua a URL abaixo pela sua URL do Google Apps Script
+ * CORREÇÕES IMPLEMENTADAS:
+ * - Persistência de sessão (não perde login no F5)
+ * - Nome do projeto correto para admin
+ * - Melhor tratamento de erros
+ * - Upload de arquivos corrigido
  */
 
 // ===== CONFIGURAÇÕES =====
@@ -15,18 +19,32 @@ let isAdmin = false;
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Sistema CDR Sul iniciado - Versão 2.7 Final');
-    
-    // Sempre limpar dados e iniciar na tela de login
-    localStorage.removeItem('cdr_current_user');
-    currentUser = null;
-    isAdmin = false;
+    console.log('Sistema CDR Sul iniciado - Versão 3.1 Corrigida Final');
     
     initializeApp();
 });
 
 function initializeApp() {
-    // SEMPRE mostrar tela de login primeiro
+    // VERIFICAR SE HÁ SESSÃO SALVA
+    const savedSession = localStorage.getItem('cdr_current_user');
+    
+    if (savedSession) {
+        try {
+            const sessionData = JSON.parse(savedSession);
+            currentUser = sessionData.user;
+            isAdmin = sessionData.isAdmin;
+            
+            console.log('✅ Sessão recuperada:', currentUser.email);
+            showDashboard();
+            updateUserInfo();
+            return;
+        } catch (error) {
+            console.log('❌ Erro ao recuperar sessão:', error);
+            localStorage.removeItem('cdr_current_user');
+        }
+    }
+    
+    // Se não há sessão, mostrar login
     showLogin();
     console.log('Sistema iniciado na tela de login');
     
@@ -51,13 +69,17 @@ async function testConnection() {
             if (data.version) {
                 console.log('📡 Versão do servidor:', data.version);
             }
+            
+            if (data.message) {
+                console.log('📢 Mensagem do servidor:', data.message);
+            }
         } else {
             console.warn('⚠️ Resposta não OK:', response.status);
         }
         
     } catch (error) {
         console.error('❌ Erro de conectividade:', error);
-        showMessage('Aviso: Verifique sua conexão com a internet. O sistema pode não funcionar corretamente.', 'warning');
+        showMessage('Aviso: Problemas de conectividade detectados. Algumas funcionalidades podem não funcionar.', 'warning');
     }
 }
 
@@ -162,12 +184,18 @@ async function login() {
             // VERIFICAR SE É ADMIN - APENAS cdrsultocantins@unirg.edu.br
             isAdmin = (email === ADMIN_EMAIL);
             
+            // CORRIGIR NOME DO PROJETO PARA ADMIN
+            if (isAdmin && currentUser.email === ADMIN_EMAIL) {
+                currentUser.project = 'Sistema de Gestão de Projetos CDR Sul';
+            }
+            
             console.log('✅ Login bem-sucedido. É admin?', isAdmin);
             
-            // Salvar sessão
+            // SALVAR SESSÃO PERSISTENTE
             localStorage.setItem('cdr_current_user', JSON.stringify({
                 user: currentUser,
-                isAdmin: isAdmin
+                isAdmin: isAdmin,
+                timestamp: new Date().getTime()
             }));
             
             showMessage('Login realizado com sucesso!', 'success');
@@ -177,12 +205,12 @@ async function login() {
             }, 1000);
             
         } else {
-            showMessage(response.message || 'Erro ao fazer login', 'error');
+            showMessage(response.message || 'Erro ao fazer login. Verifique suas credenciais.', 'error');
         }
         
     } catch (error) {
         console.error('❌ Erro no login:', error);
-        showMessage('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+        showMessage('Erro de conexão com o servidor. Verifique sua internet e tente novamente.', 'error');
     }
     
     showLoading(false);
@@ -242,12 +270,12 @@ async function register() {
             }, 2000);
             
         } else {
-            showMessage(response.message || 'Erro ao cadastrar usuário', 'error');
+            showMessage(response.message || 'Erro ao cadastrar usuário. Tente novamente.', 'error');
         }
         
     } catch (error) {
         console.error('❌ Erro no cadastro:', error);
-        showMessage('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+        showMessage('Erro de conexão com o servidor. Verifique sua internet e tente novamente.', 'error');
     }
     
     showLoading(false);
@@ -296,12 +324,19 @@ async function submitReport() {
                 return;
             }
             
-            const base64 = await fileToBase64(file);
-            files.push({
-                name: file.name,
-                type: file.type,
-                content: base64
-            });
+            try {
+                const base64 = await fileToBase64(file);
+                files.push({
+                    name: file.name,
+                    type: file.type,
+                    content: base64
+                });
+            } catch (fileError) {
+                console.error('Erro ao processar arquivo:', fileError);
+                showMessage(`Erro ao processar arquivo ${file.name}`, 'error');
+                showLoading(false);
+                return;
+            }
         }
         
         const response = await sendRequest({
@@ -321,7 +356,7 @@ async function submitReport() {
             clearReportForm();
             loadUserData(); // Atualizar estatísticas
         } else {
-            showMessage(response.message || 'Erro ao enviar relatório', 'error');
+            showMessage(response.message || 'Erro ao enviar relatório. Tente novamente.', 'error');
         }
         
     } catch (error) {
@@ -369,12 +404,19 @@ async function submitActivity() {
                 return;
             }
             
-            const base64 = await fileToBase64(file);
-            files.push({
-                name: file.name,
-                type: file.type,
-                content: base64
-            });
+            try {
+                const base64 = await fileToBase64(file);
+                files.push({
+                    name: file.name,
+                    type: file.type,
+                    content: base64
+                });
+            } catch (fileError) {
+                console.error('Erro ao processar arquivo:', fileError);
+                showMessage(`Erro ao processar arquivo ${file.name}`, 'error');
+                showLoading(false);
+                return;
+            }
         }
         
         const response = await sendRequest({
@@ -396,7 +438,7 @@ async function submitActivity() {
             clearActivityForm();
             loadUserData(); // Atualizar estatísticas
         } else {
-            showMessage(response.message || 'Erro ao cadastrar atividade', 'error');
+            showMessage(response.message || 'Erro ao cadastrar atividade. Tente novamente.', 'error');
         }
         
     } catch (error) {
@@ -445,12 +487,19 @@ async function uploadFiles() {
                 return;
             }
             
-            const base64 = await fileToBase64(file);
-            fileArray.push({
-                name: file.name,
-                type: file.type,
-                content: base64
-            });
+            try {
+                const base64 = await fileToBase64(file);
+                fileArray.push({
+                    name: file.name,
+                    type: file.type,
+                    content: base64
+                });
+            } catch (fileError) {
+                console.error('Erro ao processar arquivo:', fileError);
+                showMessage(`Erro ao processar arquivo ${file.name}`, 'error');
+                showLoading(false);
+                return;
+            }
         }
         
         const response = await sendRequest({
@@ -468,7 +517,7 @@ async function uploadFiles() {
             clearFileForm();
             loadUserData(); // Atualizar estatísticas
         } else {
-            showMessage(response.message || 'Erro ao fazer upload', 'error');
+            showMessage(response.message || 'Erro ao fazer upload. Tente novamente.', 'error');
         }
         
     } catch (error) {
@@ -683,10 +732,10 @@ async function loadUserData() {
         
         if (response.success) {
             // Atualizar cards de estatísticas
-            document.getElementById('userReports').textContent = response.data.reports;
-            document.getElementById('userActivities').textContent = response.data.activities;
-            document.getElementById('userFiles').textContent = response.data.files;
-            document.getElementById('lastUpdate').textContent = formatDate(response.data.lastUpdate);
+            document.getElementById('userReports').textContent = response.data.reports || 0;
+            document.getElementById('userActivities').textContent = response.data.activities || 0;
+            document.getElementById('userFiles').textContent = response.data.files || 0;
+            document.getElementById('lastUpdate').textContent = formatDate(response.data.lastUpdate || new Date());
         }
         
     } catch (error) {
@@ -749,7 +798,7 @@ async function sendRequest(data, retries = 3) {
                             name: 'CDR Sul Tocantins',
                             email: 'cdrsultocantins@unirg.edu.br',
                             institution: 'UNIRG',
-                            project: 'Sistema Demo',
+                            project: 'Sistema de Gestão de Projetos CDR Sul',
                             isDemo: true
                         }
                     };
@@ -872,5 +921,4 @@ document.addEventListener('submit', function(e) {
     e.preventDefault(); // Prevenir envio padrão de todos os formulários
 });
 
-console.log('✅ Sistema CDR Sul carregado - Versão 2.7 Final com Nova Logo e Correções');
-
+console.log('✅ Sistema CDR Sul carregado - Versão 3.1 Corrigida Final com Persistência de Sessão');
