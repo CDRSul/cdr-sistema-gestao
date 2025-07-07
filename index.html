@@ -45,10 +45,11 @@
         }
 
         .logo {
-            width: 100px;
+            width: 150px;
             height: auto;
-            margin-bottom: 15px;
-            border-radius: 8px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         .login-header h1 {
@@ -179,9 +180,10 @@
         }
 
         .header-logo {
-            width: 50px;
+            width: 80px;
             height: auto;
-            border-radius: 6px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .user-info h2 {
@@ -387,6 +389,14 @@
 
         /* ===== RESPONSIVIDADE ===== */
         @media (max-width: 768px) {
+            .logo {
+                width: 120px;
+            }
+
+            .header-logo {
+                width: 60px;
+            }
+
             .login-header h1 {
                 font-size: 1.7rem;
             }
@@ -429,16 +439,20 @@
         }
 
         @media (max-width: 480px) {
+            .logo {
+                width: 100px;
+            }
+
+            .header-logo {
+                width: 50px;
+            }
+
             .login-container {
                 padding: 15px;
             }
 
             .login-form-container {
                 padding: 20px 15px;
-            }
-
-            .logo {
-                width: 70px;
             }
 
             .login-header h1 {
@@ -553,6 +567,27 @@
             font-size: 0.8rem;
             margin-top: 4px;
         }
+
+        /* ===== ALERTA DE ERRO ===== */
+        .error-alert {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #feb2b2;
+            font-size: 0.9rem;
+        }
+
+        .success-alert {
+            background: #c6f6d5;
+            color: #2f855a;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #9ae6b4;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -562,8 +597,8 @@
     
     <script>
         /**
-         * Sistema de Gestão de Projetos CDR Sul - Frontend ULTRA SIMPLES
-         * Versão CORRIGIDA - 100% Compatível
+         * Sistema de Gestão de Projetos CDR Sul - Frontend FINAL
+         * Versão CORRIGIDA - Logo maior e conexão estável
          */
 
         // ===== CONFIGURAÇÃO =====
@@ -575,7 +610,7 @@
 
         // ===== INICIALIZAÇÃO =====
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('✅ Sistema CDR Sul carregado - Versão ULTRA SIMPLES');
+            console.log('✅ Sistema CDR Sul carregado - Versão FINAL CORRIGIDA');
             
             // Verificar usuário salvo
             const savedUser = localStorage.getItem('cdr_user');
@@ -607,11 +642,30 @@
                 if (response.ok) {
                     const data = await response.json();
                     console.log('✅ Conectividade OK:', data.version);
+                    showAlert('Conectividade OK: ' + data.version, 'success');
                 } else {
                     console.log('⚠️ Resposta não OK:', response.status);
+                    showAlert('Problema de conectividade. Status: ' + response.status, 'error');
                 }
             } catch (error) {
                 console.log('❌ Erro de conectividade:', error);
+                showAlert('Erro de conexão com o servidor. Verifique se o Google Apps Script foi atualizado.', 'error');
+            }
+        }
+
+        // ===== MOSTRAR ALERTA =====
+        function showAlert(message, type = 'error') {
+            const alertClass = type === 'success' ? 'success-alert' : 'error-alert';
+            const alertHtml = `<div class="${alertClass}">${message}</div>`;
+            
+            // Adicionar alerta no topo da tela de login se existir
+            const loginContainer = document.querySelector('.login-form-container');
+            if (loginContainer) {
+                const existingAlert = loginContainer.querySelector('.error-alert, .success-alert');
+                if (existingAlert) {
+                    existingAlert.remove();
+                }
+                loginContainer.insertAdjacentHTML('afterbegin', alertHtml);
             }
         }
 
@@ -648,7 +702,7 @@
                     </div>
                     
                     <div class="footer">
-                        <p>Desenvolvido pela equipe do CDR Sul Tocantins - Versão 3.0 Ultra Simples</p>
+                        <p>Desenvolvido pela equipe do CDR Sul Tocantins - Versão 4.0 Final</p>
                     </div>
                 </div>
             `;
@@ -719,6 +773,8 @@
             console.log('🔐 Tentando login:', email);
             
             try {
+                showAlert('Conectando...', 'success');
+                
                 const result = await sendRequest({
                     action: 'login',
                     email: email,
@@ -731,11 +787,11 @@
                     localStorage.setItem('cdr_user', JSON.stringify(currentUser));
                     showDashboard(currentUser);
                 } else {
-                    alert('Erro no login: ' + result.message);
+                    showAlert('Erro no login: ' + result.message, 'error');
                 }
             } catch (error) {
                 console.error('❌ Erro no login:', error);
-                alert('Erro de conexão. Verifique sua internet e tente novamente.');
+                showAlert('Erro de conexão. Verifique se o Google Apps Script foi atualizado corretamente.', 'error');
             }
         }
 
@@ -751,13 +807,15 @@
             const confirmPassword = document.getElementById('registerConfirmPassword').value;
             
             if (password !== confirmPassword) {
-                alert('As senhas não coincidem!');
+                showAlert('As senhas não coincidem!', 'error');
                 return;
             }
             
             console.log('📝 Tentando cadastro:', email);
             
             try {
+                showAlert('Cadastrando...', 'success');
+                
                 const result = await sendRequest({
                     action: 'register',
                     name: name,
@@ -768,14 +826,14 @@
                 });
                 
                 if (result.success) {
-                    alert('Cadastro realizado com sucesso! Faça login para continuar.');
-                    showLoginScreen();
+                    showAlert('Cadastro realizado com sucesso! Faça login para continuar.', 'success');
+                    setTimeout(() => showLoginScreen(), 2000);
                 } else {
-                    alert('Erro no cadastro: ' + result.message);
+                    showAlert('Erro no cadastro: ' + result.message, 'error');
                 }
             } catch (error) {
                 console.error('❌ Erro no cadastro:', error);
-                alert('Erro de conexão. Verifique sua internet e tente novamente.');
+                showAlert('Erro de conexão. Verifique se o Google Apps Script foi atualizado corretamente.', 'error');
             }
         }
 
@@ -1292,8 +1350,7 @@
             showLoginScreen();
         }
 
-        console.log('✅ Sistema CDR Sul Frontend carregado - Versão ULTRA SIMPLES');
+        console.log('✅ Sistema CDR Sul Frontend carregado - Versão FINAL CORRIGIDA');
     </script>
 </body>
 </html>
-
