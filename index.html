@@ -7,113 +7,81 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .logo { width: 300px; height: auto; margin-bottom: 30px; border-radius: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); }
-        h1 { text-align: center; color: #ffffff; margin-bottom: 10px; font-size: 2.5em; font-weight: 700; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-        .subtitle { text-align: center; color: #f0f0f0; margin-bottom: 30px; font-size: 1.2em; }
-        .container, .dashboard { background: rgba(255, 255, 255, 0.95); padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); width: 100%; backdrop-filter: blur(10px); }
+        .logo { width: 250px; margin-bottom: 20px; }
+        .container, .dashboard { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; }
         .container { max-width: 500px; }
         .dashboard { max-width: 1200px; display: none; }
-        .form-group { margin-bottom: 25px; }
-        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
-        input, textarea, select { width: 100%; padding: 15px; border: 2px solid #e1e5e9; border-radius: 10px; font-size: 16px; }
-        .btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
-        .link { color: #667eea; text-decoration: none; font-weight: 500; cursor: pointer;}
-        .text-center { text-align: center; margin-top: 20px; }
         .hidden { display: none; }
-        .user-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; text-align: center; }
-        .tabs { display: flex; margin-bottom: 20px; background: #f8f9fa; border-radius: 10px; overflow: hidden; flex-wrap: wrap; }
-        .tab { flex: 1; padding: 15px; background: transparent; border: none; cursor: pointer; font-weight: 500; color: #666; transition: all 0.3s ease; min-width: 120px; }
-        .tab.active { background: #667eea; color: white; }
-        .tab-content { padding: 20px; border-radius: 10px; background: #f8f9fa; min-height: 400px; }
-        .message { padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-weight: bold; }
-        .message-success { background-color: #d4edda; color: #155724; }
-        .message-error { background-color: #f8d7da; color: #721c24; }
-        .message-info { background-color: #d1ecf1; color: #0c5460; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #333; }
+        input[type="email"], input[type="password"], input[type="text"], input[type="date"], select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; background: #667eea; color: white; font-size: 1rem; cursor: pointer; }
+        .link { color: #667eea; cursor: pointer; text-decoration: underline; }
+        .text-center { text-align: center; margin-top: 1rem; }
+        .user-info { padding: 1.5rem; text-align: center; background-color: #f8f9fa; border-radius: 8px; margin-bottom: 1.5rem; }
+        .tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 1.5rem; }
+        .tab { padding: 1rem; cursor: pointer; border-bottom: 2px solid transparent; }
+        .tab.active { border-bottom-color: #667eea; color: #667eea; font-weight: bold; }
+        .tab-content { padding: 1rem; }
+        .message { padding: 1rem; margin-bottom: 1rem; border-radius: 8px; font-weight: 500; }
+        .message-error { background: #f8d7da; color: #721c24; }
+        .message-success { background: #d4edda; color: #155724; }
+        .message-info { background: #d1ecf1; color: #0c5460; }
     </style>
 </head>
 <body>
-
-    <img src="https://static.wixstatic.com/media/96b2d1_82005fa5efee493fb11c905fa9b56a83~mv2.png" alt="CDR Sul Tocantins" class="logo">
-    <h1>Sistema de Gestão de Projetos CDR Sul</h1>
-    <p class="subtitle">Tudo sobre o seu projeto, reunido em um só lugar</p>
-    
-    <div id="message-area" style="width:100%; max-width:500px;"></div>
+    <img src="https://static.wixstatic.com/media/96b2d1_82005fa5efee493fb11c905fa9b56a83~mv2.png" alt="Logo" class="logo">
+    <div id="message-area" style="width: 100%; max-width: 500px; position: absolute; top: 20px;"></div>
 
     <div class="container" id="authContainer">
         <div id="loginScreen">
-            <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Acesso ao Sistema</h2>
+            <h2>Acesso ao Sistema</h2>
             <div class="form-group">
-                <label for="email">E-mail:</label>
-                <input type="email" id="email" placeholder="Digite seu e-mail">
+                <label for="email">E-mail</label>
+                <input type="email" id="email">
             </div>
             <div class="form-group">
-                <label for="password">Senha:</label>
-                <input type="password" id="password" placeholder="Digite sua senha">
+                <label for="password">Senha</label>
+                <input type="password" id="password">
             </div>
             <button onclick="login()" class="btn">Entrar</button>
-            <div class="text-center">
-                <p>Não tem conta? <a class="link" onclick="showRegister()">Cadastre-se aqui</a></p>
-            </div>
+            <p class="text-center">Não tem conta? <a class="link" onclick="showRegister()">Cadastre-se</a></p>
         </div>
-
         <div id="registerScreen" class="hidden">
-            <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Cadastro de Usuário</h2>
-            <div class="form-group">
-                <label for="regName">Nome Completo:</label>
-                <input type="text" id="regName" placeholder="Digite seu nome completo">
-            </div>
-            <div class="form-group">
-                <label for="regEmail">E-mail:</label>
-                <input type="email" id="regEmail" placeholder="Digite seu e-mail">
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="regInstitution">Instituição:</label>
-                    <input type="text" id="regInstitution" placeholder="Ex: UNIRG">
-                </div>
-                <div class="form-group">
-                    <label for="regProject">Projeto:</label>
-                    <input type="text" id="regProject" placeholder="Nome do projeto">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="regPassword">Senha:</label>
-                <input type="password" id="regPassword" placeholder="Digite uma senha">
-            </div>
+            <h2>Cadastro de Usuário</h2>
+            <div class="form-group"><label for="regName">Nome Completo</label><input type="text" id="regName"></div>
+            <div class="form-group"><label for="regEmail">E-mail</label><input type="email" id="regEmail"></div>
+            <div class="form-group"><label for="regInstitution">Instituição</label><input type="text" id="regInstitution"></div>
+            <div class="form-group"><label for="regProject">Projeto</label><input type="text" id="regProject"></div>
+            <div class="form-group"><label for="regPassword">Senha</label><input type="password" id="regPassword"></div>
             <button onclick="register()" class="btn">Cadastrar</button>
-            <div class="text-center">
-                <p>Já tem conta? <a class="link" onclick="showLogin()">Faça login aqui</a></p>
-            </div>
+            <p class="text-center">Já tem conta? <a class="link" onclick="showLogin()">Faça Login</a></p>
         </div>
     </div>
 
     <div id="dashboard" class="dashboard hidden">
         <div class="user-info">
-            <h3 id="userName">Bem-vindo!</h3>
-            <p id="userInfo">Carregando informações...</p>
-            <button onclick="logout()" class="btn" style="margin-top: 15px; background: rgba(255,255,255,0.2); max-width: 200px; margin-left: auto; margin-right: auto;">Sair</button>
+            <h3 id="userName"></h3>
+            <p id="userInfo"></p>
+            <button onclick="logout()" style="background: #6c757d; margin-top: 1rem;">Sair</button>
         </div>
-
         <div class="tabs">
-            <button class="tab active" onclick="showTab(event, 'overview')">Visão Geral</button>
-            <button class="tab" onclick="showTab(event, 'reports')">Relatórios</button>
-            <button class="tab" onclick="showTab(event, 'activities')">Atividades</button>
-            <button class="tab" onclick="showTab(event, 'files')">Arquivos</button>
-            <button class="tab hidden" id="adminTab" onclick="showTab(event, 'admin')">Admin</button>
+            <button class="tab" onclick="showTab(event, 'overview')">Visão Geral</button>
+            <button class="tab" onclick="showTab(event, 'reports')">Enviar Relatório</button>
+            <button class="tab" onclick="showTab(event, 'activities')">Cadastrar Atividade</button>
+            <button class="tab" onclick="showTab(event, 'files')">Enviar Arquivos</button>
+            <button class="tab" id="adminTab" onclick="showTab(event, 'admin')">Admin</button>
         </div>
-
-        <div class="tab-content" id="overviewContent">
-            </div>
-        <div class="tab-content hidden" id="reportsContent">
-            </div>
-        <div class="tab-content hidden" id="activitiesContent">
-            </div>
-        <div class="tab-content hidden" id="filesContent">
-            </div>
-        <div class="tab-content hidden" id="adminContent">
-            </div>
-    </div>
+        <div id="overviewContent" class="tab-content">Conteúdo da Visão Geral...</div>
+        <div id="reportsContent" class="tab-content" style="display:none;">
+            <h3>Enviar Relatório</h3>
+            <div class="form-group"><label for="reportType">Tipo</label><input type="text" id="reportType"></div>
+            <div class="form-group"><label for="reportTitle">Título</label><input type="text" id="reportTitle"></div>
+            <div class="form-group"><label for="reportDescription">Descrição</label><textarea id="reportDescription" rows="4"></textarea></div>
+            <div class="form-group"><label for="reportFile">Anexo</label><input type="file" id="reportFile"></div>
+            <button onclick="submitReport()" class="btn">Enviar</button>
+        </div>
+        </div>
 
     <script src="script.js"></script>
 </body>
