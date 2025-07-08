@@ -1,6 +1,6 @@
 /**
  * Sistema CDR Sul Tocantins - Frontend JavaScript
- * Versão 2.0 - 100% Funcional 
+ * Versão 2.0 - 100% Funcional 08/07/2025
  */
 
 // ==================== CONFIGURAÇÕES ====================
