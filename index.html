@@ -3,168 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema CDR Sul Tocantins</title>
+    <title>Sistema de Gestão de Projetos</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .logo {
-            width: 300px;
-            height: auto;
-            margin-bottom: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        }
-
-        h1 {
-            text-align: center;
-            color: #ffffff;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #f0f0f0;
-            margin-bottom: 30px;
-            font-size: 1.2em;
-        }
-
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 800px; /* Largura ajustada para desktop */
-        }
-        
-        .dashboard {
-             width: 100%;
-            max-width: 1200px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-        }
-
-        input, textarea, select {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 16px;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .link {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .text-center {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .hidden {
-            display: none;
-        }
-        
-        /* Adicione aqui quaisquer outros estilos que você tinha no seu arquivo original */
-
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f0f2f5; }
+        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; }
+        input { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 0.75rem; border: none; border-radius: 4px; background-color: #007bff; color: white; font-size: 1rem; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .hidden { display: none; }
+        .link { color: #007bff; cursor: pointer; text-align: center; margin-top: 1rem; display: block; }
+        #dashboard { padding: 2rem; }
     </style>
 </head>
 <body>
 
-    <img src="https://static.wixstatic.com/media/96b2d1_82005fa5efee493fb11c905fa9b56a83~mv2.png" alt="CDR Sul Tocantins" class="logo">
-    <h1>Sistema de Gestão de Projetos CDR Sul</h1>
-    <p class="subtitle">Tudo sobre o seu projeto, reunido em um só lugar</p>
-
-    <div class="container" id="loginArea">
+    <div class="container">
         <div id="loginScreen">
-            <h2 style="text-align: center; margin-bottom: 30px;">Acesso ao Sistema</h2>
+            <h2>Login</h2>
             <div class="form-group">
-                <label for="email">E-mail:</label>
-                <input type="email" id="email" placeholder="Digite seu e-mail">
+                <label for="email">E-mail</label>
+                <input type="email" id="email">
             </div>
             <div class="form-group">
-                <label for="password">Senha:</label>
-                <input type="password" id="password" placeholder="Digite sua senha">
+                <label for="password">Senha</label>
+                <input type="password" id="password">
             </div>
-            <button onclick="login()" class="btn">Entrar</button>
-            <div class="text-center">
-                <p>Não tem conta? <a href="#" class="link" onclick="showRegister()">Cadastre-se aqui</a></p>
-            </div>
+            <button onclick="login()">Entrar</button>
+            <a class="link" onclick="showRegister()">Não tem conta? Cadastre-se</a>
         </div>
 
         <div id="registerScreen" class="hidden">
-            <h2 style="text-align: center; margin-bottom: 30px;">Cadastro de Usuário</h2>
+            <h2>Cadastro de Novo Usuário</h2>
             <div class="form-group">
-                <label for="regName">Nome Completo:</label>
-                <input type="text" id="regName" placeholder="Seu nome completo">
-            </div>
-            <div class="form-group">
-                <label for="regEmail">E-mail:</label>
-                <input type="email" id="regEmail" placeholder="Seu e-mail">
+                <label for="regName">Nome Completo</label>
+                <input type="text" id="regName">
             </div>
             <div class="form-group">
-                <label for="regPassword">Senha:</label>
-                <input type="password" id="regPassword" placeholder="Crie uma senha">
+                <label for="regEmail">E-mail</label>
+                <input type="email" id="regEmail">
             </div>
-            <button onclick="register()" class="btn">Cadastrar</button>
-            <div class="text-center">
-                <p>Já tem conta? <a href="#" class="link" onclick="showLogin()">Faça login aqui</a></p>
+            <div class="form-group">
+                <label for="regPassword">Senha</label>
+                <input type="password" id="regPassword">
             </div>
+            <button onclick="register()">Cadastrar</button>
+            <a class="link" onclick="showLogin()">Já tem conta? Faça Login</a>
         </div>
     </div>
     
-    <div id="dashboard" class="dashboard hidden">
+    <div id="dashboard" class="container hidden">
         <h2 id="userName"></h2>
-        <button onclick="logout()" class="btn">Sair</button>
+        <p>Painel de controle do sistema.</p>
+        <div id="adminTab" class="hidden">
+            <h3>Painel Administrativo</h3>
         </div>
-    
-    <div id="message-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;"></div>
-
+        <hr>
+        <div>
+            <h3>Enviar Relatório</h3>
+            <div class="form-group">
+                <label for="reportType">Tipo de Relatório</label>
+                <input type="text" id="reportType">
+            </div>
+            <div class="form-group">
+                <label for="reportTitle">Título</label>
+                <input type="text" id="reportTitle">
+            </div>
+            <div class="form-group">
+                <label for="reportDescription">Descrição</label>
+                <textarea id="reportDescription" rows="4" style="width:100%"></textarea>
+            </div>
+             <div class="form-group">
+                <label for="reportFile">Anexar Arquivo (Opcional)</label>
+                <input type="file" id="reportFile">
+            </div>
+            <button onclick="submitReport()">Enviar Relatório</button>
+        </div>
+        <hr>
+        <button onclick="logout()" style="margin-top: 2rem; background-color: #dc3545;">Sair</button>
+    </div>
 
     <script src="script.js"></script>
 </body>
