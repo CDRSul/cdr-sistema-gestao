@@ -4,7 +4,7 @@
  */
 
 // ATENÇÃO: Cole aqui o URL da sua implantação final do Google Apps Script!
-const APPS_SCRIPT_URL = 'COLE_AQUI_O_URL_DA_SUA_IMPLANTAÇÃO';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw46D1ZcV0IohzFTq4Zwg3CagxeMW0_oKZ5gadsxAKoQXQwUiUUiGwC1QP0nX_TdFkG/exec';
 
 let currentUser = null;
 
