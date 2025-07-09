@@ -94,7 +94,7 @@ async function sendToScript(action, data = {}) {
 }
 
 /**
- * Modo offline/fallback
+ * Modo offline/fallback 
  */
 function handleOfflineMode(action, data) {
     debugLog(`Modo offline ativado para ação: ${action}`);
