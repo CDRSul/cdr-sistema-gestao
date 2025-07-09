@@ -3,580 +3,1296 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema CDR Sul Tocantins</title>
+    <title>Sistema de Gestão de Projetos CDR Sul</title>
     <style>
+        /* ===== RESET E BASE ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        body {
+        html, body {
+            height: 100%;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* ===== CONTAINER PRINCIPAL ===== */
+        .main-container {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== TELA DE LOGIN ===== */
+        .login-container {
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             padding: 20px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
         }
 
         .logo {
-            width: 300px;
+            width: 100px;
             height: auto;
-            margin-bottom: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+            border-radius: 8px;
         }
 
-        h1 {
-            text-align: center;
-            color: #ffffff;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        .login-header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        .subtitle {
-            text-align: center;
-            color: #f0f0f0;
-            margin-bottom: 30px;
-            font-size: 1.2em;
-            font-weight: 400;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        .login-header p {
+            font-size: 1rem;
+            opacity: 0.9;
         }
 
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        .login-form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
             width: 100%;
-            max-width: 500px;
-            backdrop-filter: blur(10px);
+            max-width: 400px;
+            margin-bottom: 15px;
+        }
+
+        .login-form-container h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #4a5568;
+            font-size: 1.5rem;
         }
 
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 18px;
         }
 
-        label {
+        .form-group label {
             display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 0.9rem;
         }
 
-        input[type="email"],
-        input[type="password"],
-        input[type="text"],
-        textarea,
-        select {
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
             width: 100%;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background-color: #f8f9fa;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
         }
 
-        input:focus,
-        textarea:focus,
-        select:focus {
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
             outline: none;
             border-color: #667eea;
-            background-color: #fff;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .btn {
+        .btn-primary {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
+            border-radius: 6px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
+            transition: transform 0.2s ease;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        .register-link {
+            text-align: center;
+            margin-top: 15px;
+            color: #4a5568;
+            font-size: 0.9rem;
         }
 
-        .link {
+        .register-link a {
             color: #667eea;
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
         }
 
-        .link:hover {
+        .register-link a:hover {
             text-decoration: underline;
         }
 
-        .text-center {
+        .footer {
             text-align: center;
-            margin-top: 20px;
+            color: white;
+            opacity: 0.8;
+            font-size: 0.8rem;
+            margin-top: 10px;
         }
 
-        .hidden {
-            display: none;
-        }
-
+        /* ===== DASHBOARD ===== */
         .dashboard {
-            width: 100%;
-            max-width: 1200px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+            background: #f7fafc;
+            color: #2d3748;
+            display: flex;
+            flex-direction: column;
         }
 
-        .user-info {
+        .dashboard-header {
+            background: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-logo {
+            width: 50px;
+            height: auto;
+            border-radius: 6px;
+        }
+
+        .user-info h2 {
+            color: #2d3748;
+            margin-bottom: 3px;
+            font-size: 1.2rem;
+        }
+
+        .user-info p {
+            color: #718096;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .admin-badge {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 20px;
+            padding: 3px 10px;
             border-radius: 15px;
-            margin-bottom: 20px;
-            text-align: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 8px;
         }
 
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            overflow: hidden;
-            flex-wrap: wrap;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 15px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            color: #666;
-            transition: all 0.3s ease;
-            min-width: 120px;
-        }
-
-        .tab.active {
-            background: #667eea;
+        .btn-logout {
+            background: #e53e3e;
             color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
         }
 
-        .tab-content {
+        .btn-logout:hover {
+            background: #c53030;
+        }
+
+        .dashboard-nav {
+            background: white;
+            padding: 0 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            gap: 0;
+            flex-shrink: 0;
+            overflow-x: auto;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #718096;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        .nav-btn:hover {
+            color: #4a5568;
+            background: #f7fafc;
+        }
+
+        .nav-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .dashboard-content {
+            flex: 1;
             padding: 20px;
-            border-radius: 10px;
-            background: #f8f9fa;
-            min-height: 400px;
+            overflow-y: auto;
         }
 
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 0.9em;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-        }
-
-        .message {
-            padding: 15px;
-            border-radius: 10px;
+        /* ===== ABAS DO DASHBOARD ===== */
+        .overview-tab h3,
+        .reports-tab h3,
+        .activities-tab h3,
+        .files-tab h3,
+        .admin-tab h3 {
+            color: #2d3748;
             margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .message-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .message-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            font-size: 1.5rem;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
         .stat-card {
             background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
             text-align: center;
+        }
+
+        .stat-card h4 {
+            color: #718096;
+            margin-bottom: 12px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .stat-number {
-            font-size: 2em;
-            font-weight: bold;
+            font-size: 2rem;
+            font-weight: 700;
             color: #667eea;
-            margin-bottom: 5px;
         }
 
-        .stat-label {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .file-upload {
-            border: 2px dashed #667eea;
+        .project-info {
+            background: white;
+            padding: 20px;
             border-radius: 10px;
-            padding: 30px;
-            text-align: center;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+        }
+
+        .project-info h4 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .project-info p {
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        /* ===== FORMULÁRIOS ===== */
+        .reports-tab,
+        .activities-tab,
+        .files-tab {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+        }
+
+        /* ===== PAINEL ADMIN ===== */
+        .admin-tab {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
             margin-bottom: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
         }
 
-        .file-upload:hover {
-            background-color: rgba(102, 126, 234, 0.05);
+        .admin-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
         }
 
-        .file-upload.dragover {
-            background-color: rgba(102, 126, 234, 0.1);
-            border-color: #5a67d8;
+        .admin-section {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
         }
 
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        .admin-section h4 {
+            color: #2d3748;
+            margin-bottom: 12px;
+            font-size: 1rem;
         }
 
-        .table th,
-        .table td {
+        .admin-item {
+            background: white;
             padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            border-left: 3px solid #667eea;
+            font-size: 0.9rem;
         }
 
-        .table th {
-            background-color: #667eea;
-            color: white;
-            font-weight: 600;
+        .admin-item:last-child {
+            margin-bottom: 0;
         }
 
-        .table tr:hover {
-            background-color: #f5f5f5;
+        .admin-item strong {
+            color: #2d3748;
         }
 
-        /* Responsivo */
+        .admin-item small {
+            color: #718096;
+        }
+
+        /* ===== RESPONSIVIDADE ===== */
         @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-                margin: 10px;
+            .login-header h1 {
+                font-size: 1.7rem;
             }
 
-            h1 {
-                font-size: 2em;
+            .login-form-container {
+                padding: 25px 20px;
             }
 
-            .subtitle {
-                font-size: 1em;
-            }
-
-            .logo {
-                width: 250px;
-            }
-
-            .tabs {
+            .dashboard-header {
+                padding: 12px 15px;
                 flex-direction: column;
+                gap: 10px;
+                text-align: center;
             }
 
-            .tab {
-                min-width: auto;
+            .header-left {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .dashboard-nav {
+                padding: 0 15px;
+            }
+
+            .nav-btn {
+                padding: 12px 15px;
+            }
+
+            .dashboard-content {
+                padding: 15px;
             }
 
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+
+            .admin-sections {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 480px) {
-            .logo {
-                width: 200px;
-            }
-
-            h1 {
-                font-size: 1.8em;
-            }
-
-            .subtitle {
-                font-size: 0.9em;
-            }
-
-            .container {
+            .login-container {
                 padding: 15px;
             }
+
+            .login-form-container {
+                padding: 20px 15px;
+            }
+
+            .logo {
+                width: 70px;
+            }
+
+            .login-header h1 {
+                font-size: 1.4rem;
+            }
+
+            .dashboard-content {
+                padding: 12px;
+            }
+
+            .reports-tab,
+            .activities-tab,
+            .files-tab,
+            .admin-tab {
+                padding: 20px 15px;
+            }
+        }
+
+        /* ===== MELHORIAS PARA IFRAME ===== */
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-container {
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .dashboard {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .dashboard-content {
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        /* ===== SCROLLBAR CUSTOMIZADA ===== */
+        .dashboard-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dashboard-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .dashboard-content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .dashboard-content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* ===== ANIMAÇÕES ===== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-form-container,
+        .dashboard-content > * {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        /* ===== ESTADOS DE LOADING ===== */
+        .loading {
+            text-align: center;
+            color: #718096;
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        /* ===== MELHORIAS VISUAIS ===== */
+        .form-group input[type="file"] {
+            padding: 6px;
+            background: #f7fafc;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        .success-message {
+            color: #38a169;
+            font-size: 0.8rem;
+            margin-top: 4px;
         }
     </style>
 </head>
 <body>
-    <!-- Logo CDR Sul -->
-    <img src="https://static.wixstatic.com/media/96b2d1_82005fa5efee493fb11c905fa9b56a83~mv2.png" 
-         alt="CDR Sul Tocantins" class="logo">
+    <div class="main-container">
+        <!-- O conteúdo será carregado dinamicamente pelo JavaScript -->
+    </div>
+    
+    <script>
+        /**
+         * Sistema de Gestão de Projetos CDR Sul - Frontend ULTRA SIMPLES
+         * Versão CORRIGIDA - 100% Compatível
+         */
 
-    <!-- Título Principal -->
-    <h1>Sistema de Gestão de Projetos CDR Sul</h1>
-    <p class="subtitle">Tudo sobre o seu projeto, reunido em um só lugar</p>
+        // ===== CONFIGURAÇÃO =====
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxb999xR_nS_O4S2Tud3SjAZWhvU6Lhd8r_TmM595PU3lw0eBfedIxnsnsguJDc-FTA/exec';
 
-    <!-- Container Principal -->
-    <div class="container">
-        <!-- Tela de Login -->
-        <div id="loginScreen">
-            <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Acesso ao Sistema</h2>
-            
-            <div class="form-group">
-                <label for="email">E-mail:</label>
-                <input type="email" id="email" placeholder="Digite seu e-mail">
-            </div>
-            
-            <div class="form-group">
-                <label for="password">Senha:</label>
-                <input type="password" id="password" placeholder="Digite sua senha">
-            </div>
-            
-            <button onclick="login()" class="btn">Entrar</button>
-            
-            <div class="text-center">
-                <p>Não tem conta? <a href="#" class="link" onclick="showRegister()">Cadastre-se aqui</a></p>
-            </div>
-        </div>
+        // ===== VARIÁVEIS GLOBAIS =====
+        let currentUser = null;
+        let currentTab = 'overview';
 
-        <!-- Tela de Cadastro -->
-        <div id="registerScreen" class="hidden">
-            <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Cadastro de Novo Usuário</h2>
+        // ===== INICIALIZAÇÃO =====
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ Sistema CDR Sul carregado - Versão ULTRA SIMPLES');
             
-            <div class="form-group">
-                <label for="regName">Nome Completo:</label>
-                <input type="text" id="regName" placeholder="Digite seu nome completo">
-            </div>
+            // Verificar usuário salvo
+            const savedUser = localStorage.getItem('cdr_user');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    console.log('👤 Usuário recuperado:', currentUser.email);
+                    showDashboard(currentUser);
+                    return;
+                } catch (e) {
+                    localStorage.removeItem('cdr_user');
+                }
+            }
             
-            <div class="form-group">
-                <label for="regEmail">E-mail:</label>
-                <input type="email" id="regEmail" placeholder="Digite seu e-mail">
-            </div>
-            
-            <div class="form-group">
-                <label for="regInstitution">Instituição:</label>
-                <input type="text" id="regInstitution" placeholder="Digite sua instituição">
-            </div>
-            
-            <div class="form-group">
-                <label for="regProject">Nome do Projeto:</label>
-                <input type="text" id="regProject" placeholder="Digite o nome do projeto">
-            </div>
-            
-            <div class="form-group">
-                <label for="regPassword">Senha:</label>
-                <input type="password" id="regPassword" placeholder="Digite uma senha">
-            </div>
-            
-            <div class="form-group">
-                <label for="regConfirmPassword">Confirmar Senha:</label>
-                <input type="password" id="regConfirmPassword" placeholder="Confirme sua senha">
-            </div>
-            
-            <button onclick="register()" class="btn">Cadastrar</button>
-            
-            <div class="text-center">
-                <p>Já tem conta? <a href="#" class="link" onclick="showLogin()">Faça login aqui</a></p>
-            </div>
-        </div>
+            showLoginScreen();
+            testConnectivity();
+        });
 
-        <!-- Dashboard -->
-        <div id="dashboard" class="dashboard hidden">
-            <div class="user-info">
-                <h3 id="userName">Bem-vindo!</h3>
-                <p id="userInfo">Carregando informações...</p>
-                <button onclick="logout()" class="btn" style="margin-top: 15px; background: rgba(255,255,255,0.2);">Sair</button>
-            </div>
+        // ===== TESTAR CONECTIVIDADE =====
+        async function testConnectivity() {
+            console.log('🔍 Testando conectividade...');
+            
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ Conectividade OK:', data.version);
+                } else {
+                    console.log('⚠️ Resposta não OK:', response.status);
+                }
+            } catch (error) {
+                console.log('❌ Erro de conectividade:', error);
+            }
+        }
 
-            <div class="tabs">
-                <button class="tab active" onclick="showTab('overview')">Visão Geral</button>
-                <button class="tab" onclick="showTab('reports')">Relatórios</button>
-                <button class="tab" onclick="showTab('activities')">Atividades</button>
-                <button class="tab" onclick="showTab('files')">Arquivos</button>
-                <button class="tab hidden" id="adminTab" onclick="showTab('admin')">Admin</button>
-            </div>
-
-            <div class="tab-content">
-                <!-- Visão Geral -->
-                <div id="overviewContent">
-                    <h3>Visão Geral do Projeto</h3>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-number" id="reportCount">0</div>
-                            <div class="stat-label">Relatórios Enviados</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="activityCount">0</div>
-                            <div class="stat-label">Atividades Cadastradas</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="fileCount">0</div>
-                            <div class="stat-label">Arquivos Enviados</div>
-                        </div>
+        // ===== MOSTRAR TELA DE LOGIN =====
+        function showLoginScreen() {
+            document.querySelector('.main-container').innerHTML = `
+                <div class="login-container">
+                    <div class="login-header">
+                        <img src="https://static.wixstatic.com/media/96b2d1_82005fa5efee493fb11c905fa9b56a83~mv2.png" alt="CDR Sul Tocantins" class="logo">
+                        <h1>Sistema de Gestão de Projetos CDR Sul</h1>
+                        <p>Tudo sobre o seu projeto, reunido em um só lugar</p>
                     </div>
-                    <div style="background: white; padding: 20px; border-radius: 10px;">
-                        <h4>Informações do Usuário</h4>
-                        <p><strong>Nome:</strong> <span id="currentUserName"></span></p>
-                        <p><strong>E-mail:</strong> <span id="currentUserEmail"></span></p>
-                        <p><strong>Projeto:</strong> <span id="currentUserProject"></span></p>
-                        <p><strong>Instituição:</strong> <span id="currentUserInstitution"></span></p>
+                    
+                    <div class="login-form-container">
+                        <h2>Acesso ao Sistema</h2>
+                        
+                        <form id="loginForm" onsubmit="handleLogin(event)">
+                            <div class="form-group">
+                                <label for="loginEmail">E-mail:</label>
+                                <input type="email" id="loginEmail" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="loginPassword">Senha:</label>
+                                <input type="password" id="loginPassword" required>
+                            </div>
+                            
+                            <button type="submit" class="btn-primary">Entrar</button>
+                        </form>
+                        
+                        <p class="register-link">
+                            Não tem conta? <a href="#" onclick="showRegisterScreen()">Cadastre-se aqui</a>
+                        </p>
+                    </div>
+                    
+                    <div class="footer">
+                        <p>Desenvolvido pela equipe do CDR Sul Tocantins - Versão 3.0 Ultra Simples</p>
                     </div>
                 </div>
+            `;
+        }
 
-                <!-- Relatórios -->
-                <div id="reportsContent" class="hidden">
-                    <h3>Envio de Relatórios</h3>
-                    <div style="background: white; padding: 20px; border-radius: 10px;">
+        // ===== MOSTRAR TELA DE CADASTRO =====
+        function showRegisterScreen() {
+            document.querySelector('.main-container').innerHTML = `
+                <div class="login-container">
+                    <div class="login-header">
+                        <img src="https://static.wixstatic.com/media/96b2d1_82005fa5efee493fb11c905fa9b56a83~mv2.png" alt="CDR Sul Tocantins" class="logo">
+                        <h1>Sistema de Gestão de Projetos CDR Sul</h1>
+                        <p>Cadastro de Novo Usuário</p>
+                    </div>
+                    
+                    <div class="login-form-container">
+                        <h2>Criar Conta</h2>
+                        
+                        <form id="registerForm" onsubmit="handleRegister(event)">
+                            <div class="form-group">
+                                <label for="registerName">Nome Completo:</label>
+                                <input type="text" id="registerName" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="registerEmail">E-mail:</label>
+                                <input type="email" id="registerEmail" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="registerInstitution">Instituição:</label>
+                                <input type="text" id="registerInstitution" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="registerProject">Nome do Projeto:</label>
+                                <input type="text" id="registerProject" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="registerPassword">Senha:</label>
+                                <input type="password" id="registerPassword" required minlength="6">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="registerConfirmPassword">Confirmar Senha:</label>
+                                <input type="password" id="registerConfirmPassword" required minlength="6">
+                            </div>
+                            
+                            <button type="submit" class="btn-primary">Cadastrar</button>
+                        </form>
+                        
+                        <p class="register-link">
+                            Já tem conta? <a href="#" onclick="showLoginScreen()">Faça login aqui</a>
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ===== PROCESSAR LOGIN =====
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            console.log('🔐 Tentando login:', email);
+            
+            try {
+                const result = await sendRequest({
+                    action: 'login',
+                    email: email,
+                    password: password
+                });
+                
+                if (result.success) {
+                    console.log('✅ Login bem-sucedido:', result.user);
+                    currentUser = result.user;
+                    localStorage.setItem('cdr_user', JSON.stringify(currentUser));
+                    showDashboard(currentUser);
+                } else {
+                    alert('Erro no login: ' + result.message);
+                }
+            } catch (error) {
+                console.error('❌ Erro no login:', error);
+                alert('Erro de conexão. Verifique sua internet e tente novamente.');
+            }
+        }
+
+        // ===== PROCESSAR CADASTRO =====
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const institution = document.getElementById('registerInstitution').value;
+            const project = document.getElementById('registerProject').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                alert('As senhas não coincidem!');
+                return;
+            }
+            
+            console.log('📝 Tentando cadastro:', email);
+            
+            try {
+                const result = await sendRequest({
+                    action: 'register',
+                    name: name,
+                    email: email,
+                    institution: institution,
+                    project: project,
+                    password: password
+                });
+                
+                if (result.success) {
+                    alert('Cadastro realizado com sucesso! Faça login para continuar.');
+                    showLoginScreen();
+                } else {
+                    alert('Erro no cadastro: ' + result.message);
+                }
+            } catch (error) {
+                console.error('❌ Erro no cadastro:', error);
+                alert('Erro de conexão. Verifique sua internet e tente novamente.');
+            }
+        }
+
+        // ===== MOSTRAR DASHBOARD =====
+        function showDashboard(user) {
+            console.log('📊 Mostrando dashboard:', user.email);
+            
+            currentUser = user;
+            
+            document.querySelector('.main-container').innerHTML = `
+                <div class="dashboard">
+                    <header class="dashboard-header">
+                        <div class="header-left">
+                            <img src="https://static.wixstatic.com/media/96b2d1_82005fa5efee493fb11c905fa9b56a83~mv2.png" alt="CDR Sul" class="header-logo">
+                            <div class="user-info">
+                                <h2>Bem-vindo, ${user.name}</h2>
+                                <p>Projeto: ${user.project}</p>
+                                ${user.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
+                            </div>
+                        </div>
+                        <button onclick="logout()" class="btn-logout">Sair</button>
+                    </header>
+                    
+                    <nav class="dashboard-nav">
+                        <button onclick="showTab('overview')" class="nav-btn active" data-tab="overview">Visão Geral</button>
+                        <button onclick="showTab('reports')" class="nav-btn" data-tab="reports">Relatórios</button>
+                        <button onclick="showTab('activities')" class="nav-btn" data-tab="activities">Atividades</button>
+                        <button onclick="showTab('files')" class="nav-btn" data-tab="files">Arquivos</button>
+                        ${user.isAdmin ? '<button onclick="showTab(\'admin\')" class="nav-btn" data-tab="admin">Admin</button>' : ''}
+                    </nav>
+                    
+                    <main class="dashboard-content" id="dashboardContent">
+                        <!-- Conteúdo será carregado aqui -->
+                    </main>
+                </div>
+            `;
+            
+            showTab('overview');
+            loadUserData();
+        }
+
+        // ===== MOSTRAR ABA =====
+        function showTab(tabName) {
+            console.log('📑 Mostrando aba:', tabName);
+            
+            currentTab = tabName;
+            
+            // Atualizar navegação
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+            
+            // Mostrar conteúdo
+            switch (tabName) {
+                case 'overview':
+                    showOverviewTab();
+                    break;
+                case 'reports':
+                    showReportsTab();
+                    break;
+                case 'activities':
+                    showActivitiesTab();
+                    break;
+                case 'files':
+                    showFilesTab();
+                    break;
+                case 'admin':
+                    if (currentUser && currentUser.isAdmin) {
+                        showAdminTab();
+                    }
+                    break;
+            }
+        }
+
+        // ===== ABA VISÃO GERAL =====
+        function showOverviewTab() {
+            document.getElementById('dashboardContent').innerHTML = `
+                <div class="overview-tab">
+                    <h3>Visão Geral do Projeto</h3>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h4>Relatórios Enviados</h4>
+                            <div class="stat-number" id="statsReports">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Atividades Cadastradas</h4>
+                            <div class="stat-number" id="statsActivities">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Arquivos Enviados</h4>
+                            <div class="stat-number" id="statsFiles">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="project-info">
+                        <h4>Informações do Projeto</h4>
+                        <p><strong>Coordenador:</strong> ${currentUser.name}</p>
+                        <p><strong>Instituição:</strong> ${currentUser.institution}</p>
+                        <p><strong>Projeto:</strong> ${currentUser.project}</p>
+                        <p><strong>E-mail:</strong> ${currentUser.email}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ===== ABA RELATÓRIOS =====
+        function showReportsTab() {
+            document.getElementById('dashboardContent').innerHTML = `
+                <div class="reports-tab">
+                    <h3>Enviar Relatório</h3>
+                    
+                    <form id="reportForm" onsubmit="handleSubmitReport(event)">
                         <div class="form-group">
                             <label for="reportType">Tipo de Relatório:</label>
-                            <select id="reportType">
-                                <option value="parcial">Relatório Parcial</option>
-                                <option value="final">Relatório Final</option>
-                                <option value="atividade">Relatório de Atividade</option>
+                            <select id="reportType" required>
+                                <option value="Relatório Parcial">Relatório Parcial</option>
+                                <option value="Relatório Final">Relatório Final</option>
+                                <option value="Relatório de Atividade">Relatório de Atividade</option>
                             </select>
                         </div>
                         
                         <div class="form-group">
-                            <label for="reportTitle">Título do Relatório:</label>
-                            <input type="text" id="reportTitle" placeholder="Digite o título do relatório">
+                            <label for="reportDate">Data do Relatório:</label>
+                            <input type="date" id="reportDate" value="${new Date().toISOString().split('T')[0]}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reportTitle">Título:</label>
+                            <input type="text" id="reportTitle" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="reportDescription">Descrição:</label>
-                            <textarea id="reportDescription" rows="4" placeholder="Descreva o conteúdo do relatório"></textarea>
+                            <textarea id="reportDescription" rows="4" required></textarea>
                         </div>
                         
                         <div class="form-group">
-                            <label for="reportFile">Arquivo do Relatório:</label>
-                            <input type="file" id="reportFile" accept=".pdf,.doc,.docx">
+                            <label for="reportFiles">Arquivos (PDF, DOC, DOCX):</label>
+                            <input type="file" id="reportFiles" multiple accept=".pdf,.doc,.docx">
                         </div>
                         
-                        <button onclick="submitReport()" class="btn">Enviar Relatório</button>
-                    </div>
+                        <button type="submit" class="btn-primary">Enviar Relatório</button>
+                    </form>
                 </div>
+            `;
+        }
 
-                <!-- Atividades -->
-                <div id="activitiesContent" class="hidden">
-                    <h3>Cadastro de Atividades</h3>
-                    <div style="background: white; padding: 20px; border-radius: 10px;">
+        // ===== ABA ATIVIDADES =====
+        function showActivitiesTab() {
+            document.getElementById('dashboardContent').innerHTML = `
+                <div class="activities-tab">
+                    <h3>Cadastrar Atividade</h3>
+                    
+                    <form id="activityForm" onsubmit="handleSubmitActivity(event)">
                         <div class="form-group">
-                            <label for="activityName">Nome da Atividade:</label>
-                            <input type="text" id="activityName" placeholder="Digite o nome da atividade">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="activityDate">Data da Atividade:</label>
-                            <input type="date" id="activityDate">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="activityDescription">Descrição da Atividade:</label>
-                            <textarea id="activityDescription" rows="4" placeholder="Descreva a atividade realizada"></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="activityFiles">Arquivos de Evidência:</label>
-                            <input type="file" id="activityFiles" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-                        </div>
-                        
-                        <button onclick="submitActivity()" class="btn">Cadastrar Atividade</button>
-                    </div>
-                </div>
-
-                <!-- Arquivos -->
-                <div id="filesContent" class="hidden">
-                    <h3>Gerenciamento de Arquivos</h3>
-                    <div style="background: white; padding: 20px; border-radius: 10px;">
-                        <div class="form-group">
-                            <label for="fileCategory">Categoria do Arquivo:</label>
-                            <select id="fileCategory">
-                                <option value="documentos">Documentos</option>
-                                <option value="fotos">Fotos</option>
-                                <option value="videos">Vídeos</option>
-                                <option value="outros">Outros</option>
+                            <label for="activityType">Tipo de Atividade:</label>
+                            <select id="activityType" required>
+                                <option value="Reunião">Reunião</option>
+                                <option value="Workshop">Workshop</option>
+                                <option value="Palestra">Palestra</option>
+                                <option value="Curso">Curso</option>
+                                <option value="Evento">Evento</option>
+                                <option value="Pesquisa de Campo">Pesquisa de Campo</option>
+                                <option value="Outra">Outra</option>
                             </select>
                         </div>
                         
                         <div class="form-group">
-                            <label for="fileDescription">Descrição do Arquivo:</label>
-                            <input type="text" id="fileDescription" placeholder="Descreva o arquivo">
+                            <label for="activityDate">Data da Atividade:</label>
+                            <input type="date" id="activityDate" value="${new Date().toISOString().split('T')[0]}" required>
                         </div>
                         
-                        <div class="file-upload" onclick="document.getElementById('fileInput').click()">
-                            <p>📁 Clique aqui para selecionar arquivos</p>
-                            <p style="font-size: 0.9em; color: #666;">Ou arraste e solte os arquivos aqui</p>
-                            <input type="file" id="fileInput" multiple style="display: none;">
+                        <div class="form-group">
+                            <label for="activityTitle">Título da Atividade:</label>
+                            <input type="text" id="activityTitle" required>
                         </div>
                         
-                        <button onclick="uploadFiles()" class="btn">Enviar Arquivos</button>
-                    </div>
+                        <div class="form-group">
+                            <label for="activityDescription">Descrição:</label>
+                            <textarea id="activityDescription" rows="4" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="activityLocation">Local:</label>
+                            <input type="text" id="activityLocation">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="activityParticipants">Participantes:</label>
+                            <textarea id="activityParticipants" rows="2" placeholder="Liste os participantes da atividade"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="activityFiles">Arquivos (Fotos, Documentos):</label>
+                            <input type="file" id="activityFiles" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                        </div>
+                        
+                        <button type="submit" class="btn-primary">Cadastrar Atividade</button>
+                    </form>
                 </div>
+            `;
+        }
 
-                <!-- Admin -->
-                <div id="adminContent" class="hidden">
+        // ===== ABA ARQUIVOS =====
+        function showFilesTab() {
+            document.getElementById('dashboardContent').innerHTML = `
+                <div class="files-tab">
+                    <h3>Enviar Arquivos</h3>
+                    
+                    <form id="filesForm" onsubmit="handleUploadFiles(event)">
+                        <div class="form-group">
+                            <label for="fileCategory">Categoria:</label>
+                            <select id="fileCategory" required>
+                                <option value="Documentos">Documentos</option>
+                                <option value="Fotos">Fotos</option>
+                                <option value="Planilhas">Planilhas</option>
+                                <option value="Apresentações">Apresentações</option>
+                                <option value="Outros">Outros</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="fileDescription">Descrição:</label>
+                            <textarea id="fileDescription" rows="3" placeholder="Descreva os arquivos que está enviando"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="uploadFiles">Selecionar Arquivos:</label>
+                            <input type="file" id="uploadFiles" multiple required>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary">Enviar Arquivos</button>
+                    </form>
+                </div>
+            `;
+        }
+
+        // ===== ABA ADMIN =====
+        function showAdminTab() {
+            if (!currentUser || !currentUser.isAdmin) return;
+            
+            document.getElementById('dashboardContent').innerHTML = `
+                <div class="admin-tab">
                     <h3>Painel Administrativo</h3>
-                    <div style="background: white; padding: 20px; border-radius: 10px;">
-                        <h4>Estatísticas Gerais</h4>
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-number" id="totalUsers">0</div>
-                                <div class="stat-label">Usuários Cadastrados</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number" id="totalReports">0</div>
-                                <div class="stat-label">Total de Relatórios</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number" id="totalActivities">0</div>
-                                <div class="stat-label">Total de Atividades</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number" id="totalFiles">0</div>
-                                <div class="stat-label">Total de Arquivos</div>
-                            </div>
+                    
+                    <div class="admin-stats">
+                        <div class="stat-card">
+                            <h4>Total de Usuários</h4>
+                            <div class="stat-number" id="adminStatsUsers">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Total de Relatórios</h4>
+                            <div class="stat-number" id="adminStatsReports">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Total de Atividades</h4>
+                            <div class="stat-number" id="adminStatsActivities">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-sections">
+                        <div class="admin-section">
+                            <h4>Usuários Cadastrados</h4>
+                            <div id="adminUsersList">Carregando...</div>
                         </div>
                         
-                        <button onclick="loadAdminData()" class="btn">Atualizar Dados</button>
-                        <button onclick="exportData()" class="btn" style="background: #28a745;">Exportar Dados</button>
+                        <div class="admin-section">
+                            <h4>Relatórios Recentes</h4>
+                            <div id="adminReportsList">Carregando...</div>
+                        </div>
+                        
+                        <div class="admin-section">
+                            <h4>Atividades Recentes</h4>
+                            <div id="adminActivitiesList">Carregando...</div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
+            `;
+            
+            loadAdminData();
+        }
 
-    <!-- Footer -->
-    <div class="footer">
-        Desenvolvido pela equipe do CDR Sul Tocantins - Sistema Versão 2.0
-    </div>
+        // ===== PROCESSAR ENVIO DE RELATÓRIO =====
+        async function handleSubmitReport(event) {
+            event.preventDefault();
+            
+            const reportType = document.getElementById('reportType').value;
+            const reportDate = document.getElementById('reportDate').value;
+            const title = document.getElementById('reportTitle').value;
+            const description = document.getElementById('reportDescription').value;
+            
+            console.log('📄 Enviando relatório:', title);
+            
+            try {
+                const result = await sendRequest({
+                    action: 'submit_report',
+                    userEmail: currentUser.email,
+                    reportType: reportType,
+                    reportDate: reportDate,
+                    title: title,
+                    description: description
+                });
+                
+                if (result.success) {
+                    alert('Relatório enviado com sucesso!');
+                    document.getElementById('reportForm').reset();
+                    loadUserData();
+                } else {
+                    alert('Erro ao enviar relatório: ' + result.message);
+                }
+            } catch (error) {
+                console.error('❌ Erro ao enviar relatório:', error);
+                alert('Erro de conexão. Verifique sua internet e tente novamente.');
+            }
+        }
 
-    <!-- JavaScript -->
-    <script src="script.js"></script>
+        // ===== PROCESSAR CADASTRO DE ATIVIDADE =====
+        async function handleSubmitActivity(event) {
+            event.preventDefault();
+            
+            const activityType = document.getElementById('activityType').value;
+            const activityDate = document.getElementById('activityDate').value;
+            const title = document.getElementById('activityTitle').value;
+            const description = document.getElementById('activityDescription').value;
+            const location = document.getElementById('activityLocation').value;
+            const participants = document.getElementById('activityParticipants').value;
+            
+            console.log('🎯 Cadastrando atividade:', title);
+            
+            try {
+                const result = await sendRequest({
+                    action: 'submit_activity',
+                    userEmail: currentUser.email,
+                    activityType: activityType,
+                    activityDate: activityDate,
+                    title: title,
+                    description: description,
+                    location: location,
+                    participants: participants
+                });
+                
+                if (result.success) {
+                    alert('Atividade cadastrada com sucesso!');
+                    document.getElementById('activityForm').reset();
+                    loadUserData();
+                } else {
+                    alert('Erro ao cadastrar atividade: ' + result.message);
+                }
+            } catch (error) {
+                console.error('❌ Erro ao cadastrar atividade:', error);
+                alert('Erro de conexão. Verifique sua internet e tente novamente.');
+            }
+        }
+
+        // ===== PROCESSAR UPLOAD DE ARQUIVOS =====
+        async function handleUploadFiles(event) {
+            event.preventDefault();
+            
+            const category = document.getElementById('fileCategory').value;
+            const description = document.getElementById('fileDescription').value;
+            
+            console.log('📁 Enviando arquivos, categoria:', category);
+            
+            try {
+                const result = await sendRequest({
+                    action: 'upload_file',
+                    userEmail: currentUser.email,
+                    category: category,
+                    description: description
+                });
+                
+                if (result.success) {
+                    alert('Arquivo(s) enviado(s) com sucesso!');
+                    document.getElementById('filesForm').reset();
+                    loadUserData();
+                } else {
+                    alert('Erro ao enviar arquivos: ' + result.message);
+                }
+            } catch (error) {
+                console.error('❌ Erro ao enviar arquivos:', error);
+                alert('Erro de conexão. Verifique sua internet e tente novamente.');
+            }
+        }
+
+        // ===== CARREGAR DADOS DO USUÁRIO =====
+        async function loadUserData() {
+            if (!currentUser) return;
+            
+            try {
+                const result = await sendRequest({
+                    action: 'get_user_data',
+                    userEmail: currentUser.email
+                });
+                
+                if (result.success) {
+                    const data = result.data;
+                    
+                    const statsReports = document.getElementById('statsReports');
+                    const statsActivities = document.getElementById('statsActivities');
+                    const statsFiles = document.getElementById('statsFiles');
+                    
+                    if (statsReports) statsReports.textContent = data.reports;
+                    if (statsActivities) statsActivities.textContent = data.activities;
+                    if (statsFiles) statsFiles.textContent = data.files;
+                    
+                    console.log('✅ Dados do usuário carregados:', data);
+                }
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados do usuário:', error);
+            }
+        }
+
+        // ===== CARREGAR DADOS ADMINISTRATIVOS =====
+        async function loadAdminData() {
+            if (!currentUser || !currentUser.isAdmin) return;
+            
+            try {
+                const result = await sendRequest({
+                    action: 'get_admin_data'
+                });
+                
+                if (result.success) {
+                    const data = result.data;
+                    
+                    document.getElementById('adminStatsUsers').textContent = data.totalUsers;
+                    document.getElementById('adminStatsReports').textContent = data.totalReports;
+                    document.getElementById('adminStatsActivities').textContent = data.totalActivities;
+                    
+                    // Usuários
+                    const usersList = document.getElementById('adminUsersList');
+                    if (data.users && data.users.length > 0) {
+                        usersList.innerHTML = data.users.map(user => `
+                            <div class="admin-item">
+                                <strong>${user.name}</strong><br>
+                                ${user.email}<br>
+                                <small>${user.institution} - ${user.project}</small>
+                            </div>
+                        `).join('');
+                    } else {
+                        usersList.innerHTML = '<p>Nenhum usuário cadastrado</p>';
+                    }
+                    
+                    // Relatórios
+                    const reportsList = document.getElementById('adminReportsList');
+                    if (data.recentReports && data.recentReports.length > 0) {
+                        reportsList.innerHTML = data.recentReports.map(report => `
+                            <div class="admin-item">
+                                <strong>${report.title}</strong><br>
+                                ${report.userEmail}<br>
+                                <small>${new Date(report.date).toLocaleDateString()}</small>
+                            </div>
+                        `).join('');
+                    } else {
+                        reportsList.innerHTML = '<p>Nenhum relatório encontrado</p>';
+                    }
+                    
+                    // Atividades
+                    const activitiesList = document.getElementById('adminActivitiesList');
+                    if (data.recentActivities && data.recentActivities.length > 0) {
+                        activitiesList.innerHTML = data.recentActivities.map(activity => `
+                            <div class="admin-item">
+                                <strong>${activity.title}</strong><br>
+                                ${activity.userEmail}<br>
+                                <small>${new Date(activity.date).toLocaleDateString()} - ${activity.location}</small>
+                            </div>
+                        `).join('');
+                    } else {
+                        activitiesList.innerHTML = '<p>Nenhuma atividade encontrada</p>';
+                    }
+                    
+                    console.log('✅ Dados administrativos carregados:', data);
+                }
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados administrativos:', error);
+            }
+        }
+
+        // ===== ENVIAR REQUISIÇÃO =====
+        async function sendRequest(data) {
+            console.log('📡 Enviando requisição:', data);
+            
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('📥 Resposta recebida:', result);
+                return result;
+                
+            } catch (error) {
+                console.error('❌ Erro na requisição:', error);
+                throw error;
+            }
+        }
+
+        // ===== LOGOUT =====
+        function logout() {
+            console.log('👋 Fazendo logout');
+            currentUser = null;
+            localStorage.removeItem('cdr_user');
+            showLoginScreen();
+        }
+
+        console.log('✅ Sistema CDR Sul - Versão 2.0');
+    </script>
 </body>
 </html>
