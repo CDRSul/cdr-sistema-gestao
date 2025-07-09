@@ -1,119 +1,142 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<title>Sistema CDR Sul</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<style>
-body{font-family:sans-serif;margin:0;background:#f5f5f5}
-.container{max-width:500px;margin:20px auto;background:#fff;padding:20px;
-           border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
-input,select,textarea{width:100%;padding:8px;margin:6px 0;border:1px solid #ddd;border-radius:4px}
-button{padding:10px 16px;border:none;background:#4d6bff;color:#fff;border-radius:4px;cursor:pointer}
-button:disabled{opacity:.6}
-.hidden{display:none}
-.message{margin:10px 0;padding:10px;border-radius:4px}
-.message.error{background:#ffe5e5;color:#c00}
-.message.success{background:#e8ffea;color:#11803b}
-</style>
-</head>
-<body>
-
-<!-- LOGIN ---------->
-<div class="container" id="loginScreen">
-  <h2>Login</h2>
-  <div id="msgLogin"></div>
-  <form id="loginForm">
-    <input id="loginEmail" placeholder="E-mail" type="email" required>
-    <input id="loginPass" placeholder="Senha" type="password" required>
-    <button>Entrar</button>
-  </form>
-</div>
-
-<!-- DASHBOARD ------>
-<div class="container hidden" id="dashScreen">
-  <h3>Bem-vindo, <span id="userName"></span></h3>
-  <button id="btnLogout" style="background:#c00">Sair</button>
-
-  <hr><h2>Enviar Arquivos</h2>
-  <div id="msgUpload"></div>
-  <form id="uploadForm">
-    <select id="upCategory" required>
-      <option value="">Categoria</option>
-      <option>Documentos</option><option>Fotos</option><option>Outros</option>
-    </select>
-    <textarea id="upDesc" placeholder="Descrição"></textarea>
-    <input id="upFiles" type="file" multiple required>
-    <button>Enviar</button>
-  </form>
-</div>
-
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec';
+/* ---------- CONFIGURAÇÃO ---------- */
+const APPS_SCRIPT_URL =
+  'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec';
+
 let currentUser = null;
 
-/* ----------- Função genérica de chamada ----------- */
-async function apiCall(payload, files=null){
-  let body, headers={};
-  if(files){                               // FormData
+/* ---------- CHAMADA GENÉRICA ---------- */
+async function apiCall(payload, files = null) {
+  let body, headers = {};
+
+  if (files) {                                // FormData (upload)
     body = new FormData();
-    Object.entries(payload).forEach(([k,v])=>body.append(k,v));
-    files.forEach(f=>body.append('file',f));
-  }else{                                   // JSON
+    Object.entries(payload).forEach(([k, v]) => body.append(k, v));
+    files.forEach(f => body.append('file', f));     // um ou vários <input>
+  } else {                                    // JSON normal
     body = JSON.stringify(payload);
-    headers['Content-Type']='application/json';
+    headers['Content-Type'] = 'application/json';
   }
-  const res = await fetch(APPS_SCRIPT_URL,{method:'POST',body,headers});
-  if(!res.ok) throw new Error('HTTP '+res.status);
+
+  const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body, headers });
+  if (!res.ok) throw new Error('Failed to fetch');
   return res.json();
 }
-/* ----------- util de mensagem --------------------- */
-function showMsg(el,msg,err){
-  el.innerHTML = '<div class="message '+(err?'error':'success')+'">'+msg+'</div>';
+
+/* ---------- UTIL DE MENSAGEM ---------- */
+function msg(el, txt, err) {
+  el.textContent = txt;
+  el.className   = err ? 'error-message' : 'success-message';
 }
 
-/* ----------- LOGIN -------------------------------- */
-loginForm.addEventListener('submit', async e=>{
-  e.preventDefault();
-  try{
-    const out = await apiCall({
-      action:'login',
-      email : loginEmail.value.trim(),
-      password: loginPass.value.trim()
-    });
-    if(out.success){
-      currentUser = out.user;
-      userName.textContent = currentUser.name;
-      loginScreen.classList.add('hidden');
-      dashScreen.classList.remove('hidden');
-    }else showMsg(msgLogin,out.message,true);
-  }catch(err){ showMsg(msgLogin,err.message,true); }
-});
+/* ---------- LOGIN ---------- */
+async function handleLogin(ev) {
+  ev.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value.trim();
+  const box   = document.getElementById('loginMsg');
 
-/* ----------- UPLOAD ------------------------------- */
-uploadForm.addEventListener('submit', async e=>{
-  e.preventDefault();
-  const files=[...upFiles.files];
-  if(!files.length){showMsg(msgUpload,'Escolha arquivos',true);return;}
-  try{
-    const out = await apiCall({
-      action:'uploadFiles',
-      email:currentUser.email,
-      category:upCategory.value,
-      description:upDesc.value
-    },files);
-    showMsg(msgUpload,out.message,false);
-    uploadForm.reset();
-  }catch(err){ showMsg(msgUpload,err.message,true); }
-});
+  try {
+    const out = await apiCall({ action: 'login', email, password: pass });
+    if (!out.success) { msg(box, out.message, true); return; }
 
-/* ----------- LOGOUT ------------------------------- */
-btnLogout.onclick = ()=>{
-  currentUser=null;
-  dashScreen.classList.add('hidden');
-  loginScreen.classList.remove('hidden');
-  loginForm.reset(); msgLogin.innerHTML='';
-};
+    currentUser = out.user;
+    localStorage.setItem('cdr_user', JSON.stringify(currentUser));
+    showDashboard(currentUser);
+  } catch (e) { msg(box, e.message, true); }
+}
+
+/* ---------- ENVIO DE RELATÓRIO ---------- */
+async function handleSubmitReport(ev) {
+  ev.preventDefault();
+  const f = ev.target, fileInput = document.getElementById('reportFiles');
+  const files = [...fileInput.files];       // 0 ou 1
+
+  const payload = {
+    action      : 'submitReport',
+    email       : currentUser.email,
+    reportType  : document.getElementById('reportType').value,
+    title       : document.getElementById('reportTitle').value,
+    description : document.getElementById('reportDescription').value
+  };
+
+  try {
+    const out = await apiCall(payload, files);
+    alert(out.message);
+    f.reset(); loadUserData();
+  } catch (e) { alert('Erro: ' + e.message); }
+}
+
+/* ---------- ENVIO DE ATIVIDADE ---------- */
+async function handleSubmitActivity(ev) {
+  ev.preventDefault();
+  const files = [...document.getElementById('activityFiles').files];
+
+  const payload = {
+    action : 'submitActivity',
+    email  : currentUser.email,
+    name   : document.getElementById('activityTitle').value,
+    date   : document.getElementById('activityDate').value,
+    description : document.getElementById('activityDescription').value
+  };
+
+  try {
+    const out = await apiCall(payload, files);
+    alert(out.message);
+    ev.target.reset(); loadUserData();
+  } catch (e) { alert('Erro: ' + e.message); }
+}
+
+/* ---------- ENVIO DE ARQUIVOS ---------- */
+async function handleUploadFiles(ev) {
+  ev.preventDefault();
+  const files = [...document.getElementById('uploadFiles').files];
+  if (!files.length) { alert('Selecione arquivo(s)'); return; }
+
+  const payload = {
+    action      : 'uploadFiles',
+    email       : currentUser.email,
+    category    : document.getElementById('fileCategory').value,
+    description : document.getElementById('fileDescription').value
+  };
+
+  try {
+    const out = await apiCall(payload, files);
+    alert(out.message);
+    ev.target.reset(); loadUserData();
+  } catch (e) { alert('Erro: ' + e.message); }
+}
+
+/* ---------- ADMIN / ESTATÍSTICAS ---------- */
+async function loadUserData() {
+  if (!currentUser) return;
+  const out = await apiCall({ action:'getUserStats', email:currentUser.email });
+  if (out.success) {
+    document.getElementById('statsReports'   ).textContent = out.stats.reports;
+    document.getElementById('statsActivities').textContent = out.stats.activities;
+    document.getElementById('statsFiles'     ).textContent = out.stats.files;
+  }
+}
+async function loadAdminData() {
+  if (!currentUser?.isAdmin) return;
+  const out = await apiCall({ action:'getAdminData', email:currentUser.email });
+  if (out.success) {
+    document.getElementById('adminStatsUsers'     ).textContent = out.data.totalUsers;
+    document.getElementById('adminStatsReports'   ).textContent = out.data.totalReports;
+    document.getElementById('adminStatsActivities').textContent = out.data.totalActivities;
+  }
+}
+
+/* ---------- BOOT ---------- */
+document.addEventListener('DOMContentLoaded', () => {
+  /* liga formulários já existentes no HTML original */
+  document.getElementById('loginForm'   ).onsubmit = handleLogin;
+  document.getElementById('reportForm'  ).onsubmit = handleSubmitReport;
+  document.getElementById('activityForm').onsubmit = handleSubmitActivity;
+  document.getElementById('filesForm'   ).onsubmit = handleUploadFiles;
+
+  /* recupera usuário salvo */
+  const saved = localStorage.getItem('cdr_user');
+  if (saved) try { currentUser = JSON.parse(saved); showDashboard(currentUser); } catch{}
+});
 </script>
-</body>
-</html>
