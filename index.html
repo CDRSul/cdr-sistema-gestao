@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sistema de Gestão de Projetos CDR Sul</title>
     <style>
         /* ===== RESET E BASE ===== */
@@ -179,7 +179,7 @@
         }
 
         .header-logo {
-            width: 50px;
+            width: 80px;
             height: auto;
             border-radius: 6px;
         }
@@ -325,6 +325,8 @@
         .activities-tab,
         .files-tab {
             background: white;
+            max-width: 600px;
+            margin: 0 auto;
             padding: 25px;
             border-radius: 10px;
             box-shadow: 0 3px 12px rgba(0,0,0,0.1);
@@ -542,6 +544,17 @@
             transform: none;
         }
 
+        .dashboard-content .btn-primary {
+            width: auto;
+            display: inline-block;
+            padding: 12px 24px;
+        }
+
+        .form-actions {
+            text-align: center;
+            margin-top: 15px;
+        }
+
         .error-message {
             color: #e53e3e;
             font-size: 0.8rem;
@@ -559,7 +572,7 @@
     <div class="main-container">
         <!-- O conteúdo será carregado dinamicamente pelo JavaScript -->
     </div>
-    
+
     <script>
         /**
          * Sistema de Gestão de Projetos CDR Sul - Frontend ULTRA SIMPLES
@@ -920,7 +933,9 @@
                             <input type="file" id="reportFiles" multiple accept=".pdf,.doc,.docx">
                         </div>
                         
-                        <button type="submit" class="btn-primary">Enviar Relatório</button>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Enviar Relatório</button>
+                        </div>
                     </form>
                 </div>
             `;
@@ -976,7 +991,9 @@
                             <input type="file" id="activityFiles" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
                         </div>
                         
-                        <button type="submit" class="btn-primary">Cadastrar Atividade</button>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Cadastrar Atividade</button>
+                        </div>
                     </form>
                 </div>
             `;
@@ -1010,7 +1027,9 @@
                             <input type="file" id="uploadFiles" multiple required>
                         </div>
                         
-                        <button type="submit" class="btn-primary">Enviar Arquivos</button>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Enviar Arquivos</button>
+                        </div>
                     </form>
                 </div>
             `;
@@ -1064,48 +1083,37 @@
         // ===== PROCESSAR ENVIO DE RELATÓRIO =====
         async function handleSubmitReport(event) {
             event.preventDefault();
-
+            
             const reportType = document.getElementById('reportType').value;
             const reportDate = document.getElementById('reportDate').value;
             const title = document.getElementById('reportTitle').value;
             const description = document.getElementById('reportDescription').value;
-
+            
             console.log('📄 Enviando relatório:', title);
-
+            
             try {
-                // Preparar evidências (arquivos) para envio
-                const fileInput = document.getElementById('reportFiles');
-                let filesData = [];
-                if (fileInput && fileInput.files && fileInput.files.length > 0) {
-                    for (const file of fileInput.files) {
-                        const base64 = await new Promise((resolve, reject) => {
-                            const reader = new FileReader();
-                            reader.onload = () => resolve(reader.result.split(',')[1]);
-                            reader.onerror = () => reject(reader.error);
-                            reader.readAsDataURL(file);
-                        });
-                        filesData.push({
-                            name: file.name,
-                            type: file.type,
-                            data: base64
-                        });
-                    }
+                // Preparar dados do formulário com arquivos
+                let formData = new FormData();
+                formData.append('action', 'submitReport');
+                formData.append('userEmail', currentUser.email);
+                formData.append('reportType', reportType);
+                formData.append('reportDate', reportDate);
+                formData.append('title', title);
+                formData.append('description', description);
+                const files = document.getElementById('reportFiles').files;
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('files', files[i]);
                 }
-
-                const payload = {
-                    action: 'submitReport',
-                    userEmail: currentUser.email,
-                    reportType: reportType,
-                    reportDate: reportDate,
-                    title: title,
-                    description: description
-                };
-                if (filesData.length > 0) {
-                    payload.files = filesData;
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    body: formData
+                });
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
                 }
-
-                const result = await sendRequest(payload);
-
+                const result = await response.json();
+                
                 if (result.success) {
                     alert('Relatório enviado com sucesso!');
                     document.getElementById('reportForm').reset();
@@ -1122,52 +1130,41 @@
         // ===== PROCESSAR CADASTRO DE ATIVIDADE =====
         async function handleSubmitActivity(event) {
             event.preventDefault();
-
+            
             const activityType = document.getElementById('activityType').value;
             const activityDate = document.getElementById('activityDate').value;
             const title = document.getElementById('activityTitle').value;
             const description = document.getElementById('activityDescription').value;
             const location = document.getElementById('activityLocation').value;
             const participants = document.getElementById('activityParticipants').value;
-
+            
             console.log('🎯 Cadastrando atividade:', title);
-
+            
             try {
-                // Preparar evidências (arquivos) para envio
-                const fileInput = document.getElementById('activityFiles');
-                let filesData = [];
-                if (fileInput && fileInput.files && fileInput.files.length > 0) {
-                    for (const file of fileInput.files) {
-                        const base64 = await new Promise((resolve, reject) => {
-                            const reader = new FileReader();
-                            reader.onload = () => resolve(reader.result.split(',')[1]);
-                            reader.onerror = () => reject(reader.error);
-                            reader.readAsDataURL(file);
-                        });
-                        filesData.push({
-                            name: file.name,
-                            type: file.type,
-                            data: base64
-                        });
-                    }
+                // Preparar dados do formulário com arquivos
+                let formData = new FormData();
+                formData.append('action', 'submitActivity');
+                formData.append('userEmail', currentUser.email);
+                formData.append('activityType', activityType);
+                formData.append('activityDate', activityDate);
+                formData.append('title', title);
+                formData.append('description', description);
+                formData.append('location', location);
+                formData.append('participants', participants);
+                const files = document.getElementById('activityFiles').files;
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('files', files[i]);
                 }
-
-                const payload = {
-                    action: 'submitActivity',
-                    userEmail: currentUser.email,
-                    activityType: activityType,
-                    activityDate: activityDate,
-                    title: title,
-                    description: description,
-                    location: location,
-                    participants: participants
-                };
-                if (filesData.length > 0) {
-                    payload.files = filesData;
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    body: formData
+                });
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
                 }
-
-                const result = await sendRequest(payload);
-
+                const result = await response.json();
+                
                 if (result.success) {
                     alert('Atividade cadastrada com sucesso!');
                     document.getElementById('activityForm').reset();
@@ -1184,44 +1181,33 @@
         // ===== PROCESSAR UPLOAD DE ARQUIVOS =====
         async function handleUploadFiles(event) {
             event.preventDefault();
-
+            
             const category = document.getElementById('fileCategory').value;
             const description = document.getElementById('fileDescription').value;
-
+            
             console.log('📁 Enviando arquivos, categoria:', category);
-
+            
             try {
-                // Preparar evidências (arquivos) para envio
-                const fileInput = document.getElementById('uploadFiles');
-                let filesData = [];
-                if (fileInput && fileInput.files && fileInput.files.length > 0) {
-                    for (const file of fileInput.files) {
-                        const base64 = await new Promise((resolve, reject) => {
-                            const reader = new FileReader();
-                            reader.onload = () => resolve(reader.result.split(',')[1]);
-                            reader.onerror = () => reject(reader.error);
-                            reader.readAsDataURL(file);
-                        });
-                        filesData.push({
-                            name: file.name,
-                            type: file.type,
-                            data: base64
-                        });
-                    }
+                // Preparar dados do formulário com arquivos
+                let formData = new FormData();
+                formData.append('action', 'uploadFiles');
+                formData.append('userEmail', currentUser.email);
+                formData.append('category', category);
+                formData.append('description', description);
+                const files = document.getElementById('uploadFiles').files;
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('files', files[i]);
                 }
-
-                const payload = {
-                    action: 'upload_file',
-                    userEmail: currentUser.email,
-                    category: category,
-                    description: description
-                };
-                if (filesData.length > 0) {
-                    payload.files = filesData;
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    body: formData
+                });
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
                 }
-
-                const result = await sendRequest(payload);
-
+                const result = await response.json();
+                
                 if (result.success) {
                     alert('Arquivo(s) enviado(s) com sucesso!');
                     document.getElementById('filesForm').reset();
@@ -1241,7 +1227,7 @@
             
             try {
                 const result = await sendRequest({
-                    action: 'get_user_data',
+                    action: 'getUserData',
                     userEmail: currentUser.email
                 });
                 
@@ -1269,7 +1255,7 @@
             
             try {
                 const result = await sendRequest({
-                    action: 'get_admin_data'
+                    action: 'getAdminData'
                 });
                 
                 if (result.success) {
@@ -1344,7 +1330,7 @@
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error('HTTP error! status: ' + response.status);
                 }
                 
                 const result = await response.json();
