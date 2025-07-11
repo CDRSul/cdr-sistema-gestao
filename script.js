@@ -1,768 +1,764 @@
-/**
- * Sistema CDR Sul Tocantins - JavaScript Completo
- * Versão 2.8 - COMPLETO - Todas as funcionalidades
- * Data: 10/07/2025
- * Integração completa com Google Drive e Sheets
- * Correção do erro "Dados POST não encontrados"
- */
-
 // ==================== CONFIGURAÇÕES ====================
-
-// URL do Google Apps Script (MANTER A URL ATUAL)
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec';
-
-// Configurações do sistema
 const CONFIG = {
-    version: '2.8 - COMPLETO',
-    debug: true,
-    retryAttempts: 3,
-    retryDelay: 2000
+    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec',
+    VERSION: '3.1 - CORREÇÃO JSON + TRATAMENTO ROBUSTO',
+    DEBUG: true
 };
 
-// ==================== VARIÁVEIS GLOBAIS ====================
-
+// ==================== ESTADO GLOBAL ====================
 let currentUser = null;
 let isLoggedIn = false;
-let currentTab = 'overview';
 
-// ==================== FUNÇÕES DE UTILIDADE ====================
+// ==================== INICIALIZAÇÃO ====================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log(`[CDR Sul] Sistema CDR Sul iniciando - Versão ${CONFIG.VERSION}`);
+    
+    // Verificar sessão salva
+    checkSavedSession();
+    
+    // Configurar event listeners
+    setupEventListeners();
+    
+    // Testar conectividade
+    testConnectivity();
+});
 
-/**
- * Exibe mensagem para o usuário
- */
-function showMessage(message, type = 'info') {
-    // Criar modal de mensagem
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 10000;
-    `;
-    
-    const messageBox = document.createElement('div');
-    messageBox.style.cssText = `
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        max-width: 400px;
-        text-align: center;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    `;
-    
-    const colors = {
-        success: '#28a745',
-        error: '#dc3545',
-        info: '#17a2b8',
-        warning: '#ffc107'
-    };
-    
-    messageBox.innerHTML = `
-        <div style="color: ${colors[type] || colors.info}; font-size: 18px; margin-bottom: 15px;">
-            ${message}
-        </div>
-        <button onclick="this.closest('.modal').remove()" style="
-            background: ${colors[type] || colors.info};
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        ">OK</button>
-    `;
-    
-    modal.className = 'modal';
-    modal.appendChild(messageBox);
-    document.body.appendChild(modal);
-    
-    // Remove automaticamente após 5 segundos
-    setTimeout(() => {
-        if (modal.parentNode) {
-            modal.parentNode.removeChild(modal);
+function setupEventListeners() {
+    try {
+        // Formulário de login
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', handleLogin);
         }
-    }, 5000);
-}
-
-/**
- * Log de debug
- */
-function debugLog(message, data = null) {
-    if (CONFIG.debug) {
-        console.log(`[CDR Sul] ${message}`, data || '');
+        
+        // Formulário de cadastro
+        const registerForm = document.getElementById('registerForm');
+        if (registerForm) {
+            registerForm.addEventListener('submit', handleRegister);
+        }
+        
+        // Formulário de relatório
+        const reportForm = document.getElementById('reportForm');
+        if (reportForm) {
+            reportForm.addEventListener('submit', handleSubmitReport);
+        }
+        
+        // Formulário de atividade
+        const activityForm = document.getElementById('activityForm');
+        if (activityForm) {
+            activityForm.addEventListener('submit', handleSubmitActivity);
+        }
+        
+        // Formulário de arquivos
+        const filesForm = document.getElementById('filesForm');
+        if (filesForm) {
+            filesForm.addEventListener('submit', handleUploadFiles);
+        }
+        
+        // Botão de logout
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', handleLogout);
+        }
+        
+        // Links de navegação
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', handleNavigation);
+        });
+        
+        // Link de cadastro
+        const registerLink = document.getElementById('registerLink');
+        if (registerLink) {
+            registerLink.addEventListener('click', showRegisterForm);
+        }
+        
+        // Link de voltar ao login
+        const backToLoginLink = document.getElementById('backToLoginLink');
+        if (backToLoginLink) {
+            backToLoginLink.addEventListener('click', showLoginForm);
+        }
+        
+        console.log('[CDR Sul] Event listeners configurados');
+    } catch (error) {
+        console.error('[CDR Sul] Erro ao configurar event listeners:', error);
     }
 }
 
-/**
- * Comunicação com Google Apps Script - Versão Robusta
- */
-async function sendToScript(action, data = {}, files = null) {
-    debugLog(`Enviando ação: ${action}`, data);
-    
+// ==================== COMUNICAÇÃO COM GOOGLE APPS SCRIPT ====================
+
+async function makeRequest(action, data = {}, files = null) {
     try {
-        let response;
+        console.log(`[CDR Sul] Enviando ação: ${action}`);
+        console.log(`[CDR Sul] Dados:`, data);
         
-        if (files && files.length > 0) {
-            // Envio com arquivos usando FormData
-            const formData = new FormData();
-            formData.append('action', action);
-            
-            // Adicionar dados como campos do formulário
-            Object.keys(data).forEach(key => {
-                if (data[key] !== null && data[key] !== undefined) {
-                    formData.append(key, data[key]);
-                }
-            });
-            
-            // Adicionar arquivos
-            files.forEach((file, index) => {
-                formData.append(`file${index}`, file);
-            });
-            
-            response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: formData
-            });
-        } else {
-            // Envio JSON padrão
-            const payload = {
-                action: action,
-                ...data,
-                timestamp: new Date().toISOString()
-            };
-
-            response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload)
-            });
+        if (!CONFIG.GOOGLE_APPS_SCRIPT_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL === 'INSERIR_URL_AQUI') {
+            throw new Error('URL do Google Apps Script não configurada');
         }
-
+        
+        // Preparar dados
+        const formData = new FormData();
+        formData.append('action', action);
+        
+        // Adicionar dados
+        Object.keys(data).forEach(key => {
+            if (data[key] !== null && data[key] !== undefined) {
+                formData.append(key, data[key]);
+            }
+        });
+        
+        // Adicionar arquivos se existirem
+        if (files) {
+            if (files instanceof FileList) {
+                for (let i = 0; i < files.length; i++) {
+                    formData.append(`file_${i}`, files[i]);
+                }
+            } else if (files instanceof File) {
+                formData.append('file_0', files);
+            }
+        }
+        
+        // Fazer requisição
+        const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: formData,
+            mode: 'cors'
+        });
+        
+        console.log(`[CDR Sul] Status da resposta: ${response.status}`);
+        
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-
-        const result = await response.json();
-        debugLog(`Resposta recebida:`, result);
-        return result;
-
-    } catch (error) {
-        debugLog(`Erro na comunicação:`, error);
-        throw error;
-    }
-}
-
-// ==================== FUNÇÕES DE INTERFACE ====================
-
-/**
- * Mostra tela de login
- */
-function showLogin() {
-    debugLog('Mostrando tela de login');
-    document.getElementById('loginScreen').classList.remove('hidden');
-    document.getElementById('registerScreen').classList.add('hidden');
-    document.getElementById('dashboard').classList.add('hidden');
-}
-
-/**
- * Mostra tela de cadastro
- */
-function showRegister() {
-    debugLog('Mostrando tela de cadastro');
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('registerScreen').classList.remove('hidden');
-    document.getElementById('dashboard').classList.add('hidden');
-}
-
-/**
- * Mostra dashboard
- */
-function showDashboard() {
-    debugLog('Mostrando dashboard');
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('registerScreen').classList.add('hidden');
-    document.getElementById('dashboard').classList.remove('hidden');
-    
-    // Carregar dados iniciais
-    loadUserData();
-    if (currentUser && currentUser.isAdmin) {
-        document.getElementById('adminTab').classList.remove('hidden');
-    }
-}
-
-/**
- * Troca de abas
- */
-function showTab(tabName) {
-    debugLog(`Mostrando aba: ${tabName}`);
-    currentTab = tabName;
-    
-    // Atualizar botões das abas
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
-    
-    // Mostrar conteúdo da aba
-    document.querySelectorAll('.tab-content > div').forEach(content => {
-        content.classList.add('hidden');
-    });
-    document.getElementById(`${tabName}Content`).classList.remove('hidden');
-    
-    // Carregar dados específicos da aba
-    switch (tabName) {
-        case 'overview':
-            loadUserData();
-            break;
-        case 'admin':
-            if (currentUser && currentUser.isAdmin) {
-                loadAdminData();
-            }
-            break;
-    }
-}
-
-// ==================== FUNÇÕES PRINCIPAIS ====================
-
-/**
- * Função de login
- */
-async function login() {
-    debugLog('Iniciando processo de login');
-    
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
-    
-    if (!email || !password) {
-        showMessage('Por favor, preencha todos os campos', 'error');
-        return;
-    }
-    
-    const loginBtn = document.getElementById('loginBtn');
-    const originalText = loginBtn.textContent;
-    loginBtn.disabled = true;
-    loginBtn.textContent = 'Entrando...';
-    
-    try {
-        const result = await sendToScript('login', { email, password });
         
-        if (result.success) {
-            currentUser = result.user;
-            isLoggedIn = true;
+        // ==================== TRATAMENTO ROBUSTO DE JSON ====================
+        let result;
+        const responseText = await response.text();
+        
+        console.log(`[CDR Sul] Resposta bruta:`, responseText);
+        
+        try {
+            // Tentar fazer parse do JSON
+            result = JSON.parse(responseText);
+        } catch (jsonError) {
+            console.error('[CDR Sul] Erro ao fazer parse do JSON:', jsonError);
+            console.error('[CDR Sul] Resposta que causou erro:', responseText);
             
-            // Atualizar interface
-            document.getElementById('userName').textContent = `Bem-vindo, ${currentUser.name}!`;
-            document.getElementById('userInfo').textContent = `Projeto: ${currentUser.project}`;
-            document.getElementById('currentUser').textContent = currentUser.email;
-            document.getElementById('currentProject').textContent = currentUser.project || 'Não informado';
-            
-            showMessage('Login realizado com sucesso!', 'success');
-            showDashboard();
-            
-        } else {
-            showMessage(result.message || 'Erro ao fazer login', 'error');
+            // Se não conseguir fazer parse, criar resposta de erro
+            result = {
+                success: false,
+                error: `Resposta inválida do servidor: ${responseText.substring(0, 100)}...`,
+                debug: {
+                    originalError: jsonError.message,
+                    responseText: responseText
+                }
+            };
         }
         
+        console.log(`[CDR Sul] Resposta processada:`, result);
+        
+        return result;
+        
     } catch (error) {
-        debugLog('Erro no login:', error);
-        showMessage('Erro de conexão. Tente novamente.', 'error');
-    } finally {
-        loginBtn.disabled = false;
-        loginBtn.textContent = originalText;
+        console.error(`[CDR Sul] Erro na requisição:`, error);
+        
+        return {
+            success: false,
+            error: `Erro de conexão: ${error.message}`,
+            debug: {
+                action: action,
+                url: CONFIG.GOOGLE_APPS_SCRIPT_URL,
+                originalError: error.toString()
+            }
+        };
     }
 }
 
-/**
- * Função de cadastro
- */
-async function register() {
-    debugLog('Iniciando processo de cadastro');
-    
-    const name = document.getElementById('regName').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
-    const institution = document.getElementById('regInstitution').value.trim();
-    const project = document.getElementById('regProject').value.trim();
-    const password = document.getElementById('regPassword').value.trim();
-    
-    if (!name || !email || !institution || !project || !password) {
-        showMessage('Por favor, preencha todos os campos', 'error');
-        return;
+async function testConnectivity() {
+    try {
+        console.log('[CDR Sul] Testando conectividade...');
+        
+        if (!CONFIG.GOOGLE_APPS_SCRIPT_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL === 'INSERIR_URL_AQUI') {
+            console.warn('[CDR Sul] URL do Google Apps Script não configurada');
+            return;
+        }
+        
+        const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+            method: 'GET',
+            mode: 'cors'
+        });
+        
+        if (response.ok) {
+            const result = await response.text();
+            try {
+                const jsonResult = JSON.parse(result);
+                console.log('[CDR Sul] Conectividade OK:', jsonResult);
+            } catch (e) {
+                console.log('[CDR Sul] Conectividade OK (resposta não-JSON):', result);
+            }
+        } else {
+            console.warn('[CDR Sul] Problema de conectividade:', response.status);
+        }
+    } catch (error) {
+        console.warn('[CDR Sul] Erro de conectividade:', error.message);
     }
-    
-    const registerBtn = document.getElementById('registerBtn');
-    const originalText = registerBtn.textContent;
-    registerBtn.disabled = true;
-    registerBtn.textContent = 'Cadastrando...';
+}
+
+// ==================== FUNÇÕES DE AUTENTICAÇÃO ====================
+
+async function handleLogin(event) {
+    event.preventDefault();
     
     try {
-        const result = await sendToScript('register', {
-            name, email, institution, project, password
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        if (!email || !password) {
+            showMessage('Por favor, preencha todos os campos', 'error');
+            return;
+        }
+        
+        showMessage('Fazendo login...', 'info');
+        
+        const result = await makeRequest('login', {
+            email: email,
+            password: password
         });
         
         if (result.success) {
-            showMessage('Cadastro realizado com sucesso! Faça login para continuar.', 'success');
+            currentUser = result.data;
+            isLoggedIn = true;
             
-            // Limpar formulário
-            document.getElementById('registerForm').reset();
+            // Salvar sessão
+            localStorage.setItem('cdr_user', JSON.stringify(currentUser));
             
-            // Voltar para login após 2 segundos
-            setTimeout(() => {
-                showLogin();
-            }, 2000);
-            
+            showMessage(result.message || 'Login realizado com sucesso!', 'success');
+            showDashboard();
         } else {
-            showMessage(result.message || 'Erro ao fazer cadastro', 'error');
+            showMessage(result.error || 'Erro no login', 'error');
         }
         
     } catch (error) {
-        debugLog('Erro no cadastro:', error);
-        showMessage('Erro de conexão. Tente novamente.', 'error');
-    } finally {
-        registerBtn.disabled = false;
-        registerBtn.textContent = originalText;
+        console.error('[CDR Sul] Erro no login:', error);
+        showMessage('Erro interno no login', 'error');
     }
 }
 
-/**
- * Função de logout
- */
-function logout() {
-    debugLog('Fazendo logout');
+async function handleRegister(event) {
+    event.preventDefault();
     
+    try {
+        const email = document.getElementById('registerEmail').value;
+        const password = document.getElementById('registerPassword').value;
+        const name = document.getElementById('registerName').value;
+        const institution = document.getElementById('registerInstitution').value;
+        
+        if (!email || !password || !name) {
+            showMessage('Por favor, preencha todos os campos obrigatórios', 'error');
+            return;
+        }
+        
+        showMessage('Criando conta...', 'info');
+        
+        const result = await makeRequest('register', {
+            email: email,
+            password: password,
+            name: name,
+            institution: institution
+        });
+        
+        if (result.success) {
+            showMessage(result.message || 'Conta criada com sucesso!', 'success');
+            showLoginForm();
+            
+            // Preencher email no login
+            document.getElementById('email').value = email;
+        } else {
+            showMessage(result.error || 'Erro no cadastro', 'error');
+        }
+        
+    } catch (error) {
+        console.error('[CDR Sul] Erro no cadastro:', error);
+        showMessage('Erro interno no cadastro', 'error');
+    }
+}
+
+function handleLogout() {
     currentUser = null;
     isLoggedIn = false;
-    
-    // Limpar formulários
-    document.getElementById('loginForm').reset();
-    if (document.getElementById('registerForm')) {
-        document.getElementById('registerForm').reset();
+    localStorage.removeItem('cdr_user');
+    showLoginForm();
+    showMessage('Logout realizado com sucesso!', 'success');
+}
+
+function checkSavedSession() {
+    try {
+        const savedUser = localStorage.getItem('cdr_user');
+        if (savedUser) {
+            currentUser = JSON.parse(savedUser);
+            isLoggedIn = true;
+            showDashboard();
+        }
+    } catch (error) {
+        console.error('[CDR Sul] Erro ao verificar sessão salva:', error);
+        localStorage.removeItem('cdr_user');
     }
-    
-    showMessage('Logout realizado com sucesso!', 'info');
-    showLogin();
 }
 
 // ==================== FUNÇÕES DE ENVIO ====================
 
-/**
- * Enviar relatório
- */
-async function submitReport() {
-    debugLog('Enviando relatório');
-    
-    if (!currentUser) {
-        showMessage('Você precisa estar logado para enviar relatórios', 'error');
-        return;
-    }
-    
-    const reportType = document.getElementById('reportType').value;
-    const reportDate = document.getElementById('reportDate').value;
-    const title = document.getElementById('reportTitle').value.trim();
-    const description = document.getElementById('reportDescription').value.trim();
-    const fileInput = document.getElementById('reportFile');
-    
-    if (!reportType || !reportDate || !title || !description) {
-        showMessage('Por favor, preencha todos os campos obrigatórios', 'error');
-        return;
-    }
-    
-    const submitBtn = document.querySelector('#reportsContent button');
-    const originalText = submitBtn.textContent;
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Enviando...';
+async function handleSubmitReport(event) {
+    event.preventDefault();
     
     try {
-        const files = fileInput.files.length > 0 ? Array.from(fileInput.files) : null;
+        const form = event.target;
+        const formData = new FormData(form);
         
-        const result = await sendToScript('submitReport', {
+        const data = {
             email: currentUser.email,
-            userEmail: currentUser.email,
-            reportType: reportType,
-            date: reportDate,
-            reportDate: reportDate,
-            title: title,
-            description: description
-        }, files);
+            reportType: formData.get('reportType'),
+            title: formData.get('title'),
+            description: formData.get('description')
+        };
+        
+        const fileInput = form.querySelector('input[type="file"]');
+        const files = fileInput ? fileInput.files : null;
+        
+        showMessage('Enviando relatório...', 'info');
+        
+        const result = await makeRequest('submitReport', data, files);
         
         if (result.success) {
-            showMessage('Relatório enviado com sucesso!', 'success');
-            
-            // Limpar formulário
-            document.getElementById('reportType').value = '';
-            document.getElementById('reportDate').value = '';
-            document.getElementById('reportTitle').value = '';
-            document.getElementById('reportDescription').value = '';
-            fileInput.value = '';
-            
-            // Atualizar estatísticas
-            loadUserData();
-            
+            showMessage(result.message || 'Relatório enviado com sucesso!', 'success');
+            form.reset();
+            loadUserStats(); // Atualizar estatísticas
         } else {
-            showMessage(`Erro ao enviar relatório: ${result.message}`, 'error');
+            showMessage(result.error || 'Erro ao enviar relatório', 'error');
         }
         
     } catch (error) {
-        debugLog('Erro no envio de relatório:', error);
-        showMessage('Erro de conexão ao enviar relatório. Tente novamente.', 'error');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
+        console.error('[CDR Sul] Erro ao enviar relatório:', error);
+        showMessage('Erro interno ao enviar relatório', 'error');
     }
 }
 
-/**
- * Cadastrar atividade
- */
-async function submitActivity() {
-    debugLog('Cadastrando atividade');
-    
-    if (!currentUser) {
-        showMessage('Você precisa estar logado para cadastrar atividades', 'error');
-        return;
-    }
-    
-    const activityType = document.getElementById('activityType').value;
-    const activityDate = document.getElementById('activityDate').value;
-    const title = document.getElementById('activityTitle').value.trim();
-    const description = document.getElementById('activityDescription').value.trim();
-    const location = document.getElementById('activityLocation').value.trim();
-    const participants = document.getElementById('activityParticipants').value.trim();
-    const fileInput = document.getElementById('activityFiles');
-    
-    if (!activityType || !activityDate || !title || !description) {
-        showMessage('Por favor, preencha todos os campos obrigatórios', 'error');
-        return;
-    }
-    
-    const submitBtn = document.querySelector('#activitiesContent button');
-    const originalText = submitBtn.textContent;
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Cadastrando...';
+async function handleSubmitActivity(event) {
+    event.preventDefault();
     
     try {
-        const files = fileInput.files.length > 0 ? Array.from(fileInput.files) : null;
+        const form = event.target;
+        const formData = new FormData(form);
         
-        const result = await sendToScript('submitActivity', {
+        const data = {
             email: currentUser.email,
-            userEmail: currentUser.email,
-            activityType: activityType,
-            type: activityType,
-            date: activityDate,
-            activityDate: activityDate,
-            title: title,
-            activityName: title,
-            description: description,
-            location: location,
-            participants: participants
-        }, files);
+            activityType: formData.get('activityType'),
+            title: formData.get('title'),
+            description: formData.get('description'),
+            location: formData.get('location'),
+            participants: formData.get('participants')
+        };
+        
+        const fileInput = form.querySelector('input[type="file"]');
+        const files = fileInput ? fileInput.files : null;
+        
+        showMessage('Cadastrando atividade...', 'info');
+        
+        const result = await makeRequest('submitActivity', data, files);
         
         if (result.success) {
-            showMessage('Atividade cadastrada com sucesso!', 'success');
-            
-            // Limpar formulário
-            document.getElementById('activityType').value = '';
-            document.getElementById('activityDate').value = '';
-            document.getElementById('activityTitle').value = '';
-            document.getElementById('activityDescription').value = '';
-            document.getElementById('activityLocation').value = '';
-            document.getElementById('activityParticipants').value = '';
-            fileInput.value = '';
-            
-            // Atualizar estatísticas
-            loadUserData();
-            
+            showMessage(result.message || 'Atividade cadastrada com sucesso!', 'success');
+            form.reset();
+            loadUserStats(); // Atualizar estatísticas
         } else {
-            showMessage(`Erro ao cadastrar atividade: ${result.message}`, 'error');
+            showMessage(result.error || 'Erro ao cadastrar atividade', 'error');
         }
         
     } catch (error) {
-        debugLog('Erro no cadastro de atividade:', error);
-        showMessage('Erro de conexão ao cadastrar atividade. Tente novamente.', 'error');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
+        console.error('[CDR Sul] Erro ao cadastrar atividade:', error);
+        showMessage('Erro interno ao cadastrar atividade', 'error');
     }
 }
 
-/**
- * Enviar arquivos
- */
-async function uploadFiles() {
-    debugLog('Enviando arquivos');
-    
-    if (!currentUser) {
-        showMessage('Você precisa estar logado para enviar arquivos', 'error');
-        return;
-    }
-    
-    const category = document.getElementById('fileCategory').value;
-    const description = document.getElementById('fileDescription').value.trim();
-    const fileInput = document.getElementById('uploadFiles');
-    
-    if (!category) {
-        showMessage('Por favor, selecione uma categoria', 'error');
-        return;
-    }
-    
-    if (fileInput.files.length === 0) {
-        showMessage('Por favor, selecione pelo menos um arquivo', 'error');
-        return;
-    }
-    
-    const submitBtn = document.querySelector('#filesContent button');
-    const originalText = submitBtn.textContent;
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Enviando...';
+async function handleUploadFiles(event) {
+    event.preventDefault();
     
     try {
-        const files = Array.from(fileInput.files);
+        const form = event.target;
+        const formData = new FormData(form);
         
-        const result = await sendToScript('uploadFiles', {
+        const data = {
             email: currentUser.email,
-            userEmail: currentUser.email,
-            category: category,
-            description: description
-        }, files);
+            category: formData.get('category'),
+            description: formData.get('description')
+        };
+        
+        const fileInput = form.querySelector('input[type="file"]');
+        const files = fileInput ? fileInput.files : null;
+        
+        if (!files || files.length === 0) {
+            showMessage('Por favor, selecione pelo menos um arquivo', 'error');
+            return;
+        }
+        
+        showMessage('Enviando arquivos...', 'info');
+        
+        const result = await makeRequest('uploadFiles', data, files);
         
         if (result.success) {
-            showMessage('Arquivos enviados com sucesso!', 'success');
-            
-            // Limpar formulário
-            document.getElementById('fileCategory').value = '';
-            document.getElementById('fileDescription').value = '';
-            fileInput.value = '';
-            
-            // Atualizar estatísticas
-            loadUserData();
-            
+            showMessage(result.message || 'Arquivos enviados com sucesso!', 'success');
+            form.reset();
+            loadUserStats(); // Atualizar estatísticas
         } else {
-            showMessage(`Erro ao enviar arquivos: ${result.message}`, 'error');
+            showMessage(result.error || 'Erro ao enviar arquivos', 'error');
         }
         
     } catch (error) {
-        debugLog('Erro no envio de arquivos:', error);
-        showMessage('Erro de conexão ao enviar arquivos. Tente novamente.', 'error');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
+        console.error('[CDR Sul] Erro ao enviar arquivos:', error);
+        showMessage('Erro interno ao enviar arquivos', 'error');
     }
 }
 
 // ==================== FUNÇÕES DE CARREGAMENTO DE DADOS ====================
 
-/**
- * Carregar dados do usuário
- */
-async function loadUserData() {
-    debugLog('Carregando dados do usuário');
-    
-    if (!currentUser) return;
-    
+async function loadAdminData() {
     try {
-        const result = await sendToScript('getUserStats', {
-            email: currentUser.email,
-            userEmail: currentUser.email
-        });
-        
-        if (result.success && result.stats) {
-            // Atualizar estatísticas na visão geral
-            document.getElementById('statsReports').textContent = result.stats.reports || 0;
-            document.getElementById('statsActivities').textContent = result.stats.activities || 0;
-            document.getElementById('statsFiles').textContent = result.stats.files || 0;
-        } else {
-            debugLog('Erro ao carregar estatísticas do usuário:', result.message);
+        if (!currentUser || !currentUser.isAdmin) {
+            return;
         }
         
-    } catch (error) {
-        debugLog('Erro ao carregar dados do usuário:', error);
-    }
-}
-
-/**
- * Carregar dados administrativos
- */
-async function loadAdminData() {
-    debugLog('Carregando dados administrativos');
-    
-    if (!currentUser || !currentUser.isAdmin) return;
-    
-    try {
-        const result = await sendToScript('getAdminData', {
+        console.log('[CDR Sul] Carregando dados administrativos...');
+        
+        const result = await makeRequest('getAdminData', {
             email: currentUser.email
         });
         
         if (result.success && result.data) {
-            const data = result.data;
-            
-            // Atualizar estatísticas gerais
-            document.getElementById('adminStatsUsers').textContent = data.totalUsers || 0;
-            document.getElementById('adminStatsReports').textContent = data.totalReports || 0;
-            document.getElementById('adminStatsActivities').textContent = data.totalActivities || 0;
-            document.getElementById('adminStatsFiles').textContent = data.totalFiles || 0;
-            
-            // Atualizar listas de dados recentes
-            updateAdminList('adminUsersList', data.recentUsers, 'users');
-            updateAdminList('adminReportsList', data.recentReports, 'reports');
-            updateAdminList('adminActivitiesList', data.recentActivities, 'activities');
-            
+            updateAdminDashboard(result.data);
         } else {
-            debugLog('Erro ao carregar dados administrativos:', result.message);
-            showMessage('Erro ao carregar dados administrativos', 'error');
+            console.error('[CDR Sul] Erro ao carregar dados admin:', result.error);
+            showAdminError();
         }
         
     } catch (error) {
-        debugLog('Erro ao carregar dados administrativos:', error);
-        showMessage('Erro de conexão ao carregar dados administrativos', 'error');
+        console.error('[CDR Sul] Erro ao carregar dados admin:', error);
+        showAdminError();
     }
 }
 
-/**
- * Atualizar listas administrativas
- */
-function updateAdminList(elementId, data, type) {
+async function loadUserStats() {
+    try {
+        if (!currentUser) {
+            return;
+        }
+        
+        console.log('[CDR Sul] Carregando estatísticas do usuário...');
+        
+        const result = await makeRequest('getUserStats', {
+            email: currentUser.email
+        });
+        
+        if (result.success && result.data) {
+            updateUserDashboard(result.data);
+        } else {
+            console.error('[CDR Sul] Erro ao carregar stats:', result.error);
+            showUserStatsError();
+        }
+        
+    } catch (error) {
+        console.error('[CDR Sul] Erro ao carregar stats:', error);
+        showUserStatsError();
+    }
+}
+
+// ==================== FUNÇÕES DE INTERFACE ====================
+
+function showLoginForm() {
+    document.getElementById('loginSection').style.display = 'block';
+    document.getElementById('registerSection').style.display = 'none';
+    document.getElementById('dashboardSection').style.display = 'none';
+}
+
+function showRegisterForm() {
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('registerSection').style.display = 'block';
+    document.getElementById('dashboardSection').style.display = 'none';
+}
+
+function showDashboard() {
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('registerSection').style.display = 'none';
+    document.getElementById('dashboardSection').style.display = 'block';
+    
+    // Atualizar informações do usuário
+    updateUserInfo();
+    
+    // Mostrar aba inicial
+    showTab('visao-geral');
+    
+    // Carregar dados
+    if (currentUser.isAdmin) {
+        loadAdminData();
+    }
+    loadUserStats();
+}
+
+function updateUserInfo() {
+    const userNameElement = document.getElementById('userName');
+    const userEmailElement = document.getElementById('userEmail');
+    const adminBadge = document.getElementById('adminBadge');
+    const adminTab = document.getElementById('adminTab');
+    
+    if (userNameElement) {
+        userNameElement.textContent = currentUser.name || 'Usuário';
+    }
+    
+    if (userEmailElement) {
+        userEmailElement.textContent = currentUser.email || '';
+    }
+    
+    if (adminBadge) {
+        adminBadge.style.display = currentUser.isAdmin ? 'inline' : 'none';
+    }
+    
+    if (adminTab) {
+        adminTab.style.display = currentUser.isAdmin ? 'block' : 'none';
+    }
+}
+
+function handleNavigation(event) {
+    event.preventDefault();
+    const tabId = event.target.getAttribute('data-tab');
+    if (tabId) {
+        showTab(tabId);
+    }
+}
+
+function showTab(tabId) {
+    // Esconder todas as abas
+    const tabs = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => {
+        tab.style.display = 'none';
+    });
+    
+    // Remover classe ativa de todos os links
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // Mostrar aba selecionada
+    const selectedTab = document.getElementById(tabId);
+    if (selectedTab) {
+        selectedTab.style.display = 'block';
+    }
+    
+    // Adicionar classe ativa ao link
+    const activeLink = document.querySelector(`[data-tab="${tabId}"]`);
+    if (activeLink) {
+        activeLink.classList.add('active');
+    }
+    
+    // Carregar dados específicos da aba
+    if (tabId === 'admin' && currentUser && currentUser.isAdmin) {
+        loadAdminData();
+    } else if (tabId === 'visao-geral') {
+        loadUserStats();
+    }
+}
+
+function updateAdminDashboard(data) {
+    try {
+        // Atualizar contadores
+        const totalUsersElement = document.getElementById('totalUsers');
+        const totalReportsElement = document.getElementById('totalReports');
+        const totalActivitiesElement = document.getElementById('totalActivities');
+        
+        if (totalUsersElement) {
+            totalUsersElement.textContent = data.totalUsers || '0';
+        }
+        
+        if (totalReportsElement) {
+            totalReportsElement.textContent = data.totalReports || '0';
+        }
+        
+        if (totalActivitiesElement) {
+            totalActivitiesElement.textContent = data.totalActivities || '0';
+        }
+        
+        // Atualizar listas
+        updateRecentList('recentUsersList', data.recentUsers, 'usuário');
+        updateRecentList('recentReportsList', data.recentReports, 'relatório');
+        updateRecentList('recentActivitiesList', data.recentActivities, 'atividade');
+        
+        console.log('[CDR Sul] Dashboard admin atualizado');
+        
+    } catch (error) {
+        console.error('[CDR Sul] Erro ao atualizar dashboard admin:', error);
+    }
+}
+
+function updateUserDashboard(data) {
+    try {
+        // Atualizar contadores do usuário
+        const userReportsElement = document.getElementById('userReports');
+        const userActivitiesElement = document.getElementById('userActivities');
+        const userFilesElement = document.getElementById('userFiles');
+        
+        if (userReportsElement) {
+            userReportsElement.textContent = data.reportsCount || '0';
+        }
+        
+        if (userActivitiesElement) {
+            userActivitiesElement.textContent = data.activitiesCount || '0';
+        }
+        
+        if (userFilesElement) {
+            userFilesElement.textContent = data.filesCount || '0';
+        }
+        
+        // Atualizar listas do usuário
+        updateRecentList('userRecentReports', data.recentReports, 'relatório');
+        updateRecentList('userRecentActivities', data.recentActivities, 'atividade');
+        
+        console.log('[CDR Sul] Dashboard usuário atualizado');
+        
+    } catch (error) {
+        console.error('[CDR Sul] Erro ao atualizar dashboard usuário:', error);
+    }
+}
+
+function updateRecentList(elementId, items, type) {
     const element = document.getElementById(elementId);
-    if (!element || !data || !Array.isArray(data)) {
-        if (element) element.innerHTML = '<p>Nenhum dado disponível</p>';
+    if (!element) return;
+    
+    if (!items || items.length === 0) {
+        element.innerHTML = `<p>Nenhum ${type} encontrado</p>`;
         return;
     }
     
-    let html = '';
+    const html = items.map(item => {
+        const date = new Date(item.date).toLocaleDateString('pt-BR');
+        return `
+            <div class="recent-item">
+                <strong>${item.title || item.name}</strong>
+                <small>${item.email || ''} - ${date}</small>
+            </div>
+        `;
+    }).join('');
     
-    switch (type) {
-        case 'users':
-            html = data.map(user => `
-                <div style="border-bottom: 1px solid #eee; padding: 10px 0;">
-                    <strong>${user.name}</strong><br>
-                    <small>${user.email} - ${user.institution}</small><br>
-                    <small>Projeto: ${user.project}</small>
-                </div>
-            `).join('');
-            break;
-            
-        case 'reports':
-            html = data.map(report => `
-                <div style="border-bottom: 1px solid #eee; padding: 10px 0;">
-                    <strong>${report.title}</strong><br>
-                    <small>${report.email} - ${report.type}</small><br>
-                    <small>Status: ${report.status}</small>
-                </div>
-            `).join('');
-            break;
-            
-        case 'activities':
-            html = data.map(activity => `
-                <div style="border-bottom: 1px solid #eee; padding: 10px 0;">
-                    <strong>${activity.name}</strong><br>
-                    <small>${activity.email}</small><br>
-                    <small>Arquivos: ${activity.files}</small>
-                </div>
-            `).join('');
-            break;
-    }
-    
-    element.innerHTML = html || '<p>Nenhum dado disponível</p>';
+    element.innerHTML = html;
 }
 
-// ==================== INICIALIZAÇÃO ====================
-
-/**
- * Inicializa o sistema quando a página carrega
- */
-function initializeSystem() {
-    debugLog(`Sistema CDR Sul iniciando - ${CONFIG.version}`);
-    
-    // Event listeners para formulários
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            login();
-        });
-    }
-    
-    const registerForm = document.getElementById('registerForm');
-    if (registerForm) {
-        registerForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            register();
-        });
-    }
-    
-    // Event listeners para links
-    const showRegisterLink = document.getElementById('showRegisterLink');
-    if (showRegisterLink) {
-        showRegisterLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            showRegister();
-        });
-    }
-    
-    const showLoginLink = document.getElementById('showLoginLink');
-    if (showLoginLink) {
-        showLoginLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            showLogin();
-        });
-    }
-    
-    // Event listener para logout
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            logout();
-        });
-    }
-    
-    // Teste de conectividade
-    testConnectivity();
-    
-    debugLog('Sistema inicializado com sucesso');
-}
-
-/**
- * Testa conectividade com o servidor
- */
-async function testConnectivity() {
-    debugLog('Testando conectividade...');
-    
-    try {
-        const result = await sendToScript('test');
-        if (result && result.success) {
-            debugLog('Conectividade OK:', result);
-        } else {
-            debugLog('Conectividade limitada');
+function showAdminError() {
+    const elements = ['totalUsers', 'totalReports', 'totalActivities'];
+    elements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = '-';
         }
-    } catch (error) {
-        debugLog('Erro de conectividade:', error);
+    });
+    
+    const lists = ['recentUsersList', 'recentReportsList', 'recentActivitiesList'];
+    lists.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.innerHTML = '<p>Erro ao carregar dados</p>';
+        }
+    });
+}
+
+function showUserStatsError() {
+    const elements = ['userReports', 'userActivities', 'userFiles'];
+    elements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = '-';
+        }
+    });
+    
+    const lists = ['userRecentReports', 'userRecentActivities'];
+    lists.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.innerHTML = '<p>Erro ao carregar dados</p>';
+        }
+    });
+}
+
+function showMessage(message, type = 'info') {
+    // Remover mensagens anteriores
+    const existingMessages = document.querySelectorAll('.message');
+    existingMessages.forEach(msg => msg.remove());
+    
+    // Criar nova mensagem
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message message-${type}`;
+    messageDiv.textContent = message;
+    
+    // Adicionar estilos
+    messageDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 5px;
+        color: white;
+        font-weight: bold;
+        z-index: 10000;
+        max-width: 400px;
+        word-wrap: break-word;
+    `;
+    
+    // Cores por tipo
+    switch (type) {
+        case 'success':
+            messageDiv.style.backgroundColor = '#28a745';
+            break;
+        case 'error':
+            messageDiv.style.backgroundColor = '#dc3545';
+            break;
+        case 'warning':
+            messageDiv.style.backgroundColor = '#ffc107';
+            messageDiv.style.color = '#000';
+            break;
+        default:
+            messageDiv.style.backgroundColor = '#17a2b8';
     }
+    
+    // Adicionar ao DOM
+    document.body.appendChild(messageDiv);
+    
+    // Remover após 5 segundos
+    setTimeout(() => {
+        if (messageDiv.parentNode) {
+            messageDiv.parentNode.removeChild(messageDiv);
+        }
+    }, 5000);
+    
+    console.log(`[CDR Sul] Mensagem (${type}): ${message}`);
 }
 
-// ==================== INICIALIZAÇÃO AUTOMÁTICA ====================
+// ==================== UTILITÁRIOS ====================
 
-// Inicializa quando o DOM estiver pronto
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeSystem);
-} else {
-    initializeSystem();
+function formatDate(date) {
+    if (!date) return '';
+    return new Date(date).toLocaleDateString('pt-BR');
 }
 
-// Exporta funções para uso global (compatibilidade)
-window.login = login;
-window.register = register;
-window.logout = logout;
-window.showLogin = showLogin;
-window.showRegister = showRegister;
-window.showTab = showTab;
-window.submitReport = submitReport;
-window.submitActivity = submitActivity;
-window.uploadFiles = uploadFiles;
+function formatDateTime(date) {
+    if (!date) return '';
+    return new Date(date).toLocaleString('pt-BR');
+}
 
-debugLog('JavaScript carregado com sucesso');
+// ==================== LOGS E DEBUG ====================
+console.log(`[CDR Sul] Script carregado - Versão ${CONFIG.VERSION}`);
+
+// Expor funções globais para debug
+if (CONFIG.DEBUG) {
+    window.cdrDebug = {
+        makeRequest,
+        testConnectivity,
+        currentUser: () => currentUser,
+        config: CONFIG
+    };
+}
