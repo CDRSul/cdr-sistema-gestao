@@ -1,11 +1,11 @@
 // ==================== CONFIGURAÇÕES ====================
 const CONFIG = {
-    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec', 
-    VERSION: '3.2 - LIMITE ARQUIVOS + VALIDAÇÃO',
+    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec',
+    VERSION: '3.3 - ARQUIVOS CORRIGIDO + SEGURANÇA',
     DEBUG: true,
     MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB em bytes
     MAX_TOTAL_SIZE: 50 * 1024 * 1024, // 50MB total
-    SUPPORTED_FORMATS: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'zip', 'rar', 'xls', 'xlsx', 'ods', 'pptx', 'ppt']
+    SUPPORTED_FORMATS: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'zip', 'rar', 'xlsx', 'ppt', 'doc', 'xlx']
 };
 
 // ==================== ESTADO GLOBAL ====================
@@ -14,7 +14,7 @@ let isLoggedIn = false;
 
 // ==================== INICIALIZAÇÃO ====================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log(`[CDR Sul] Sistema CDR Sul - Versão 2.0 ${CONFIG.VERSION}`);
+    console.log(`[CDR Sul] Sistema CDR Sul iniciando - Versão ${CONFIG.VERSION}`);
     
     // Verificar sessão salva
     checkSavedSession();
@@ -184,15 +184,12 @@ function createFileFeedback(inputElement) {
 async function makeRequest(action, data = {}, files = null) {
     try {
         console.log(`[CDR Sul] Enviando ação: ${action}`);
-        
-        if (!CONFIG.GOOGLE_APPS_SCRIPT_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec') {
-            throw new Error('URL do Google Apps Script não configurada');
-        }
+        console.log(`[CDR Sul] Dados:`, Object.keys(data));
+        console.log(`[CDR Sul] Arquivos:`, files ? files.length : 0);
         
         // Validar arquivos antes de enviar
-        if (files) {
-            const fileArray = Array.from(files);
-            const validation = validateFilesForUpload(fileArray);
+        if (files && files.length > 0) {
+            const validation = validateFilesForUpload(Array.from(files));
             if (!validation.success) {
                 throw new Error(validation.error);
             }
@@ -208,14 +205,25 @@ async function makeRequest(action, data = {}, files = null) {
             }
         });
         
-        // Adicionar arquivos
-        if (files) {
+        // Adicionar arquivos com nomes específicos
+        if (files && files.length > 0) {
             Array.from(files).forEach((file, index) => {
-                formData.append(`file_${index}`, file);
+                // Usar nomes específicos baseados na ação
+                let fileName = `file_${index}`;
+                if (action === 'submitReport') {
+                    fileName = `reportFile_${index}`;
+                } else if (action === 'submitActivity') {
+                    fileName = `activityFile_${index}`;
+                } else if (action === 'uploadFiles') {
+                    fileName = `uploadFile_${index}`;
+                }
+                
+                formData.append(fileName, file);
+                console.log(`[CDR Sul] Arquivo adicionado: ${fileName} = ${file.name} (${file.size} bytes)`);
             });
         }
         
-        console.log(`[CDR Sul] Dados preparados: ${Object.keys(data).length} campos, ${files ? files.length : 0} arquivo(s)`);
+        console.log(`[CDR Sul] Enviando requisição para: ${CONFIG.GOOGLE_APPS_SCRIPT_URL}`);
         
         const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
             method: 'POST',
@@ -243,12 +251,6 @@ async function makeRequest(action, data = {}, files = null) {
         
     } catch (error) {
         console.error(`[CDR Sul] Erro na requisição:`, error);
-        
-        // Fallback para validação local em caso de erro de rede
-        if (action === 'login' && error.message.includes('fetch')) {
-            return handleOfflineLogin(data);
-        }
-        
         throw error;
     }
 }
@@ -325,28 +327,6 @@ async function handleLogin(e) {
     }
 }
 
-function handleOfflineLogin(data) {
-    // Validação local para credenciais conhecidas
-    const knownUsers = [
-        { email: 'cdrsultocantins@unirg.edu.br', password: 'CDR@2025', name: 'Administrador CDR Sul', role: 'admin' },
-    ];
-    
-    const user = knownUsers.find(u => u.email === data.email && u.password === data.password);
-    
-    if (user) {
-        return {
-            success: true,
-            user: user,
-            message: 'Login realizado (modo offline)'
-        };
-    }
-    
-    return {
-        success: false,
-        error: 'Credenciais inválidas ou sem conexão'
-    };
-}
-
 async function handleRegister(e) {
     e.preventDefault();
     
@@ -402,6 +382,9 @@ async function handleSubmitReport(e) {
             period: formData.get('period')
         };
         
+        console.log('[CDR Sul] Dados do relatório:', data);
+        console.log('[CDR Sul] Arquivos do relatório:', files.length);
+        
         const result = await makeRequest('submitReport', data, files);
         
         if (result.success) {
@@ -409,17 +392,19 @@ async function handleSubmitReport(e) {
             
             // Mostrar detalhes do arquivo se houver
             if (result.data && result.data.fileName) {
-                const details = `Arquivo: ${result.data.fileName}`;
+                let details = `Arquivo: ${result.data.fileName}`;
                 if (result.data.fileInfo) {
                     details += ` (${result.data.fileInfo})`;
                 }
                 showMessage(messageDiv, details, 'info', true);
+            } else if (result.data && !result.data.hasFile) {
+                showMessage(messageDiv, 'Relatório salvo sem arquivo anexo', 'warning', true);
             }
             
             e.target.reset();
             
             // Atualizar estatísticas se estiver na aba visão geral
-            if (document.getElementById('overviewTab').classList.contains('active')) {
+            if (document.getElementById('overviewTab') && document.getElementById('overviewTab').classList.contains('active')) {
                 loadUserStats();
             }
         } else {
@@ -461,6 +446,9 @@ async function handleSubmitActivity(e) {
             participants: formData.get('participants')
         };
         
+        console.log('[CDR Sul] Dados da atividade:', data);
+        console.log('[CDR Sul] Arquivos da atividade:', files.length);
+        
         const result = await makeRequest('submitActivity', data, files);
         
         if (result.success) {
@@ -474,12 +462,14 @@ async function handleSubmitActivity(e) {
                 if (result.data.fileInfos && result.data.fileInfos.length > 0) {
                     showMessage(messageDiv, result.data.fileInfos.join('; '), 'warning', true);
                 }
+            } else {
+                showMessage(messageDiv, 'Atividade cadastrada sem evidências', 'warning', true);
             }
             
             e.target.reset();
             
             // Atualizar estatísticas
-            if (document.getElementById('overviewTab').classList.contains('active')) {
+            if (document.getElementById('overviewTab') && document.getElementById('overviewTab').classList.contains('active')) {
                 loadUserStats();
             }
         } else {
@@ -518,6 +508,9 @@ async function handleUploadFiles(e) {
             description: formData.get('description')
         };
         
+        console.log('[CDR Sul] Dados dos arquivos:', data);
+        console.log('[CDR Sul] Arquivos para upload:', files.length);
+        
         const result = await makeRequest('uploadFiles', data, files);
         
         if (result.success) {
@@ -543,11 +536,21 @@ async function handleUploadFiles(e) {
             e.target.reset();
             
             // Atualizar estatísticas
-            if (document.getElementById('overviewTab').classList.contains('active')) {
+            if (document.getElementById('overviewTab') && document.getElementById('overviewTab').classList.contains('active')) {
                 loadUserStats();
             }
         } else {
             showMessage(messageDiv, result.error, 'error');
+            
+            // Mostrar detalhes específicos se houver
+            if (result.details) {
+                if (result.details.receivedKeys) {
+                    showMessage(messageDiv, `Chaves recebidas: ${result.details.receivedKeys.join(', ')}`, 'info', true);
+                }
+                if (result.details.skippedFiles) {
+                    showMessage(messageDiv, `Arquivos com problema: ${result.details.skippedFiles.join(', ')}`, 'warning', true);
+                }
+            }
         }
     } catch (error) {
         console.error('[CDR Sul] Erro ao enviar arquivos:', error);
@@ -824,10 +827,7 @@ function checkSavedSession() {
 
 async function testConnectivity() {
     try {
-        if (!CONFIG.GOOGLE_APPS_SCRIPT_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec') {
-            console.warn('[CDR Sul] URL do Google Apps Script não configurada');
-            return;
-        }
+        console.log('[CDR Sul] Testando conectividade...');
         
         const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL);
         const result = await response.json();
@@ -901,5 +901,6 @@ function formatFileSize(bytes) {
 // ==================== INICIALIZAÇÃO FINAL ====================
 
 console.log(`[CDR Sul] JavaScript carregado - Versão ${CONFIG.VERSION}`);
+console.log(`[CDR Sul] URL configurada: ${CONFIG.GOOGLE_APPS_SCRIPT_URL}`);
 console.log(`[CDR Sul] Limites: Arquivo ${formatFileSize(CONFIG.MAX_FILE_SIZE)}, Total ${formatFileSize(CONFIG.MAX_TOTAL_SIZE)}`);
 console.log(`[CDR Sul] Formatos suportados: ${CONFIG.SUPPORTED_FORMATS.join(', ')}`);
