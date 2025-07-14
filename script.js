@@ -1,8 +1,11 @@
 // ==================== CONFIGURAÇÕES ====================
 const CONFIG = {
-    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec',
-    VERSION: '3.1 - CORREÇÃO JSON + TRATAMENTO ROBUSTO',
-    DEBUG: true
+    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec', 
+    VERSION: '3.2 - LIMITE ARQUIVOS + VALIDAÇÃO',
+    DEBUG: true,
+    MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB em bytes
+    MAX_TOTAL_SIZE: 50 * 1024 * 1024, // 50MB total
+    SUPPORTED_FORMATS: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'zip', 'rar']
 };
 
 // ==================== ESTADO GLOBAL ====================
@@ -79,10 +82,101 @@ function setupEventListeners() {
             backToLoginLink.addEventListener('click', showLoginForm);
         }
         
+        // Validação de arquivos em tempo real
+        setupFileValidation();
+        
         console.log('[CDR Sul] Event listeners configurados');
     } catch (error) {
         console.error('[CDR Sul] Erro ao configurar event listeners:', error);
     }
+}
+
+// ==================== VALIDAÇÃO DE ARQUIVOS ====================
+
+function setupFileValidation() {
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    
+    fileInputs.forEach(input => {
+        input.addEventListener('change', function(e) {
+            validateFiles(e.target.files, e.target);
+        });
+    });
+}
+
+function validateFiles(files, inputElement) {
+    if (!files || files.length === 0) return true;
+    
+    let totalSize = 0;
+    const errors = [];
+    const warnings = [];
+    
+    Array.from(files).forEach((file, index) => {
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        totalSize += file.size;
+        
+        // Verificar tamanho individual
+        if (file.size > CONFIG.MAX_FILE_SIZE) {
+            errors.push(`${file.name} (${fileSizeMB}MB) excede o limite de 10MB`);
+        }
+        
+        // Verificar formato
+        const extension = file.name.split('.').pop().toLowerCase();
+        if (!CONFIG.SUPPORTED_FORMATS.includes(extension)) {
+            warnings.push(`${file.name} - formato ${extension} pode não ser suportado`);
+        }
+        
+        // Verificar se é imagem grande (pode ser comprimida)
+        if (file.size > CONFIG.MAX_FILE_SIZE && ['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+            warnings.push(`${file.name} será comprimido automaticamente`);
+        }
+    });
+    
+    // Verificar tamanho total
+    const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+    if (totalSize > CONFIG.MAX_TOTAL_SIZE) {
+        errors.push(`Tamanho total (${totalSizeMB}MB) excede o limite de 50MB`);
+    }
+    
+    // Exibir feedback
+    const feedbackDiv = inputElement.parentNode.querySelector('.file-feedback') || 
+                       createFileFeedback(inputElement);
+    
+    if (errors.length > 0) {
+        feedbackDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <strong>Erros encontrados:</strong>
+                <ul>${errors.map(error => `<li>${error}</li>`).join('')}</ul>
+                <small>Comprima os arquivos ou divida em partes menores.</small>
+            </div>
+        `;
+        inputElement.setCustomValidity('Arquivos muito grandes');
+        return false;
+    }
+    
+    if (warnings.length > 0) {
+        feedbackDiv.innerHTML = `
+            <div class="alert alert-warning">
+                <strong>Avisos:</strong>
+                <ul>${warnings.map(warning => `<li>${warning}</li>`).join('')}</ul>
+            </div>
+        `;
+    } else {
+        feedbackDiv.innerHTML = `
+            <div class="alert alert-success">
+                <strong>✓ Arquivos válidos:</strong> ${files.length} arquivo(s), Total: ${totalSizeMB}MB
+            </div>
+        `;
+    }
+    
+    inputElement.setCustomValidity('');
+    return true;
+}
+
+function createFileFeedback(inputElement) {
+    const feedbackDiv = document.createElement('div');
+    feedbackDiv.className = 'file-feedback mt-2';
+    inputElement.parentNode.appendChild(feedbackDiv);
+    return feedbackDiv;
 }
 
 // ==================== COMUNICAÇÃO COM GOOGLE APPS SCRIPT ====================
@@ -90,264 +184,274 @@ function setupEventListeners() {
 async function makeRequest(action, data = {}, files = null) {
     try {
         console.log(`[CDR Sul] Enviando ação: ${action}`);
-        console.log(`[CDR Sul] Dados:`, data);
         
         if (!CONFIG.GOOGLE_APPS_SCRIPT_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL === 'INSERIR_URL_AQUI') {
             throw new Error('URL do Google Apps Script não configurada');
         }
         
-        // Preparar dados
+        // Validar arquivos antes de enviar
+        if (files) {
+            const fileArray = Array.from(files);
+            const validation = validateFilesForUpload(fileArray);
+            if (!validation.success) {
+                throw new Error(validation.error);
+            }
+        }
+        
         const formData = new FormData();
-        formData.append('action', action);
         
         // Adicionar dados
+        formData.append('action', action);
         Object.keys(data).forEach(key => {
             if (data[key] !== null && data[key] !== undefined) {
                 formData.append(key, data[key]);
             }
         });
         
-        // Adicionar arquivos se existirem
+        // Adicionar arquivos
         if (files) {
-            if (files instanceof FileList) {
-                for (let i = 0; i < files.length; i++) {
-                    formData.append(`file_${i}`, files[i]);
-                }
-            } else if (files instanceof File) {
-                formData.append('file_0', files);
-            }
+            Array.from(files).forEach((file, index) => {
+                formData.append(`file_${index}`, file);
+            });
         }
         
-        // Fazer requisição
+        console.log(`[CDR Sul] Dados preparados: ${Object.keys(data).length} campos, ${files ? files.length : 0} arquivo(s)`);
+        
         const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
             method: 'POST',
             body: formData,
             mode: 'cors'
         });
         
-        console.log(`[CDR Sul] Status da resposta: ${response.status}`);
-        
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
-        // ==================== TRATAMENTO ROBUSTO DE JSON ====================
-        let result;
         const responseText = await response.text();
+        console.log(`[CDR Sul] Resposta recebida: ${responseText.substring(0, 200)}...`);
         
-        console.log(`[CDR Sul] Resposta bruta:`, responseText);
-        
+        let result;
         try {
-            // Tentar fazer parse do JSON
             result = JSON.parse(responseText);
-        } catch (jsonError) {
-            console.error('[CDR Sul] Erro ao fazer parse do JSON:', jsonError);
-            console.error('[CDR Sul] Resposta que causou erro:', responseText);
-            
-            // Se não conseguir fazer parse, criar resposta de erro
-            result = {
-                success: false,
-                error: `Resposta inválida do servidor: ${responseText.substring(0, 100)}...`,
-                debug: {
-                    originalError: jsonError.message,
-                    responseText: responseText
-                }
-            };
+        } catch (parseError) {
+            console.error('[CDR Sul] Erro ao fazer parse da resposta:', parseError);
+            throw new Error(`Resposta inválida do servidor: ${responseText.substring(0, 100)}`);
         }
         
         console.log(`[CDR Sul] Resposta processada:`, result);
-        
         return result;
         
     } catch (error) {
         console.error(`[CDR Sul] Erro na requisição:`, error);
         
-        return {
-            success: false,
-            error: `Erro de conexão: ${error.message}`,
-            debug: {
-                action: action,
-                url: CONFIG.GOOGLE_APPS_SCRIPT_URL,
-                originalError: error.toString()
-            }
-        };
+        // Fallback para validação local em caso de erro de rede
+        if (action === 'login' && error.message.includes('fetch')) {
+            return handleOfflineLogin(data);
+        }
+        
+        throw error;
     }
 }
 
-async function testConnectivity() {
-    try {
-        console.log('[CDR Sul] Testando conectividade...');
-        
-        if (!CONFIG.GOOGLE_APPS_SCRIPT_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL === 'INSERIR_URL_AQUI') {
-            console.warn('[CDR Sul] URL do Google Apps Script não configurada');
-            return;
-        }
-        
-        const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
-            method: 'GET',
-            mode: 'cors'
-        });
-        
-        if (response.ok) {
-            const result = await response.text();
-            try {
-                const jsonResult = JSON.parse(result);
-                console.log('[CDR Sul] Conectividade OK:', jsonResult);
-            } catch (e) {
-                console.log('[CDR Sul] Conectividade OK (resposta não-JSON):', result);
-            }
-        } else {
-            console.warn('[CDR Sul] Problema de conectividade:', response.status);
-        }
-    } catch (error) {
-        console.warn('[CDR Sul] Erro de conectividade:', error.message);
+function validateFilesForUpload(files) {
+    if (!files || files.length === 0) {
+        return { success: true };
     }
+    
+    let totalSize = 0;
+    const errors = [];
+    
+    files.forEach(file => {
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        totalSize += file.size;
+        
+        if (file.size > CONFIG.MAX_FILE_SIZE) {
+            // Verificar se é imagem (pode ser comprimida)
+            const extension = file.name.split('.').pop().toLowerCase();
+            if (!['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+                errors.push(`${file.name} (${fileSizeMB}MB) excede 10MB e não pode ser comprimido`);
+            }
+        }
+    });
+    
+    const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+    if (totalSize > CONFIG.MAX_TOTAL_SIZE) {
+        errors.push(`Tamanho total (${totalSizeMB}MB) excede 50MB`);
+    }
+    
+    if (errors.length > 0) {
+        return {
+            success: false,
+            error: errors.join('; ')
+        };
+    }
+    
+    return { success: true };
 }
 
 // ==================== FUNÇÕES DE AUTENTICAÇÃO ====================
 
-async function handleLogin(event) {
-    event.preventDefault();
+async function handleLogin(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const messageDiv = document.getElementById('loginMessage');
     
     try {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
+        showMessage(messageDiv, 'Fazendo login...', 'info');
         
-        if (!email || !password) {
-            showMessage('Por favor, preencha todos os campos', 'error');
-            return;
-        }
-        
-        showMessage('Fazendo login...', 'info');
-        
-        const result = await makeRequest('login', {
-            email: email,
-            password: password
-        });
+        const result = await makeRequest('login', { email, password });
         
         if (result.success) {
-            currentUser = result.data;
+            currentUser = result.user;
             isLoggedIn = true;
             
             // Salvar sessão
             localStorage.setItem('cdr_user', JSON.stringify(currentUser));
+            localStorage.setItem('cdr_login_time', Date.now().toString());
             
-            showMessage(result.message || 'Login realizado com sucesso!', 'success');
-            showDashboard();
+            showMessage(messageDiv, result.message, 'success');
+            
+            setTimeout(() => {
+                showDashboard();
+            }, 1000);
         } else {
-            showMessage(result.error || 'Erro no login', 'error');
+            showMessage(messageDiv, result.error, 'error');
         }
-        
     } catch (error) {
         console.error('[CDR Sul] Erro no login:', error);
-        showMessage('Erro interno no login', 'error');
+        showMessage(messageDiv, `Erro de conexão: ${error.message}`, 'error');
     }
 }
 
-async function handleRegister(event) {
-    event.preventDefault();
+function handleOfflineLogin(data) {
+    // Validação local para credenciais conhecidas
+    const knownUsers = [
+        { email: 'cdrsultocantins@unirg.edu.br', password: 'CDR@2025', name: 'Administrador CDR Sul', role: 'admin' },
+        { email: 'adriaterra@unirg.edu.br', password: 'CDR@2025', name: 'Adriano Terra', role: 'user' }
+    ];
+    
+    const user = knownUsers.find(u => u.email === data.email && u.password === data.password);
+    
+    if (user) {
+        return {
+            success: true,
+            user: user,
+            message: 'Login realizado (modo offline)'
+        };
+    }
+    
+    return {
+        success: false,
+        error: 'Credenciais inválidas ou sem conexão'
+    };
+}
+
+async function handleRegister(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+    const name = document.getElementById('registerName').value;
+    const institution = document.getElementById('registerInstitution').value;
+    const messageDiv = document.getElementById('registerMessage');
     
     try {
-        const email = document.getElementById('registerEmail').value;
-        const password = document.getElementById('registerPassword').value;
-        const name = document.getElementById('registerName').value;
-        const institution = document.getElementById('registerInstitution').value;
+        showMessage(messageDiv, 'Criando conta...', 'info');
         
-        if (!email || !password || !name) {
-            showMessage('Por favor, preencha todos os campos obrigatórios', 'error');
-            return;
-        }
-        
-        showMessage('Criando conta...', 'info');
-        
-        const result = await makeRequest('register', {
-            email: email,
-            password: password,
-            name: name,
-            institution: institution
-        });
+        const result = await makeRequest('register', { email, password, name, institution });
         
         if (result.success) {
-            showMessage(result.message || 'Conta criada com sucesso!', 'success');
-            showLoginForm();
+            showMessage(messageDiv, result.message, 'success');
             
-            // Preencher email no login
-            document.getElementById('email').value = email;
+            setTimeout(() => {
+                showLoginForm();
+            }, 2000);
         } else {
-            showMessage(result.error || 'Erro no cadastro', 'error');
+            showMessage(messageDiv, result.error, 'error');
         }
-        
     } catch (error) {
         console.error('[CDR Sul] Erro no cadastro:', error);
-        showMessage('Erro interno no cadastro', 'error');
-    }
-}
-
-function handleLogout() {
-    currentUser = null;
-    isLoggedIn = false;
-    localStorage.removeItem('cdr_user');
-    showLoginForm();
-    showMessage('Logout realizado com sucesso!', 'success');
-}
-
-function checkSavedSession() {
-    try {
-        const savedUser = localStorage.getItem('cdr_user');
-        if (savedUser) {
-            currentUser = JSON.parse(savedUser);
-            isLoggedIn = true;
-            showDashboard();
-        }
-    } catch (error) {
-        console.error('[CDR Sul] Erro ao verificar sessão salva:', error);
-        localStorage.removeItem('cdr_user');
+        showMessage(messageDiv, `Erro de conexão: ${error.message}`, 'error');
     }
 }
 
 // ==================== FUNÇÕES DE ENVIO ====================
 
-async function handleSubmitReport(event) {
-    event.preventDefault();
+async function handleSubmitReport(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const files = document.getElementById('reportFile').files;
+    const messageDiv = document.getElementById('reportMessage');
     
     try {
-        const form = event.target;
-        const formData = new FormData(form);
+        // Validar arquivos
+        if (files.length > 0 && !validateFiles(files, document.getElementById('reportFile'))) {
+            showMessage(messageDiv, 'Corrija os problemas com os arquivos antes de enviar', 'error');
+            return;
+        }
+        
+        showMessage(messageDiv, 'Enviando relatório...', 'info');
         
         const data = {
             email: currentUser.email,
             reportType: formData.get('reportType'),
             title: formData.get('title'),
-            description: formData.get('description')
+            description: formData.get('description'),
+            period: formData.get('period')
         };
-        
-        const fileInput = form.querySelector('input[type="file"]');
-        const files = fileInput ? fileInput.files : null;
-        
-        showMessage('Enviando relatório...', 'info');
         
         const result = await makeRequest('submitReport', data, files);
         
         if (result.success) {
-            showMessage(result.message || 'Relatório enviado com sucesso!', 'success');
-            form.reset();
-            loadUserStats(); // Atualizar estatísticas
+            showMessage(messageDiv, result.message, 'success');
+            
+            // Mostrar detalhes do arquivo se houver
+            if (result.data && result.data.fileName) {
+                const details = `Arquivo: ${result.data.fileName}`;
+                if (result.data.fileInfo) {
+                    details += ` (${result.data.fileInfo})`;
+                }
+                showMessage(messageDiv, details, 'info', true);
+            }
+            
+            e.target.reset();
+            
+            // Atualizar estatísticas se estiver na aba visão geral
+            if (document.getElementById('overviewTab').classList.contains('active')) {
+                loadUserStats();
+            }
         } else {
-            showMessage(result.error || 'Erro ao enviar relatório', 'error');
+            showMessage(messageDiv, result.error, 'error');
+            
+            // Mostrar detalhes específicos sobre limitações de arquivo
+            if (result.details && result.details.suggestion) {
+                showMessage(messageDiv, result.details.suggestion, 'warning', true);
+            }
         }
-        
     } catch (error) {
         console.error('[CDR Sul] Erro ao enviar relatório:', error);
-        showMessage('Erro interno ao enviar relatório', 'error');
+        showMessage(messageDiv, `Erro ao enviar relatório: ${error.message}`, 'error');
     }
 }
 
-async function handleSubmitActivity(event) {
-    event.preventDefault();
+async function handleSubmitActivity(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const files = document.getElementById('activityFiles').files;
+    const messageDiv = document.getElementById('activityMessage');
     
     try {
-        const form = event.target;
-        const formData = new FormData(form);
+        // Validar arquivos
+        if (files.length > 0 && !validateFiles(files, document.getElementById('activityFiles'))) {
+            showMessage(messageDiv, 'Corrija os problemas com os arquivos antes de enviar', 'error');
+            return;
+        }
+        
+        showMessage(messageDiv, 'Cadastrando atividade...', 'info');
         
         const data = {
             email: currentUser.email,
@@ -358,33 +462,56 @@ async function handleSubmitActivity(event) {
             participants: formData.get('participants')
         };
         
-        const fileInput = form.querySelector('input[type="file"]');
-        const files = fileInput ? fileInput.files : null;
-        
-        showMessage('Cadastrando atividade...', 'info');
-        
         const result = await makeRequest('submitActivity', data, files);
         
         if (result.success) {
-            showMessage(result.message || 'Atividade cadastrada com sucesso!', 'success');
-            form.reset();
-            loadUserStats(); // Atualizar estatísticas
+            showMessage(messageDiv, result.message, 'success');
+            
+            // Mostrar detalhes dos arquivos
+            if (result.data && result.data.files && result.data.files.length > 0) {
+                const details = `Evidências: ${result.data.files.join(', ')}`;
+                showMessage(messageDiv, details, 'info', true);
+                
+                if (result.data.fileInfos && result.data.fileInfos.length > 0) {
+                    showMessage(messageDiv, result.data.fileInfos.join('; '), 'warning', true);
+                }
+            }
+            
+            e.target.reset();
+            
+            // Atualizar estatísticas
+            if (document.getElementById('overviewTab').classList.contains('active')) {
+                loadUserStats();
+            }
         } else {
-            showMessage(result.error || 'Erro ao cadastrar atividade', 'error');
+            showMessage(messageDiv, result.error, 'error');
         }
-        
     } catch (error) {
         console.error('[CDR Sul] Erro ao cadastrar atividade:', error);
-        showMessage('Erro interno ao cadastrar atividade', 'error');
+        showMessage(messageDiv, `Erro ao cadastrar atividade: ${error.message}`, 'error');
     }
 }
 
-async function handleUploadFiles(event) {
-    event.preventDefault();
+async function handleUploadFiles(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const files = document.getElementById('uploadFiles').files;
+    const messageDiv = document.getElementById('filesMessage');
     
     try {
-        const form = event.target;
-        const formData = new FormData(form);
+        if (files.length === 0) {
+            showMessage(messageDiv, 'Selecione pelo menos um arquivo', 'error');
+            return;
+        }
+        
+        // Validar arquivos
+        if (!validateFiles(files, document.getElementById('uploadFiles'))) {
+            showMessage(messageDiv, 'Corrija os problemas com os arquivos antes de enviar', 'error');
+            return;
+        }
+        
+        showMessage(messageDiv, 'Enviando arquivos...', 'info');
         
         const data = {
             email: currentUser.email,
@@ -392,85 +519,261 @@ async function handleUploadFiles(event) {
             description: formData.get('description')
         };
         
-        const fileInput = form.querySelector('input[type="file"]');
-        const files = fileInput ? fileInput.files : null;
-        
-        if (!files || files.length === 0) {
-            showMessage('Por favor, selecione pelo menos um arquivo', 'error');
-            return;
-        }
-        
-        showMessage('Enviando arquivos...', 'info');
-        
         const result = await makeRequest('uploadFiles', data, files);
         
         if (result.success) {
-            showMessage(result.message || 'Arquivos enviados com sucesso!', 'success');
-            form.reset();
-            loadUserStats(); // Atualizar estatísticas
+            showMessage(messageDiv, result.message, 'success');
+            
+            // Mostrar detalhes dos arquivos
+            if (result.data) {
+                if (result.data.files && result.data.files.length > 0) {
+                    const details = `Arquivos enviados: ${result.data.files.join(', ')}`;
+                    showMessage(messageDiv, details, 'info', true);
+                }
+                
+                if (result.data.skippedFiles && result.data.skippedFiles.length > 0) {
+                    const skipped = `Arquivos pulados: ${result.data.skippedFiles.join(', ')}`;
+                    showMessage(messageDiv, skipped, 'warning', true);
+                }
+                
+                if (result.data.fileInfos && result.data.fileInfos.length > 0) {
+                    showMessage(messageDiv, result.data.fileInfos.join('; '), 'info', true);
+                }
+            }
+            
+            e.target.reset();
+            
+            // Atualizar estatísticas
+            if (document.getElementById('overviewTab').classList.contains('active')) {
+                loadUserStats();
+            }
         } else {
-            showMessage(result.error || 'Erro ao enviar arquivos', 'error');
+            showMessage(messageDiv, result.error, 'error');
         }
-        
     } catch (error) {
         console.error('[CDR Sul] Erro ao enviar arquivos:', error);
-        showMessage('Erro interno ao enviar arquivos', 'error');
+        showMessage(messageDiv, `Erro ao enviar arquivos: ${error.message}`, 'error');
     }
 }
 
-// ==================== FUNÇÕES DE CARREGAMENTO DE DADOS ====================
+// ==================== CARREGAMENTO DE DADOS ====================
 
-async function loadAdminData() {
+async function loadUserStats() {
     try {
-        if (!currentUser || !currentUser.isAdmin) {
-            return;
-        }
+        console.log('[CDR Sul] Carregando estatísticas do usuário');
         
-        console.log('[CDR Sul] Carregando dados administrativos...');
-        
-        const result = await makeRequest('getAdminData', {
-            email: currentUser.email
+        const result = await makeRequest('getUserStats', { 
+            email: currentUser.email,
+            requestType: 'userStats'
         });
         
         if (result.success && result.data) {
-            updateAdminDashboard(result.data);
+            updateUserStatsDisplay(result.data);
+        } else {
+            console.error('[CDR Sul] Erro ao carregar estatísticas:', result.error);
+            showUserStatsError();
+        }
+    } catch (error) {
+        console.error('[CDR Sul] Erro ao carregar estatísticas:', error);
+        showUserStatsError();
+    }
+}
+
+function updateUserStatsDisplay(data) {
+    // Atualizar contadores
+    const elements = {
+        'userReportsCount': data.reportsCount || 0,
+        'userActivitiesCount': data.activitiesCount || 0,
+        'userFilesCount': data.filesCount || 0
+    };
+    
+    Object.keys(elements).forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = elements[id];
+        }
+    });
+    
+    // Atualizar listas recentes
+    updateRecentList('userRecentReports', data.recentReports || [], 'relatório');
+    updateRecentList('userRecentActivities', data.recentActivities || [], 'atividade');
+    
+    console.log('[CDR Sul] Estatísticas do usuário atualizadas');
+}
+
+function showUserStatsError() {
+    const elements = ['userReportsCount', 'userActivitiesCount', 'userFilesCount'];
+    elements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = '0';
+        }
+    });
+    
+    const recentLists = ['userRecentReports', 'userRecentActivities'];
+    recentLists.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.innerHTML = '<li class="list-group-item text-muted">Erro ao carregar dados</li>';
+        }
+    });
+}
+
+async function loadAdminData() {
+    try {
+        console.log('[CDR Sul] Carregando dados administrativos');
+        
+        const result = await makeRequest('getAdminData', { 
+            email: currentUser.email,
+            requestType: 'adminData'
+        });
+        
+        if (result.success && result.data) {
+            updateAdminDisplay(result.data);
         } else {
             console.error('[CDR Sul] Erro ao carregar dados admin:', result.error);
             showAdminError();
         }
-        
     } catch (error) {
         console.error('[CDR Sul] Erro ao carregar dados admin:', error);
         showAdminError();
     }
 }
 
-async function loadUserStats() {
-    try {
-        if (!currentUser) {
-            return;
+function updateAdminDisplay(data) {
+    // Atualizar contadores
+    const elements = {
+        'totalUsers': data.totalUsers || 0,
+        'totalReports': data.totalReports || 0,
+        'totalActivities': data.totalActivities || 0
+    };
+    
+    Object.keys(elements).forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = elements[id];
         }
-        
-        console.log('[CDR Sul] Carregando estatísticas do usuário...');
-        
-        const result = await makeRequest('getUserStats', {
-            email: currentUser.email
-        });
-        
-        if (result.success && result.data) {
-            updateUserDashboard(result.data);
-        } else {
-            console.error('[CDR Sul] Erro ao carregar stats:', result.error);
-            showUserStatsError();
-        }
-        
-    } catch (error) {
-        console.error('[CDR Sul] Erro ao carregar stats:', error);
-        showUserStatsError();
+    });
+    
+    // Atualizar listas recentes
+    updateRecentList('recentUsers', data.recentUsers || [], 'usuário');
+    updateRecentList('recentReports', data.recentReports || [], 'relatório');
+    updateRecentList('recentActivities', data.recentActivities || [], 'atividade');
+    
+    console.log('[CDR Sul] Dados administrativos atualizados');
+}
+
+function updateRecentList(elementId, items, type) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    
+    if (!items || items.length === 0) {
+        element.innerHTML = `<li class="list-group-item text-muted">Nenhum ${type} encontrado</li>`;
+        return;
     }
+    
+    const html = items.map(item => {
+        let title = item.title || item.name || 'Sem título';
+        let subtitle = '';
+        
+        if (type === 'usuário') {
+            subtitle = item.email || 'Email não informado';
+        } else {
+            subtitle = `${item.type || 'Tipo não informado'} - ${formatDate(item.date)}`;
+        }
+        
+        return `
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1">${title}</h6>
+                        <small class="text-muted">${subtitle}</small>
+                    </div>
+                </div>
+            </li>
+        `;
+    }).join('');
+    
+    element.innerHTML = html;
+}
+
+function showAdminError() {
+    const elements = ['totalUsers', 'totalReports', 'totalActivities'];
+    elements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = '0';
+        }
+    });
+    
+    const recentLists = ['recentUsers', 'recentReports', 'recentActivities'];
+    recentLists.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.innerHTML = '<li class="list-group-item text-muted">Erro ao carregar dados</li>';
+        }
+    });
 }
 
 // ==================== FUNÇÕES DE INTERFACE ====================
+
+function showDashboard() {
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('registerSection').style.display = 'none';
+    document.getElementById('dashboardSection').style.display = 'block';
+    
+    // Atualizar informações do usuário
+    document.getElementById('userName').textContent = currentUser.name;
+    document.getElementById('userEmail').textContent = currentUser.email;
+    
+    // Configurar abas baseado no papel do usuário
+    if (currentUser.role === 'admin') {
+        document.getElementById('adminTab').style.display = 'block';
+        showTab('admin');
+        loadAdminData();
+    } else {
+        document.getElementById('adminTab').style.display = 'none';
+        showTab('overview');
+        loadUserStats();
+    }
+}
+
+function showTab(tabName) {
+    // Esconder todas as abas
+    const tabs = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => tab.style.display = 'none');
+    
+    // Remover classe active de todos os links
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => link.classList.remove('active'));
+    
+    // Mostrar aba selecionada
+    const selectedTab = document.getElementById(tabName + 'Tab');
+    if (selectedTab) {
+        selectedTab.style.display = 'block';
+    }
+    
+    // Adicionar classe active ao link
+    const selectedLink = document.querySelector(`[data-tab="${tabName}"]`);
+    if (selectedLink) {
+        selectedLink.classList.add('active');
+    }
+    
+    // Carregar dados específicos da aba
+    if (tabName === 'overview') {
+        loadUserStats();
+    } else if (tabName === 'admin') {
+        loadAdminData();
+    }
+}
+
+function handleNavigation(e) {
+    e.preventDefault();
+    const tabName = e.target.getAttribute('data-tab');
+    if (tabName) {
+        showTab(tabName);
+    }
+}
 
 function showLoginForm() {
     document.getElementById('loginSection').style.display = 'block';
@@ -484,281 +787,120 @@ function showRegisterForm() {
     document.getElementById('dashboardSection').style.display = 'none';
 }
 
-function showDashboard() {
-    document.getElementById('loginSection').style.display = 'none';
-    document.getElementById('registerSection').style.display = 'none';
-    document.getElementById('dashboardSection').style.display = 'block';
+function handleLogout() {
+    currentUser = null;
+    isLoggedIn = false;
     
-    // Atualizar informações do usuário
-    updateUserInfo();
+    // Limpar sessão
+    localStorage.removeItem('cdr_user');
+    localStorage.removeItem('cdr_login_time');
     
-    // Mostrar aba inicial
-    showTab('visao-geral');
-    
-    // Carregar dados
-    if (currentUser.isAdmin) {
-        loadAdminData();
-    }
-    loadUserStats();
+    showLoginForm();
 }
 
-function updateUserInfo() {
-    const userNameElement = document.getElementById('userName');
-    const userEmailElement = document.getElementById('userEmail');
-    const adminBadge = document.getElementById('adminBadge');
-    const adminTab = document.getElementById('adminTab');
-    
-    if (userNameElement) {
-        userNameElement.textContent = currentUser.name || 'Usuário';
-    }
-    
-    if (userEmailElement) {
-        userEmailElement.textContent = currentUser.email || '';
-    }
-    
-    if (adminBadge) {
-        adminBadge.style.display = currentUser.isAdmin ? 'inline' : 'none';
-    }
-    
-    if (adminTab) {
-        adminTab.style.display = currentUser.isAdmin ? 'block' : 'none';
-    }
-}
-
-function handleNavigation(event) {
-    event.preventDefault();
-    const tabId = event.target.getAttribute('data-tab');
-    if (tabId) {
-        showTab(tabId);
-    }
-}
-
-function showTab(tabId) {
-    // Esconder todas as abas
-    const tabs = document.querySelectorAll('.tab-content');
-    tabs.forEach(tab => {
-        tab.style.display = 'none';
-    });
-    
-    // Remover classe ativa de todos os links
-    const navLinks = document.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
-        link.classList.remove('active');
-    });
-    
-    // Mostrar aba selecionada
-    const selectedTab = document.getElementById(tabId);
-    if (selectedTab) {
-        selectedTab.style.display = 'block';
-    }
-    
-    // Adicionar classe ativa ao link
-    const activeLink = document.querySelector(`[data-tab="${tabId}"]`);
-    if (activeLink) {
-        activeLink.classList.add('active');
-    }
-    
-    // Carregar dados específicos da aba
-    if (tabId === 'admin' && currentUser && currentUser.isAdmin) {
-        loadAdminData();
-    } else if (tabId === 'visao-geral') {
-        loadUserStats();
-    }
-}
-
-function updateAdminDashboard(data) {
+function checkSavedSession() {
     try {
-        // Atualizar contadores
-        const totalUsersElement = document.getElementById('totalUsers');
-        const totalReportsElement = document.getElementById('totalReports');
-        const totalActivitiesElement = document.getElementById('totalActivities');
+        const savedUser = localStorage.getItem('cdr_user');
+        const loginTime = localStorage.getItem('cdr_login_time');
         
-        if (totalUsersElement) {
-            totalUsersElement.textContent = data.totalUsers || '0';
+        if (savedUser && loginTime) {
+            const timeDiff = Date.now() - parseInt(loginTime);
+            const hoursDiff = timeDiff / (1000 * 60 * 60);
+            
+            // Sessão válida por 24 horas
+            if (hoursDiff < 24) {
+                currentUser = JSON.parse(savedUser);
+                isLoggedIn = true;
+                showDashboard();
+                console.log('[CDR Sul] Sessão restaurada');
+                return;
+            }
         }
-        
-        if (totalReportsElement) {
-            totalReportsElement.textContent = data.totalReports || '0';
-        }
-        
-        if (totalActivitiesElement) {
-            totalActivitiesElement.textContent = data.totalActivities || '0';
-        }
-        
-        // Atualizar listas
-        updateRecentList('recentUsersList', data.recentUsers, 'usuário');
-        updateRecentList('recentReportsList', data.recentReports, 'relatório');
-        updateRecentList('recentActivitiesList', data.recentActivities, 'atividade');
-        
-        console.log('[CDR Sul] Dashboard admin atualizado');
-        
     } catch (error) {
-        console.error('[CDR Sul] Erro ao atualizar dashboard admin:', error);
+        console.error('[CDR Sul] Erro ao verificar sessão:', error);
     }
+    
+    showLoginForm();
 }
 
-function updateUserDashboard(data) {
+async function testConnectivity() {
     try {
-        // Atualizar contadores do usuário
-        const userReportsElement = document.getElementById('userReports');
-        const userActivitiesElement = document.getElementById('userActivities');
-        const userFilesElement = document.getElementById('userFiles');
-        
-        if (userReportsElement) {
-            userReportsElement.textContent = data.reportsCount || '0';
+        if (!CONFIG.GOOGLE_APPS_SCRIPT_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL === 'INSERIR_URL_AQUI') {
+            console.warn('[CDR Sul] URL do Google Apps Script não configurada');
+            return;
         }
         
-        if (userActivitiesElement) {
-            userActivitiesElement.textContent = data.activitiesCount || '0';
+        const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL);
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log(`[CDR Sul] Conectividade OK: ${result.version}`);
+            
+            // Mostrar informações sobre limitações
+            if (result.limits) {
+                console.log(`[CDR Sul] Limites: Arquivo ${result.limits.maxFileSize}, Total ${result.limits.maxTotalSize}`);
+            }
+        } else {
+            console.warn('[CDR Sul] Problema na conectividade:', result.error);
         }
-        
-        if (userFilesElement) {
-            userFilesElement.textContent = data.filesCount || '0';
-        }
-        
-        // Atualizar listas do usuário
-        updateRecentList('userRecentReports', data.recentReports, 'relatório');
-        updateRecentList('userRecentActivities', data.recentActivities, 'atividade');
-        
-        console.log('[CDR Sul] Dashboard usuário atualizado');
-        
     } catch (error) {
-        console.error('[CDR Sul] Erro ao atualizar dashboard usuário:', error);
+        console.warn('[CDR Sul] Erro de conectividade:', error.message);
     }
 }
 
-function updateRecentList(elementId, items, type) {
-    const element = document.getElementById(elementId);
+// ==================== FUNÇÕES AUXILIARES ====================
+
+function showMessage(element, message, type, append = false) {
     if (!element) return;
     
-    if (!items || items.length === 0) {
-        element.innerHTML = `<p>Nenhum ${type} encontrado</p>`;
-        return;
+    const alertClass = {
+        'success': 'alert-success',
+        'error': 'alert-danger',
+        'warning': 'alert-warning',
+        'info': 'alert-info'
+    }[type] || 'alert-info';
+    
+    const messageHtml = `<div class="alert ${alertClass} mt-2">${message}</div>`;
+    
+    if (append) {
+        element.innerHTML += messageHtml;
+    } else {
+        element.innerHTML = messageHtml;
     }
     
-    const html = items.map(item => {
-        const date = new Date(item.date).toLocaleDateString('pt-BR');
-        return `
-            <div class="recent-item">
-                <strong>${item.title || item.name}</strong>
-                <small>${item.email || ''} - ${date}</small>
-            </div>
-        `;
-    }).join('');
-    
-    element.innerHTML = html;
-}
-
-function showAdminError() {
-    const elements = ['totalUsers', 'totalReports', 'totalActivities'];
-    elements.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.textContent = '-';
-        }
-    });
-    
-    const lists = ['recentUsersList', 'recentReportsList', 'recentActivitiesList'];
-    lists.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.innerHTML = '<p>Erro ao carregar dados</p>';
-        }
-    });
-}
-
-function showUserStatsError() {
-    const elements = ['userReports', 'userActivities', 'userFiles'];
-    elements.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.textContent = '-';
-        }
-    });
-    
-    const lists = ['userRecentReports', 'userRecentActivities'];
-    lists.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.innerHTML = '<p>Erro ao carregar dados</p>';
-        }
-    });
-}
-
-function showMessage(message, type = 'info') {
-    // Remover mensagens anteriores
-    const existingMessages = document.querySelectorAll('.message');
-    existingMessages.forEach(msg => msg.remove());
-    
-    // Criar nova mensagem
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message message-${type}`;
-    messageDiv.textContent = message;
-    
-    // Adicionar estilos
-    messageDiv.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 5px;
-        color: white;
-        font-weight: bold;
-        z-index: 10000;
-        max-width: 400px;
-        word-wrap: break-word;
-    `;
-    
-    // Cores por tipo
-    switch (type) {
-        case 'success':
-            messageDiv.style.backgroundColor = '#28a745';
-            break;
-        case 'error':
-            messageDiv.style.backgroundColor = '#dc3545';
-            break;
-        case 'warning':
-            messageDiv.style.backgroundColor = '#ffc107';
-            messageDiv.style.color = '#000';
-            break;
-        default:
-            messageDiv.style.backgroundColor = '#17a2b8';
+    // Auto-remover mensagens de sucesso após 5 segundos
+    if (type === 'success') {
+        setTimeout(() => {
+            if (element.innerHTML.includes(message)) {
+                element.innerHTML = '';
+            }
+        }, 5000);
     }
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'Data não informada';
     
-    // Adicionar ao DOM
-    document.body.appendChild(messageDiv);
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('pt-BR');
+    } catch (error) {
+        return 'Data inválida';
+    }
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
     
-    // Remover após 5 segundos
-    setTimeout(() => {
-        if (messageDiv.parentNode) {
-            messageDiv.parentNode.removeChild(messageDiv);
-        }
-    }, 5000);
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
     
-    console.log(`[CDR Sul] Mensagem (${type}): ${message}`);
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// ==================== UTILITÁRIOS ====================
+// ==================== INICIALIZAÇÃO FINAL ====================
 
-function formatDate(date) {
-    if (!date) return '';
-    return new Date(date).toLocaleDateString('pt-BR');
-}
-
-function formatDateTime(date) {
-    if (!date) return '';
-    return new Date(date).toLocaleString('pt-BR');
-}
-
-// ==================== LOGS E DEBUG ====================
-console.log(`[CDR Sul] Script carregado - Versão ${CONFIG.VERSION}`);
-
-// Expor funções globais para debug
-if (CONFIG.DEBUG) {
-    window.cdrDebug = {
-        makeRequest,
-        testConnectivity,
-        currentUser: () => currentUser,
-        config: CONFIG
-    };
-}
+console.log(`[CDR Sul] JavaScript carregado - Versão ${CONFIG.VERSION}`);
+console.log(`[CDR Sul] Limites: Arquivo ${formatFileSize(CONFIG.MAX_FILE_SIZE)}, Total ${formatFileSize(CONFIG.MAX_TOTAL_SIZE)}`);
+console.log(`[CDR Sul] Formatos suportados: ${CONFIG.SUPPORTED_FORMATS.join(', ')}`);
