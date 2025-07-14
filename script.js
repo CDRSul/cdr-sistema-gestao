@@ -185,7 +185,7 @@ async function makeRequest(action, data = {}, files = null) {
     try {
         console.log(`[CDR Sul] Enviando ação: ${action}`);
         
-        if (!CONFIG.GOOGLE_APPS_SCRIPT_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL === 'INSERIR_URL_AQUI') {
+        if (!CONFIG.GOOGLE_APPS_SCRIPT_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec') {
             throw new Error('URL do Google Apps Script não configurada');
         }
         
