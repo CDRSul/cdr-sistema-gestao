@@ -5,7 +5,7 @@ const CONFIG = {
     DEBUG: true,
     MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB em bytes
     MAX_TOTAL_SIZE: 50 * 1024 * 1024, // 50MB total
-    SUPPORTED_FORMATS: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'zip', 'rar']
+    SUPPORTED_FORMATS: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'zip', 'rar', 'xls', 'xlsx', 'ods', 'pptx', 'ppt']
 };
 
 // ==================== ESTADO GLOBAL ====================
@@ -14,7 +14,7 @@ let isLoggedIn = false;
 
 // ==================== INICIALIZAÇÃO ====================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log(`[CDR Sul] Sistema CDR Sul iniciando - Versão ${CONFIG.VERSION}`);
+    console.log(`[CDR Sul] Sistema CDR Sul - Versão 2.0 ${CONFIG.VERSION}`);
     
     // Verificar sessão salva
     checkSavedSession();
@@ -329,7 +329,6 @@ function handleOfflineLogin(data) {
     // Validação local para credenciais conhecidas
     const knownUsers = [
         { email: 'cdrsultocantins@unirg.edu.br', password: 'CDR@2025', name: 'Administrador CDR Sul', role: 'admin' },
-        { email: 'adriaterra@unirg.edu.br', password: 'CDR@2025', name: 'Adriano Terra', role: 'user' }
     ];
     
     const user = knownUsers.find(u => u.email === data.email && u.password === data.password);
@@ -825,7 +824,7 @@ function checkSavedSession() {
 
 async function testConnectivity() {
     try {
-        if (!CONFIG.GOOGLE_APPS_SCRIPT_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL === 'INSERIR_URL_AQUI') {
+        if (!CONFIG.GOOGLE_APPS_SCRIPT_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec') {
             console.warn('[CDR Sul] URL do Google Apps Script não configurada');
             return;
         }
