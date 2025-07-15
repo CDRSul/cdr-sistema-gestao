@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TESTE UPLOAD - CDR Sul Tocantins</title>
+    <title>🧪 TESTE UPLOAD INLINE - CDR Sul Tocantins</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -12,7 +12,7 @@
             padding: 20px 0;
         }
         .container {
-            max-width: 800px;
+            max-width: 900px;
         }
         .card {
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
@@ -37,6 +37,14 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
+        .btn-warning {
+            background: linear-gradient(45deg, #ff9800, #f57c00);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: white;
+        }
         .form-control, .form-select {
             border-radius: 10px;
             border: 2px solid #e9ecef;
@@ -55,7 +63,17 @@
             top: 20px;
             right: 20px;
             z-index: 1000;
-            max-width: 300px;
+            max-width: 350px;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
         }
     </style>
 </head>
@@ -64,18 +82,44 @@
     
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-10">
+            <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h1 class="mb-0">🧪 TESTE UPLOAD</h1>
-                        <p class="mb-0 mt-2">Sistema CDR Sul Tocantins - Versão Diagnóstico</p>
+                        <h1 class="mb-0">🧪 TESTE UPLOAD INLINE</h1>
+                        <p class="mb-0 mt-2">Sistema CDR Sul Tocantins - Diagnóstico Completo</p>
                     </div>
                     <div class="card-body p-4">
                         
+                        <!-- SEÇÃO 1: DESCOBRIR IDs -->
+                        <div class="alert alert-info">
+                            <h5>🔍 ETAPA 1: DESCOBRIR IDs CORRETOS</h5>
+                            <p class="mb-3">Primeiro, vamos descobrir automaticamente os IDs da sua planilha e pasta do Drive.</p>
+                            <button type="button" class="btn btn-warning" onclick="descobrirIDs()">
+                                🔍 DESCOBRIR IDs AUTOMATICAMENTE
+                            </button>
+                        </div>
+                        
+                        <div id="resultadoIDs" class="mt-3"></div>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- SEÇÃO 2: TESTE DE CONECTIVIDADE -->
                         <div class="alert alert-warning">
-                            <h6>⚠️ VERSÃO DE TESTE</h6>
-                            <p class="mb-0">Esta é uma versão simplificada focada apenas em testar o upload de arquivos. 
-                            Use para diagnosticar o problema antes de implementar no sistema completo.</p>
+                            <h5>🌐 ETAPA 2: TESTE DE CONECTIVIDADE</h5>
+                            <p class="mb-3">Testar se o Google Apps Script está respondendo corretamente.</p>
+                            <button type="button" class="btn btn-primary" onclick="testarConectividade()">
+                                🚀 TESTAR CONECTIVIDADE
+                            </button>
+                        </div>
+                        
+                        <div id="resultadoConectividade" class="mt-3"></div>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- SEÇÃO 3: TESTE DE UPLOAD -->
+                        <div class="alert alert-success">
+                            <h5>📁 ETAPA 3: TESTE DE UPLOAD</h5>
+                            <p class="mb-0">Após descobrir os IDs e confirmar conectividade, teste o upload de arquivos.</p>
                         </div>
                         
                         <form id="uploadForm" class="mt-4">
@@ -111,29 +155,20 @@
                             </div>
                         </form>
                         
-                        <div id="resultado" class="mt-4"></div>
+                        <div id="resultadoUpload" class="mt-4"></div>
                         
                         <hr class="my-4">
                         
-                        <div class="row text-center">
-                            <div class="col-md-4">
-                                <div class="p-3 bg-light rounded">
-                                    <h6>📊 Objetivo</h6>
-                                    <small>Testar upload de arquivos isoladamente</small>
-                                </div>
+                        <!-- SEÇÃO 4: LOGS DE DEBUG -->
+                        <div class="alert alert-secondary">
+                            <h5>🔧 LOGS DE DEBUG</h5>
+                            <p class="mb-2">Logs detalhados para diagnóstico:</p>
+                            <div id="debugLogs" class="code-block">
+                                Aguardando ações...
                             </div>
-                            <div class="col-md-4">
-                                <div class="p-3 bg-light rounded">
-                                    <h6>🔍 Debug</h6>
-                                    <small>Logs detalhados no console (F12)</small>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="p-3 bg-light rounded">
-                                    <h6>📝 Resultado</h6>
-                                    <small>Arquivo salvo no Google Drive</small>
-                                </div>
-                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="limparLogs()">
+                                🗑️ Limpar Logs
+                            </button>
                         </div>
                         
                     </div>
@@ -141,14 +176,383 @@
                 
                 <div class="text-center mt-4">
                     <small class="text-white">
-                        🧪 Versão Teste Upload - CDR Sul Tocantins<br>
-                        Desenvolvido para diagnosticar problemas de upload de arquivos
+                        🧪 Teste Upload Inline - CDR Sul Tocantins<br>
+                        Versão com JavaScript incorporado para evitar erros 404
                     </small>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="script-TESTE-UPLOAD.js"></script>
+    <script>
+        // ==================== CONFIGURAÇÕES ====================
+        const CONFIG = {
+            GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec',
+            VERSION: 'TESTE UPLOAD INLINE v1.0',
+            DEBUG: true
+        };
+
+        let debugLogs = [];
+
+        // ==================== FUNÇÕES DE LOG ====================
+        function adicionarLog(tipo, mensagem) {
+            const timestamp = new Date().toLocaleTimeString('pt-BR');
+            const log = `[${timestamp}] ${tipo.toUpperCase()}: ${mensagem}`;
+            debugLogs.push(log);
+            console.log(log);
+            
+            const debugDiv = document.getElementById('debugLogs');
+            if (debugDiv) {
+                debugDiv.innerHTML = debugLogs.slice(-20).join('\n');
+                debugDiv.scrollTop = debugDiv.scrollHeight;
+            }
+        }
+
+        function limparLogs() {
+            debugLogs = [];
+            document.getElementById('debugLogs').innerHTML = 'Logs limpos...';
+        }
+
+        // ==================== DESCOBRIR IDs ====================
+        async function descobrirIDs() {
+            adicionarLog('INFO', 'Iniciando descoberta de IDs...');
+            
+            const resultDiv = document.getElementById('resultadoIDs');
+            resultDiv.innerHTML = `
+                <div class="alert alert-info">
+                    🔄 Descobrindo IDs automaticamente...
+                </div>
+            `;
+
+            try {
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL + '?action=descobrirIDs');
+                const result = await response.json();
+                
+                adicionarLog('SUCCESS', 'IDs descobertos com sucesso');
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h6>✅ IDs DESCOBERTOS COM SUCESSO!</h6>
+                            <div class="mt-3">
+                                <strong>📊 Planilha ID:</strong><br>
+                                <code>${result.data.spreadsheetId}</code>
+                            </div>
+                            <div class="mt-2">
+                                <strong>📁 Pasta Drive ID:</strong><br>
+                                <code>${result.data.folderId}</code>
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <strong>📝 Planilha:</strong> ${result.data.spreadsheetName}<br>
+                                    <strong>📂 Pasta:</strong> ${result.data.folderName}
+                                </small>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h6>❌ ERRO AO DESCOBRIR IDs</h6>
+                            <p>${result.error}</p>
+                            <div class="mt-3">
+                                <strong>📋 AÇÃO MANUAL NECESSÁRIA:</strong><br>
+                                1. Abra seu Google Apps Script<br>
+                                2. Adicione as linhas abaixo no início do código:<br>
+                                <div class="code-block mt-2">
+const SPREADSHEET_ID = 'SEU_ID_DA_PLANILHA_AQUI';<br>
+const DRIVE_FOLDER_ID = 'SEU_ID_DA_PASTA_AQUI';
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                adicionarLog('ERROR', `Erro ao descobrir IDs: ${error.message}`);
+                
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h6>❌ ERRO DE CONEXÃO</h6>
+                        <p>Não foi possível conectar ao Google Apps Script.</p>
+                        <p><strong>Erro:</strong> ${error.message}</p>
+                        <div class="mt-3">
+                            <strong>🔧 VERIFICAÇÕES:</strong><br>
+                            1. URL do Google Apps Script está correta?<br>
+                            2. Implantação está ativa?<br>
+                            3. Permissões estão configuradas?
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // ==================== TESTE DE CONECTIVIDADE ====================
+        async function testarConectividade() {
+            adicionarLog('INFO', 'Testando conectividade...');
+            
+            const resultDiv = document.getElementById('resultadoConectividade');
+            resultDiv.innerHTML = `
+                <div class="alert alert-info">
+                    🔄 Testando conectividade com Google Apps Script...
+                </div>
+            `;
+
+            try {
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL);
+                const result = await response.json();
+                
+                adicionarLog('SUCCESS', `Conectividade OK: ${result.version}`);
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h6>✅ CONECTIVIDADE OK!</h6>
+                            <p><strong>Versão:</strong> ${result.version}</p>
+                            <p><strong>Timestamp:</strong> ${result.timestamp}</p>
+                            <div class="mt-3">
+                                <small class="text-success">
+                                    ✅ Google Apps Script está respondendo corretamente<br>
+                                    ✅ Pode prosseguir para o teste de upload
+                                </small>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-warning">
+                            <h6>⚠️ RESPOSTA INESPERADA</h6>
+                            <p>O Google Apps Script respondeu, mas com formato inesperado.</p>
+                            <div class="code-block mt-2">
+                                ${JSON.stringify(result, null, 2)}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                adicionarLog('ERROR', `Erro de conectividade: ${error.message}`);
+                
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h6>❌ ERRO DE CONECTIVIDADE</h6>
+                        <p><strong>Erro:</strong> ${error.message}</p>
+                        <div class="mt-3">
+                            <strong>🔧 POSSÍVEIS CAUSAS:</strong><br>
+                            1. URL incorreta do Google Apps Script<br>
+                            2. Implantação não está ativa<br>
+                            3. Problemas de CORS<br>
+                            4. Rede bloqueando requisições
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // ==================== VALIDAÇÃO DE ARQUIVOS ====================
+        function validarArquivo(event) {
+            const file = event.target.files[0];
+            const feedback = document.getElementById('fileFeedback');
+            
+            if (!file) {
+                feedback.innerHTML = '';
+                return;
+            }
+            
+            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            adicionarLog('INFO', `Arquivo selecionado: ${file.name} (${sizeMB}MB)`);
+            
+            if (file.size > 10 * 1024 * 1024) { // 10MB
+                feedback.innerHTML = `
+                    <div class="alert alert-warning">
+                        ⚠️ Arquivo grande: ${file.name} (${sizeMB}MB)
+                        <br>Limite recomendado: 10MB
+                    </div>
+                `;
+            } else {
+                feedback.innerHTML = `
+                    <div class="alert alert-info">
+                        📄 Arquivo selecionado: ${file.name} (${sizeMB}MB)
+                    </div>
+                `;
+            }
+        }
+
+        // ==================== TESTE DE UPLOAD ====================
+        async function handleUpload(event) {
+            event.preventDefault();
+            
+            adicionarLog('INFO', 'Iniciando teste de upload...');
+            
+            const fileInput = document.getElementById('arquivo');
+            const categoria = document.getElementById('categoria').value;
+            const descricao = document.getElementById('descricao').value;
+            const resultDiv = document.getElementById('resultadoUpload');
+            
+            // Validar arquivo
+            if (!fileInput.files || fileInput.files.length === 0) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        ❌ Nenhum arquivo selecionado
+                    </div>
+                `;
+                return;
+            }
+            
+            const arquivo = fileInput.files[0];
+            adicionarLog('INFO', `Arquivo: ${arquivo.name}, Tamanho: ${arquivo.size} bytes`);
+            
+            // Mostrar progresso
+            resultDiv.innerHTML = `
+                <div class="alert alert-info">
+                    🔄 Enviando arquivo: ${arquivo.name}...
+                </div>
+            `;
+            
+            try {
+                // Criar FormData
+                const formData = new FormData();
+                formData.append('action', 'uploadFile');
+                formData.append('email', 'teste@upload.com');
+                formData.append('category', categoria);
+                formData.append('description', descricao);
+                
+                // TESTAR MÚLTIPLAS FORMAS DE ENVIAR O ARQUIVO
+                formData.append('arquivo', arquivo);           // Forma 1
+                formData.append('file', arquivo);              // Forma 2  
+                formData.append('uploadFile', arquivo);        // Forma 3
+                formData.append('uploadFile_0', arquivo);      // Forma 4
+                
+                adicionarLog('INFO', `FormData criado com: ${Array.from(formData.keys()).join(', ')}`);
+                
+                // Enviar requisição
+                adicionarLog('INFO', `Enviando para: ${CONFIG.GOOGLE_APPS_SCRIPT_URL}`);
+                
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                adicionarLog('INFO', `Response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const responseText = await response.text();
+                adicionarLog('INFO', `Response text: ${responseText.substring(0, 200)}...`);
+                
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (parseError) {
+                    adicionarLog('ERROR', `Erro ao fazer parse: ${parseError.message}`);
+                    throw new Error(`Resposta inválida: ${responseText.substring(0, 100)}`);
+                }
+                
+                adicionarLog('SUCCESS', `Resultado processado: ${JSON.stringify(result)}`);
+                
+                // Mostrar resultado
+                if (result.success) {
+                    let html = `
+                        <div class="alert alert-success">
+                            <h6>✅ ${result.message}</h6>
+                        </div>
+                    `;
+                    
+                    if (result.data && result.data.arquivosSalvos) {
+                        html += '<div class="mt-3"><h6>📁 Arquivos salvos:</h6><ul>';
+                        result.data.arquivosSalvos.forEach(arquivo => {
+                            html += `<li><a href="${arquivo.url}" target="_blank">${arquivo.nome}</a> (${arquivo.tamanho} bytes)</li>`;
+                        });
+                        html += '</ul></div>';
+                    }
+                    
+                    if (result.data && result.data.debug) {
+                        html += `
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <strong>🔧 Debug:</strong> ${result.data.debug.totalEncontrados} arquivos encontrados
+                                    usando métodos: ${result.data.debug.metodosUsados.join(', ')}
+                                </small>
+                            </div>
+                        `;
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                    
+                    // Limpar formulário
+                    document.getElementById('uploadForm').reset();
+                    document.getElementById('fileFeedback').innerHTML = '';
+                    
+                } else {
+                    let html = `
+                        <div class="alert alert-danger">
+                            <h6>❌ ${result.error}</h6>
+                        </div>
+                    `;
+                    
+                    if (result.debug) {
+                        html += `
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <strong>🔧 Debug:</strong><br>
+                                    Parâmetros: ${result.debug.parameterKeys?.join(', ') || 'nenhum'}<br>
+                                    Parameters: ${result.debug.parametersKeys?.join(', ') || 'nenhum'}
+                                </small>
+                            </div>
+                        `;
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                }
+                
+            } catch (error) {
+                adicionarLog('ERROR', `Erro no upload: ${error.message}`);
+                
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h6>❌ Erro no upload</h6>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // ==================== INICIALIZAÇÃO ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            adicionarLog('INFO', `Sistema iniciado - ${CONFIG.VERSION}`);
+            
+            // Configurar formulário
+            const form = document.getElementById('uploadForm');
+            if (form) {
+                form.addEventListener('submit', handleUpload);
+            }
+            
+            // Configurar validação de arquivo
+            const fileInput = document.getElementById('arquivo');
+            if (fileInput) {
+                fileInput.addEventListener('change', validarArquivo);
+            }
+            
+            // Mostrar status inicial
+            const statusDiv = document.getElementById('status');
+            if (statusDiv) {
+                statusDiv.innerHTML = `
+                    <div class="alert alert-info">
+                        ✅ Sistema carregado<br>
+                        <small>${CONFIG.VERSION}</small>
+                    </div>
+                `;
+                
+                // Auto-remover após 3 segundos
+                setTimeout(() => {
+                    statusDiv.innerHTML = '';
+                }, 3000);
+            }
+            
+            adicionarLog('SUCCESS', 'Sistema pronto para uso');
+        });
+    </script>
 </body>
 </html>
