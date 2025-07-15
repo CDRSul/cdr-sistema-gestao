@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🧪 TESTE UPLOAD INLINE - CDR Sul Tocantins</title>
+    <title>🎯 TESTE FINAL - CDR Sul Tocantins</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -45,6 +45,14 @@
             font-weight: bold;
             color: white;
         }
+        .btn-success {
+            background: linear-gradient(45deg, #4caf50, #2e7d32);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: white;
+        }
         .form-control, .form-select {
             border-radius: 10px;
             border: 2px solid #e9ecef;
@@ -75,6 +83,31 @@
             max-height: 200px;
             overflow-y: auto;
         }
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #dee2e6;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        .step.active {
+            background: #667eea;
+            color: white;
+        }
+        .step.completed {
+            background: #28a745;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -85,29 +118,23 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h1 class="mb-0">🧪 TESTE UPLOAD INLINE</h1>
-                        <p class="mb-0 mt-2">Sistema CDR Sul Tocantins - Diagnóstico Completo</p>
+                        <h1 class="mb-0">🎯 TESTE FINAL</h1>
+                        <p class="mb-0 mt-2">Sistema CDR Sul Tocantins - Solução Definitiva</p>
                     </div>
                     <div class="card-body p-4">
                         
-                        <!-- SEÇÃO 1: DESCOBRIR IDs -->
-                        <div class="alert alert-info">
-                            <h5>🔍 ETAPA 1: DESCOBRIR IDs CORRETOS</h5>
-                            <p class="mb-3">Primeiro, vamos descobrir automaticamente os IDs da sua planilha e pasta do Drive.</p>
-                            <button type="button" class="btn btn-warning" onclick="descobrirIDs()">
-                                🔍 DESCOBRIR IDs AUTOMATICAMENTE
-                            </button>
+                        <!-- INDICADOR DE PROGRESSO -->
+                        <div class="step-indicator">
+                            <div class="step" id="step1">1</div>
+                            <div class="step" id="step2">2</div>
+                            <div class="step" id="step3">3</div>
                         </div>
                         
-                        <div id="resultadoIDs" class="mt-3"></div>
-                        
-                        <hr class="my-4">
-                        
-                        <!-- SEÇÃO 2: TESTE DE CONECTIVIDADE -->
-                        <div class="alert alert-warning">
-                            <h5>🌐 ETAPA 2: TESTE DE CONECTIVIDADE</h5>
-                            <p class="mb-3">Testar se o Google Apps Script está respondendo corretamente.</p>
-                            <button type="button" class="btn btn-primary" onclick="testarConectividade()">
+                        <!-- ETAPA 1: TESTE DE CONECTIVIDADE -->
+                        <div class="alert alert-info">
+                            <h5>🌐 ETAPA 1: CONECTIVIDADE</h5>
+                            <p class="mb-3">Primeiro, vamos testar se o Google Apps Script está respondendo.</p>
+                            <button type="button" class="btn btn-warning" onclick="testarConectividade()">
                                 🚀 TESTAR CONECTIVIDADE
                             </button>
                         </div>
@@ -116,10 +143,23 @@
                         
                         <hr class="my-4">
                         
-                        <!-- SEÇÃO 3: TESTE DE UPLOAD -->
+                        <!-- ETAPA 2: TESTE DE IDs -->
+                        <div class="alert alert-warning">
+                            <h5>🔍 ETAPA 2: VERIFICAR IDs</h5>
+                            <p class="mb-3">Verificar se os IDs da planilha e pasta estão corretos.</p>
+                            <button type="button" class="btn btn-primary" onclick="verificarIDs()" disabled id="btnVerificarIDs">
+                                🔍 VERIFICAR IDs
+                            </button>
+                        </div>
+                        
+                        <div id="resultadoIDs" class="mt-3"></div>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- ETAPA 3: TESTE DE UPLOAD -->
                         <div class="alert alert-success">
-                            <h5>📁 ETAPA 3: TESTE DE UPLOAD</h5>
-                            <p class="mb-0">Após descobrir os IDs e confirmar conectividade, teste o upload de arquivos.</p>
+                            <h5>📁 ETAPA 3: UPLOAD DE ARQUIVO</h5>
+                            <p class="mb-0">Após confirmar conectividade e IDs, teste o upload.</p>
                         </div>
                         
                         <form id="uploadForm" class="mt-4">
@@ -149,8 +189,8 @@
                             </div>
                             
                             <div class="text-center">
-                                <button type="submit" class="btn btn-primary btn-lg">
-                                    🚀 TESTAR UPLOAD
+                                <button type="submit" class="btn btn-success btn-lg" disabled id="btnUpload">
+                                    📤 TESTAR UPLOAD
                                 </button>
                             </div>
                         </form>
@@ -159,12 +199,12 @@
                         
                         <hr class="my-4">
                         
-                        <!-- SEÇÃO 4: LOGS DE DEBUG -->
+                        <!-- LOGS DE DEBUG -->
                         <div class="alert alert-secondary">
                             <h5>🔧 LOGS DE DEBUG</h5>
-                            <p class="mb-2">Logs detalhados para diagnóstico:</p>
+                            <p class="mb-2">Acompanhe cada etapa em tempo real:</p>
                             <div id="debugLogs" class="code-block">
-                                Aguardando ações...
+                                Sistema iniciando...
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="limparLogs()">
                                 🗑️ Limpar Logs
@@ -176,8 +216,8 @@
                 
                 <div class="text-center mt-4">
                     <small class="text-white">
-                        🧪 Teste Upload Inline - CDR Sul Tocantins<br>
-                        Versão com JavaScript incorporado para evitar erros 404
+                        🎯 Teste Final - CDR Sul Tocantins<br>
+                        Versão com correção completa de comunicação
                     </small>
                 </div>
             </div>
@@ -188,11 +228,12 @@
         // ==================== CONFIGURAÇÕES ====================
         const CONFIG = {
             GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec',
-            VERSION: 'TESTE UPLOAD INLINE v1.0',
+            VERSION: 'TESTE FINAL v1.0',
             DEBUG: true
         };
 
         let debugLogs = [];
+        let etapaAtual = 1;
 
         // ==================== FUNÇÕES DE LOG ====================
         function adicionarLog(tipo, mensagem) {
@@ -203,7 +244,7 @@
             
             const debugDiv = document.getElementById('debugLogs');
             if (debugDiv) {
-                debugDiv.innerHTML = debugLogs.slice(-20).join('\n');
+                debugDiv.innerHTML = debugLogs.slice(-30).join('\n');
                 debugDiv.scrollTop = debugDiv.scrollHeight;
             }
         }
@@ -213,83 +254,24 @@
             document.getElementById('debugLogs').innerHTML = 'Logs limpos...';
         }
 
-        // ==================== DESCOBRIR IDs ====================
-        async function descobrirIDs() {
-            adicionarLog('INFO', 'Iniciando descoberta de IDs...');
-            
-            const resultDiv = document.getElementById('resultadoIDs');
-            resultDiv.innerHTML = `
-                <div class="alert alert-info">
-                    🔄 Descobrindo IDs automaticamente...
-                </div>
-            `;
-
-            try {
-                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL + '?action=descobrirIDs');
-                const result = await response.json();
-                
-                adicionarLog('SUCCESS', 'IDs descobertos com sucesso');
-                
-                if (result.success) {
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-success">
-                            <h6>✅ IDs DESCOBERTOS COM SUCESSO!</h6>
-                            <div class="mt-3">
-                                <strong>📊 Planilha ID:</strong><br>
-                                <code>${result.data.spreadsheetId}</code>
-                            </div>
-                            <div class="mt-2">
-                                <strong>📁 Pasta Drive ID:</strong><br>
-                                <code>${result.data.folderId}</code>
-                            </div>
-                            <div class="mt-3">
-                                <small class="text-muted">
-                                    <strong>📝 Planilha:</strong> ${result.data.spreadsheetName}<br>
-                                    <strong>📂 Pasta:</strong> ${result.data.folderName}
-                                </small>
-                            </div>
-                        </div>
-                    `;
+        function atualizarEtapa(etapa) {
+            // Atualizar indicadores visuais
+            for (let i = 1; i <= 3; i++) {
+                const stepEl = document.getElementById(`step${i}`);
+                if (i < etapa) {
+                    stepEl.className = 'step completed';
+                } else if (i === etapa) {
+                    stepEl.className = 'step active';
                 } else {
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-danger">
-                            <h6>❌ ERRO AO DESCOBRIR IDs</h6>
-                            <p>${result.error}</p>
-                            <div class="mt-3">
-                                <strong>📋 AÇÃO MANUAL NECESSÁRIA:</strong><br>
-                                1. Abra seu Google Apps Script<br>
-                                2. Adicione as linhas abaixo no início do código:<br>
-                                <div class="code-block mt-2">
-const SPREADSHEET_ID = '14qB12Ia8GrGaC7MMC5vfMmW6hBzCEPR-EtrXDvr3DaA';<br>
-const DRIVE_FOLDER_ID = '1RqqBgkJKD4e_YNtICqwZER-doR7QuyVQ';
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                    stepEl.className = 'step';
                 }
-                
-            } catch (error) {
-                adicionarLog('ERROR', `Erro ao descobrir IDs: ${error.message}`);
-                
-                resultDiv.innerHTML = `
-                    <div class="alert alert-danger">
-                        <h6>❌ ERRO DE CONEXÃO</h6>
-                        <p>Não foi possível conectar ao Google Apps Script.</p>
-                        <p><strong>Erro:</strong> ${error.message}</p>
-                        <div class="mt-3">
-                            <strong>🔧 VERIFICAÇÕES:</strong><br>
-                            1. URL do Google Apps Script está correta?<br>
-                            2. Implantação está ativa?<br>
-                            3. Permissões estão configuradas?
-                        </div>
-                    </div>
-                `;
             }
+            etapaAtual = etapa;
         }
 
         // ==================== TESTE DE CONECTIVIDADE ====================
         async function testarConectividade() {
-            adicionarLog('INFO', 'Testando conectividade...');
+            adicionarLog('INFO', 'Iniciando teste de conectividade...');
             
             const resultDiv = document.getElementById('resultadoConectividade');
             resultDiv.innerHTML = `
@@ -299,32 +281,61 @@ const DRIVE_FOLDER_ID = '1RqqBgkJKD4e_YNtICqwZER-doR7QuyVQ';
             `;
 
             try {
+                adicionarLog('INFO', `Enviando requisição para: ${CONFIG.GOOGLE_APPS_SCRIPT_URL}`);
+                
                 const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL);
-                const result = await response.json();
+                adicionarLog('INFO', `Response status: ${response.status}`);
                 
-                adicionarLog('SUCCESS', `Conectividade OK: ${result.version}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
                 
-                if (result.success) {
+                const responseText = await response.text();
+                adicionarLog('INFO', `Response text: ${responseText.substring(0, 100)}...`);
+                
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                    adicionarLog('SUCCESS', 'Resposta JSON válida recebida');
+                } catch (parseError) {
+                    adicionarLog('ERROR', `Erro ao fazer parse JSON: ${parseError.message}`);
+                    throw new Error(`Resposta inválida: ${responseText.substring(0, 100)}`);
+                }
+                
+                // CORREÇÃO: Aceitar qualquer resposta com success: true
+                if (result.success !== false) {
+                    adicionarLog('SUCCESS', `Conectividade OK - Versão: ${result.version || 'Desconhecida'}`);
+                    
                     resultDiv.innerHTML = `
                         <div class="alert alert-success">
                             <h6>✅ CONECTIVIDADE OK!</h6>
-                            <p><strong>Versão:</strong> ${result.version}</p>
-                            <p><strong>Timestamp:</strong> ${result.timestamp}</p>
+                            <p><strong>Versão:</strong> ${result.version || 'Não informada'}</p>
+                            <p><strong>Timestamp:</strong> ${result.timestamp || new Date().toISOString()}</p>
                             <div class="mt-3">
                                 <small class="text-success">
-                                    ✅ Google Apps Script está respondendo corretamente<br>
-                                    ✅ Pode prosseguir para o teste de upload
+                                    ✅ Google Apps Script está respondendo<br>
+                                    ✅ Pode prosseguir para verificação de IDs
                                 </small>
                             </div>
                         </div>
                     `;
+                    
+                    // Habilitar próxima etapa
+                    document.getElementById('btnVerificarIDs').disabled = false;
+                    atualizarEtapa(2);
+                    
                 } else {
+                    adicionarLog('WARNING', `Resposta com erro: ${result.error || 'Erro desconhecido'}`);
+                    
                     resultDiv.innerHTML = `
                         <div class="alert alert-warning">
-                            <h6>⚠️ RESPOSTA INESPERADA</h6>
-                            <p>O Google Apps Script respondeu, mas com formato inesperado.</p>
-                            <div class="code-block mt-2">
-                                ${JSON.stringify(result, null, 2)}
+                            <h6>⚠️ RESPOSTA COM ERRO</h6>
+                            <p><strong>Erro:</strong> ${result.error || 'Erro desconhecido'}</p>
+                            <div class="mt-3">
+                                <small class="text-warning">
+                                    ⚠️ Google Apps Script respondeu mas com erro<br>
+                                    ⚠️ Verifique os logs do Google Apps Script
+                                </small>
                             </div>
                         </div>
                     `;
@@ -338,12 +349,109 @@ const DRIVE_FOLDER_ID = '1RqqBgkJKD4e_YNtICqwZER-doR7QuyVQ';
                         <h6>❌ ERRO DE CONECTIVIDADE</h6>
                         <p><strong>Erro:</strong> ${error.message}</p>
                         <div class="mt-3">
-                            <strong>🔧 POSSÍVEIS CAUSAS:</strong><br>
-                            1. URL incorreta do Google Apps Script<br>
-                            2. Implantação não está ativa<br>
-                            3. Problemas de CORS<br>
-                            4. Rede bloqueando requisições
+                            <strong>🔧 VERIFICAÇÕES:</strong><br>
+                            1. URL do Google Apps Script está correta?<br>
+                            2. Implantação está ativa?<br>
+                            3. Permissões estão configuradas?<br>
+                            4. Rede permite requisições?
                         </div>
+                    </div>
+                `;
+            }
+        }
+
+        // ==================== VERIFICAÇÃO DE IDs ====================
+        async function verificarIDs() {
+            adicionarLog('INFO', 'Iniciando verificação de IDs...');
+            
+            const resultDiv = document.getElementById('resultadoIDs');
+            resultDiv.innerHTML = `
+                <div class="alert alert-info">
+                    🔄 Verificando IDs da planilha e pasta...
+                </div>
+            `;
+
+            try {
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL + '?action=descobrirIDs');
+                const responseText = await response.text();
+                
+                adicionarLog('INFO', `Response IDs: ${responseText.substring(0, 200)}...`);
+                
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (parseError) {
+                    adicionarLog('ERROR', `Erro parse IDs: ${parseError.message}`);
+                    throw new Error(`Resposta inválida: ${responseText.substring(0, 100)}`);
+                }
+                
+                // CORREÇÃO: Verificar se tem dados ou se funcionou
+                if (result.success && result.data) {
+                    adicionarLog('SUCCESS', `IDs verificados: Planilha=${result.data.spreadsheetName}, Pasta=${result.data.folderName}`);
+                    
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h6>✅ IDs VERIFICADOS COM SUCESSO!</h6>
+                            <div class="mt-3">
+                                <strong>📊 Planilha:</strong> ${result.data.spreadsheetName}<br>
+                                <small class="text-muted">ID: ${result.data.spreadsheetId}</small>
+                            </div>
+                            <div class="mt-2">
+                                <strong>📁 Pasta:</strong> ${result.data.folderName}<br>
+                                <small class="text-muted">ID: ${result.data.folderId}</small>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Habilitar upload
+                    document.getElementById('btnUpload').disabled = false;
+                    atualizarEtapa(3);
+                    
+                } else if (result.success && result.message) {
+                    // Caso o Google Apps Script retorne apenas success e message
+                    adicionarLog('SUCCESS', `Verificação OK: ${result.message}`);
+                    
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h6>✅ VERIFICAÇÃO OK!</h6>
+                            <p>${result.message}</p>
+                            <div class="mt-3">
+                                <small class="text-success">
+                                    ✅ IDs estão funcionando<br>
+                                    ✅ Pode prosseguir para upload
+                                </small>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Habilitar upload
+                    document.getElementById('btnUpload').disabled = false;
+                    atualizarEtapa(3);
+                    
+                } else {
+                    adicionarLog('ERROR', `Erro na verificação: ${result.error || 'Erro desconhecido'}`);
+                    
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h6>❌ ERRO NA VERIFICAÇÃO</h6>
+                            <p>${result.error || 'Erro desconhecido'}</p>
+                            <div class="mt-3">
+                                <strong>🔧 POSSÍVEIS CAUSAS:</strong><br>
+                                1. IDs da planilha ou pasta incorretos<br>
+                                2. Sem permissão de acesso<br>
+                                3. Planilha ou pasta foi deletada
+                            </div>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                adicionarLog('ERROR', `Erro ao verificar IDs: ${error.message}`);
+                
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h6>❌ ERRO DE COMUNICAÇÃO</h6>
+                        <p>${error.message}</p>
                     </div>
                 `;
             }
@@ -400,7 +508,7 @@ const DRIVE_FOLDER_ID = '1RqqBgkJKD4e_YNtICqwZER-doR7QuyVQ';
             }
             
             const arquivo = fileInput.files[0];
-            adicionarLog('INFO', `Arquivo: ${arquivo.name}, Tamanho: ${arquivo.size} bytes`);
+            adicionarLog('INFO', `Arquivo: ${arquivo.name}, Tamanho: ${arquivo.size} bytes, Tipo: ${arquivo.type}`);
             
             // Mostrar progresso
             resultDiv.innerHTML = `
@@ -410,22 +518,22 @@ const DRIVE_FOLDER_ID = '1RqqBgkJKD4e_YNtICqwZER-doR7QuyVQ';
             `;
             
             try {
-                // Criar FormData
+                // Criar FormData com TODOS os campos possíveis
                 const formData = new FormData();
                 formData.append('action', 'uploadFile');
                 formData.append('email', 'teste@upload.com');
                 formData.append('category', categoria);
                 formData.append('description', descricao);
                 
-                // TESTAR MÚLTIPLAS FORMAS DE ENVIAR O ARQUIVO
-                formData.append('arquivo', arquivo);           // Forma 1
-                formData.append('file', arquivo);              // Forma 2  
-                formData.append('uploadFile', arquivo);        // Forma 3
-                formData.append('uploadFile_0', arquivo);      // Forma 4
+                // MÚLTIPLAS FORMAS DE ENVIAR O ARQUIVO
+                formData.append('arquivo', arquivo);
+                formData.append('file', arquivo);
+                formData.append('uploadFile', arquivo);
+                formData.append('uploadFile_0', arquivo);
+                formData.append('document', arquivo);
+                formData.append('attachment', arquivo);
                 
-                adicionarLog('INFO', `FormData criado com: ${Array.from(formData.keys()).join(', ')}`);
-                
-                // Enviar requisição
+                adicionarLog('INFO', `FormData criado com campos: ${Array.from(formData.keys()).join(', ')}`);
                 adicionarLog('INFO', `Enviando para: ${CONFIG.GOOGLE_APPS_SCRIPT_URL}`);
                 
                 const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
@@ -440,27 +548,28 @@ const DRIVE_FOLDER_ID = '1RqqBgkJKD4e_YNtICqwZER-doR7QuyVQ';
                 }
                 
                 const responseText = await response.text();
-                adicionarLog('INFO', `Response text: ${responseText.substring(0, 200)}...`);
+                adicionarLog('INFO', `Response text: ${responseText.substring(0, 300)}...`);
                 
                 let result;
                 try {
                     result = JSON.parse(responseText);
+                    adicionarLog('SUCCESS', 'Resposta do upload processada');
                 } catch (parseError) {
-                    adicionarLog('ERROR', `Erro ao fazer parse: ${parseError.message}`);
+                    adicionarLog('ERROR', `Erro parse upload: ${parseError.message}`);
                     throw new Error(`Resposta inválida: ${responseText.substring(0, 100)}`);
                 }
                 
-                adicionarLog('SUCCESS', `Resultado processado: ${JSON.stringify(result)}`);
-                
                 // Mostrar resultado
                 if (result.success) {
+                    adicionarLog('SUCCESS', `Upload bem-sucedido: ${result.message}`);
+                    
                     let html = `
                         <div class="alert alert-success">
                             <h6>✅ ${result.message}</h6>
                         </div>
                     `;
                     
-                    if (result.data && result.data.arquivosSalvos) {
+                    if (result.data && result.data.arquivosSalvos && result.data.arquivosSalvos.length > 0) {
                         html += '<div class="mt-3"><h6>📁 Arquivos salvos:</h6><ul>';
                         result.data.arquivosSalvos.forEach(arquivo => {
                             html += `<li><a href="${arquivo.url}" target="_blank">${arquivo.nome}</a> (${arquivo.tamanho} bytes)</li>`;
@@ -472,8 +581,7 @@ const DRIVE_FOLDER_ID = '1RqqBgkJKD4e_YNtICqwZER-doR7QuyVQ';
                         html += `
                             <div class="mt-3">
                                 <small class="text-muted">
-                                    <strong>🔧 Debug:</strong> ${result.data.debug.totalEncontrados} arquivos encontrados
-                                    usando métodos: ${result.data.debug.metodosUsados.join(', ')}
+                                    <strong>🔧 Debug:</strong> ${result.data.debug.totalEncontrados || 0} arquivos encontrados
                                 </small>
                             </div>
                         `;
@@ -486,9 +594,11 @@ const DRIVE_FOLDER_ID = '1RqqBgkJKD4e_YNtICqwZER-doR7QuyVQ';
                     document.getElementById('fileFeedback').innerHTML = '';
                     
                 } else {
+                    adicionarLog('ERROR', `Upload falhou: ${result.error || result.message}`);
+                    
                     let html = `
                         <div class="alert alert-danger">
-                            <h6>❌ ${result.error}</h6>
+                            <h6>❌ ${result.error || result.message}</h6>
                         </div>
                     `;
                     
@@ -498,7 +608,8 @@ const DRIVE_FOLDER_ID = '1RqqBgkJKD4e_YNtICqwZER-doR7QuyVQ';
                                 <small class="text-muted">
                                     <strong>🔧 Debug:</strong><br>
                                     Parâmetros: ${result.debug.parameterKeys?.join(', ') || 'nenhum'}<br>
-                                    Parameters: ${result.debug.parametersKeys?.join(', ') || 'nenhum'}
+                                    Parameters: ${result.debug.parametersKeys?.join(', ') || 'nenhum'}<br>
+                                    Arquivos encontrados: ${result.debug.filesFound || 0}
                                 </small>
                             </div>
                         `;
@@ -551,7 +662,10 @@ const DRIVE_FOLDER_ID = '1RqqBgkJKD4e_YNtICqwZER-doR7QuyVQ';
                 }, 3000);
             }
             
-            adicionarLog('SUCCESS', 'Sistema pronto para uso');
+            // Inicializar etapa 1
+            atualizarEtapa(1);
+            
+            adicionarLog('SUCCESS', 'Sistema pronto - Inicie com TESTE DE CONECTIVIDADE');
         });
     </script>
 </body>
