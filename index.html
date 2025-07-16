@@ -3,670 +3,623 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎯 TESTE FINAL - CDR Sul Tocantins</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>TESTE UPLOAD BASE64 - CDR Sul Tocantins</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px 0;
+            padding: 20px;
         }
+        
         .container {
-            max-width: 900px;
-        }
-        .card {
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            border: none;
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
             border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-        .card-header {
+        
+        .header {
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
-            border-radius: 15px 15px 0 0 !important;
+            padding: 30px;
             text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .content {
             padding: 30px;
         }
-        .btn-primary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-weight: bold;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        .btn-warning {
-            background: linear-gradient(45deg, #ff9800, #f57c00);
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-weight: bold;
-            color: white;
-        }
-        .btn-success {
-            background: linear-gradient(45deg, #4caf50, #2e7d32);
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-weight: bold;
-            color: white;
-        }
-        .form-control, .form-select {
+        
+        .etapa {
+            margin-bottom: 30px;
+            border: 2px solid #e0e0e0;
             border-radius: 10px;
-            border: 2px solid #e9ecef;
-            padding: 12px 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
-        .form-control:focus, .form-select:focus {
+        
+        .etapa.ativa {
             border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
         }
-        .alert {
-            border-radius: 10px;
-            border: none;
-        }
-        #status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            max-width: 350px;
-        }
-        .code-block {
+        
+        .etapa-header {
             background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 15px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .step-indicator {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-        }
-        .step {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #dee2e6;
-            color: #6c757d;
+            padding: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #333;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin: 0 10px;
-            font-weight: bold;
+            gap: 10px;
         }
-        .step.active {
+        
+        .etapa.ativa .etapa-header {
             background: #667eea;
             color: white;
         }
-        .step.completed {
-            background: #28a745;
+        
+        .etapa-content {
+            padding: 20px;
+            display: none;
+        }
+        
+        .etapa.ativa .etapa-content {
+            display: block;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .file-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .logs {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        
+        .log-entry.info { color: #0066cc; }
+        .log-entry.success { color: #009900; }
+        .log-entry.error { color: #cc0000; }
+        
+        .progress {
+            background: #e0e0e0;
+            height: 6px;
+            border-radius: 3px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
         }
     </style>
 </head>
 <body>
-    <div id="status"></div>
-    
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h1 class="mb-0">🎯 TESTE FINAL</h1>
-                        <p class="mb-0 mt-2">Sistema CDR Sul Tocantins - Solução Definitiva</p>
-                    </div>
-                    <div class="card-body p-4">
-                        
-                        <!-- INDICADOR DE PROGRESSO -->
-                        <div class="step-indicator">
-                            <div class="step" id="step1">1</div>
-                            <div class="step" id="step2">2</div>
-                            <div class="step" id="step3">3</div>
-                        </div>
-                        
-                        <!-- ETAPA 1: TESTE DE CONECTIVIDADE -->
-                        <div class="alert alert-info">
-                            <h5>🌐 ETAPA 1: CONECTIVIDADE</h5>
-                            <p class="mb-3">Primeiro, vamos testar se o Google Apps Script está respondendo.</p>
-                            <button type="button" class="btn btn-warning" onclick="testarConectividade()">
-                                🚀 TESTAR CONECTIVIDADE
-                            </button>
-                        </div>
-                        
-                        <div id="resultadoConectividade" class="mt-3"></div>
-                        
-                        <hr class="my-4">
-                        
-                        <!-- ETAPA 2: TESTE DE IDs -->
-                        <div class="alert alert-warning">
-                            <h5>🔍 ETAPA 2: VERIFICAR IDs</h5>
-                            <p class="mb-3">Verificar se os IDs da planilha e pasta estão corretos.</p>
-                            <button type="button" class="btn btn-primary" onclick="verificarIDs()" disabled id="btnVerificarIDs">
-                                🔍 VERIFICAR IDs
-                            </button>
-                        </div>
-                        
-                        <div id="resultadoIDs" class="mt-3"></div>
-                        
-                        <hr class="my-4">
-                        
-                        <!-- ETAPA 3: TESTE DE UPLOAD -->
-                        <div class="alert alert-success">
-                            <h5>📁 ETAPA 3: UPLOAD DE ARQUIVO</h5>
-                            <p class="mb-0">Após confirmar conectividade e IDs, teste o upload.</p>
-                        </div>
-                        
-                        <form id="uploadForm" class="mt-4">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="categoria" class="form-label">Categoria:</label>
-                                    <select class="form-select" id="categoria" required>
-                                        <option value="">Selecione...</option>
-                                        <option value="Documentos">Documentos</option>
-                                        <option value="Fotos">Fotos</option>
-                                        <option value="Relatórios">Relatórios</option>
-                                        <option value="Outros">Outros</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label for="descricao" class="form-label">Descrição:</label>
-                                    <input type="text" class="form-control" id="descricao" 
-                                           placeholder="Descrição do arquivo" required>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="arquivo" class="form-label">Selecionar Arquivo:</label>
-                                <input type="file" class="form-control" id="arquivo" required>
-                                <div id="fileFeedback" class="mt-2"></div>
-                            </div>
-                            
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-success btn-lg" disabled id="btnUpload">
-                                    📤 TESTAR UPLOAD
-                                </button>
-                            </div>
-                        </form>
-                        
-                        <div id="resultadoUpload" class="mt-4"></div>
-                        
-                        <hr class="my-4">
-                        
-                        <!-- LOGS DE DEBUG -->
-                        <div class="alert alert-secondary">
-                            <h5>🔧 LOGS DE DEBUG</h5>
-                            <p class="mb-2">Acompanhe cada etapa em tempo real:</p>
-                            <div id="debugLogs" class="code-block">
-                                Sistema iniciando...
-                            </div>
-                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="limparLogs()">
-                                🗑️ Limpar Logs
-                            </button>
-                        </div>
-                        
-                    </div>
+        <div class="header">
+            <h1>🧪 TESTE UPLOAD BASE64</h1>
+            <p>Solução definitiva que converte arquivos para Base64</p>
+        </div>
+        
+        <div class="content">
+            <!-- ETAPA 1: CONECTIVIDADE -->
+            <div class="etapa ativa" id="etapa1">
+                <div class="etapa-header">
+                    <span>🌐</span>
+                    <span>ETAPA 1: TESTE DE CONECTIVIDADE</span>
                 </div>
-                
-                <div class="text-center mt-4">
-                    <small class="text-white">
-                        🎯 Teste Final - CDR Sul Tocantins<br>
-                        Versão com correção completa de comunicação
-                    </small>
+                <div class="etapa-content">
+                    <p>Verificar se o Google Apps Script está respondendo corretamente.</p>
+                    <button class="btn" onclick="testarConectividade()">
+                        🚀 TESTAR CONECTIVIDADE
+                    </button>
+                    <div id="status-conectividade"></div>
                 </div>
+            </div>
+            
+            <!-- ETAPA 2: VERIFICAR IDS -->
+            <div class="etapa" id="etapa2">
+                <div class="etapa-header">
+                    <span>🔍</span>
+                    <span>ETAPA 2: VERIFICAR IDs</span>
+                </div>
+                <div class="etapa-content">
+                    <p>Verificar se os IDs da planilha e pasta estão corretos.</p>
+                    <button class="btn" onclick="verificarIDs()" disabled>
+                        🔍 VERIFICAR IDs
+                    </button>
+                    <div id="status-ids"></div>
+                </div>
+            </div>
+            
+            <!-- ETAPA 3: UPLOAD BASE64 -->
+            <div class="etapa" id="etapa3">
+                <div class="etapa-header">
+                    <span>📤</span>
+                    <span>ETAPA 3: UPLOAD BASE64</span>
+                </div>
+                <div class="etapa-content">
+                    <p>Após confirmar conectividade e IDs, teste o upload via Base64.</p>
+                    
+                    <div class="form-group">
+                        <label>Categoria:</label>
+                        <select id="categoria">
+                            <option value="Documentos">Documentos</option>
+                            <option value="Fotos">Fotos</option>
+                            <option value="Planilhas">Planilhas</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Descrição:</label>
+                        <textarea id="descricao" rows="3" placeholder="Descreva o arquivo...">teste base64</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Selecionar Arquivo:</label>
+                        <input type="file" id="arquivo" onchange="arquivoSelecionado()">
+                    </div>
+                    
+                    <div id="arquivo-info"></div>
+                    
+                    <button class="btn" onclick="testarUploadBase64()" disabled id="btn-upload">
+                        📤 TESTAR UPLOAD BASE64
+                    </button>
+                    
+                    <div class="progress" id="progress" style="display: none;">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                    
+                    <div id="status-upload"></div>
+                </div>
+            </div>
+            
+            <!-- LOGS -->
+            <div class="logs">
+                <h3>🔧 LOGS DE DEBUG</h3>
+                <p>Acompanhe cada etapa em tempo real:</p>
+                <div id="logs"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // ==================== CONFIGURAÇÕES ====================
-        const CONFIG = {
-            GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec',
-            VERSION: 'TESTE FINAL v1.0',
-            DEBUG: true
-        };
-
-        let debugLogs = [];
-        let etapaAtual = 1;
-
-        // ==================== FUNÇÕES DE LOG ====================
-        function adicionarLog(tipo, mensagem) {
+        // URL DO GOOGLE APPS SCRIPT
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec';
+        
+        // VARIÁVEIS GLOBAIS
+        let arquivoSelecionadoGlobal = null;
+        
+        // FUNÇÃO DE LOG
+        function log(tipo, mensagem) {
             const timestamp = new Date().toLocaleTimeString('pt-BR');
-            const log = `[${timestamp}] ${tipo.toUpperCase()}: ${mensagem}`;
-            debugLogs.push(log);
-            console.log(log);
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${tipo}`;
+            logEntry.textContent = `[${timestamp}] ${tipo.toUpperCase()}: ${mensagem}`;
             
-            const debugDiv = document.getElementById('debugLogs');
-            if (debugDiv) {
-                debugDiv.innerHTML = debugLogs.slice(-30).join('\n');
-                debugDiv.scrollTop = debugDiv.scrollHeight;
-            }
+            const logsContainer = document.getElementById('logs');
+            logsContainer.appendChild(logEntry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+            
+            console.log(`[${timestamp}] ${tipo.toUpperCase()}: ${mensagem}`);
         }
-
-        function limparLogs() {
-            debugLogs = [];
-            document.getElementById('debugLogs').innerHTML = 'Logs limpos...';
+        
+        // FUNÇÃO PARA ATIVAR ETAPA
+        function ativarEtapa(numero) {
+            // Desativar todas
+            document.querySelectorAll('.etapa').forEach(etapa => {
+                etapa.classList.remove('ativa');
+            });
+            
+            // Ativar específica
+            document.getElementById(`etapa${numero}`).classList.add('ativa');
         }
-
-        function atualizarEtapa(etapa) {
-            // Atualizar indicadores visuais
-            for (let i = 1; i <= 3; i++) {
-                const stepEl = document.getElementById(`step${i}`);
-                if (i < etapa) {
-                    stepEl.className = 'step completed';
-                } else if (i === etapa) {
-                    stepEl.className = 'step active';
-                } else {
-                    stepEl.className = 'step';
-                }
-            }
-            etapaAtual = etapa;
+        
+        // FUNÇÃO PARA MOSTRAR STATUS
+        function mostrarStatus(elementId, tipo, mensagem) {
+            const elemento = document.getElementById(elementId);
+            elemento.innerHTML = `<div class="status ${tipo}">${mensagem}</div>`;
         }
-
-        // ==================== TESTE DE CONECTIVIDADE ====================
+        
+        // INICIALIZAÇÃO
+        document.addEventListener('DOMContentLoaded', function() {
+            log('info', 'Sistema iniciado - TESTE BASE64 v1.0');
+            log('success', 'Sistema pronto - Inicie com TESTE DE CONECTIVIDADE');
+        });
+        
+        // ETAPA 1: TESTAR CONECTIVIDADE
         async function testarConectividade() {
-            adicionarLog('INFO', 'Iniciando teste de conectividade...');
-            
-            const resultDiv = document.getElementById('resultadoConectividade');
-            resultDiv.innerHTML = `
-                <div class="alert alert-info">
-                    🔄 Testando conectividade com Google Apps Script...
-                </div>
-            `;
-
-            try {
-                adicionarLog('INFO', `Enviando requisição para: ${CONFIG.GOOGLE_APPS_SCRIPT_URL}`);
-                
-                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL);
-                adicionarLog('INFO', `Response status: ${response.status}`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const responseText = await response.text();
-                adicionarLog('INFO', `Response text: ${responseText.substring(0, 100)}...`);
-                
-                let result;
-                try {
-                    result = JSON.parse(responseText);
-                    adicionarLog('SUCCESS', 'Resposta JSON válida recebida');
-                } catch (parseError) {
-                    adicionarLog('ERROR', `Erro ao fazer parse JSON: ${parseError.message}`);
-                    throw new Error(`Resposta inválida: ${responseText.substring(0, 100)}`);
-                }
-                
-                // CORREÇÃO: Aceitar qualquer resposta com success: true
-                if (result.success !== false) {
-                    adicionarLog('SUCCESS', `Conectividade OK - Versão: ${result.version || 'Desconhecida'}`);
-                    
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-success">
-                            <h6>✅ CONECTIVIDADE OK!</h6>
-                            <p><strong>Versão:</strong> ${result.version || 'Não informada'}</p>
-                            <p><strong>Timestamp:</strong> ${result.timestamp || new Date().toISOString()}</p>
-                            <div class="mt-3">
-                                <small class="text-success">
-                                    ✅ Google Apps Script está respondendo<br>
-                                    ✅ Pode prosseguir para verificação de IDs
-                                </small>
-                            </div>
-                        </div>
-                    `;
-                    
-                    // Habilitar próxima etapa
-                    document.getElementById('btnVerificarIDs').disabled = false;
-                    atualizarEtapa(2);
-                    
-                } else {
-                    adicionarLog('WARNING', `Resposta com erro: ${result.error || 'Erro desconhecido'}`);
-                    
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-warning">
-                            <h6>⚠️ RESPOSTA COM ERRO</h6>
-                            <p><strong>Erro:</strong> ${result.error || 'Erro desconhecido'}</p>
-                            <div class="mt-3">
-                                <small class="text-warning">
-                                    ⚠️ Google Apps Script respondeu mas com erro<br>
-                                    ⚠️ Verifique os logs do Google Apps Script
-                                </small>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-            } catch (error) {
-                adicionarLog('ERROR', `Erro de conectividade: ${error.message}`);
-                
-                resultDiv.innerHTML = `
-                    <div class="alert alert-danger">
-                        <h6>❌ ERRO DE CONECTIVIDADE</h6>
-                        <p><strong>Erro:</strong> ${error.message}</p>
-                        <div class="mt-3">
-                            <strong>🔧 VERIFICAÇÕES:</strong><br>
-                            1. URL do Google Apps Script está correta?<br>
-                            2. Implantação está ativa?<br>
-                            3. Permissões estão configuradas?<br>
-                            4. Rede permite requisições?
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        // ==================== VERIFICAÇÃO DE IDs ====================
-        async function verificarIDs() {
-            adicionarLog('INFO', 'Iniciando verificação de IDs...');
-            
-            const resultDiv = document.getElementById('resultadoIDs');
-            resultDiv.innerHTML = `
-                <div class="alert alert-info">
-                    🔄 Verificando IDs da planilha e pasta...
-                </div>
-            `;
-
-            try {
-                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL + '?action=descobrirIDs');
-                const responseText = await response.text();
-                
-                adicionarLog('INFO', `Response IDs: ${responseText.substring(0, 200)}...`);
-                
-                let result;
-                try {
-                    result = JSON.parse(responseText);
-                } catch (parseError) {
-                    adicionarLog('ERROR', `Erro parse IDs: ${parseError.message}`);
-                    throw new Error(`Resposta inválida: ${responseText.substring(0, 100)}`);
-                }
-                
-                // CORREÇÃO: Verificar se tem dados ou se funcionou
-                if (result.success && result.data) {
-                    adicionarLog('SUCCESS', `IDs verificados: Planilha=${result.data.spreadsheetName}, Pasta=${result.data.folderName}`);
-                    
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-success">
-                            <h6>✅ IDs VERIFICADOS COM SUCESSO!</h6>
-                            <div class="mt-3">
-                                <strong>📊 Planilha:</strong> ${result.data.spreadsheetName}<br>
-                                <small class="text-muted">ID: ${result.data.spreadsheetId}</small>
-                            </div>
-                            <div class="mt-2">
-                                <strong>📁 Pasta:</strong> ${result.data.folderName}<br>
-                                <small class="text-muted">ID: ${result.data.folderId}</small>
-                            </div>
-                        </div>
-                    `;
-                    
-                    // Habilitar upload
-                    document.getElementById('btnUpload').disabled = false;
-                    atualizarEtapa(3);
-                    
-                } else if (result.success && result.message) {
-                    // Caso o Google Apps Script retorne apenas success e message
-                    adicionarLog('SUCCESS', `Verificação OK: ${result.message}`);
-                    
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-success">
-                            <h6>✅ VERIFICAÇÃO OK!</h6>
-                            <p>${result.message}</p>
-                            <div class="mt-3">
-                                <small class="text-success">
-                                    ✅ IDs estão funcionando<br>
-                                    ✅ Pode prosseguir para upload
-                                </small>
-                            </div>
-                        </div>
-                    `;
-                    
-                    // Habilitar upload
-                    document.getElementById('btnUpload').disabled = false;
-                    atualizarEtapa(3);
-                    
-                } else {
-                    adicionarLog('ERROR', `Erro na verificação: ${result.error || 'Erro desconhecido'}`);
-                    
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-danger">
-                            <h6>❌ ERRO NA VERIFICAÇÃO</h6>
-                            <p>${result.error || 'Erro desconhecido'}</p>
-                            <div class="mt-3">
-                                <strong>🔧 POSSÍVEIS CAUSAS:</strong><br>
-                                1. IDs da planilha ou pasta incorretos<br>
-                                2. Sem permissão de acesso<br>
-                                3. Planilha ou pasta foi deletada
-                            </div>
-                        </div>
-                    `;
-                }
-                
-            } catch (error) {
-                adicionarLog('ERROR', `Erro ao verificar IDs: ${error.message}`);
-                
-                resultDiv.innerHTML = `
-                    <div class="alert alert-danger">
-                        <h6>❌ ERRO DE COMUNICAÇÃO</h6>
-                        <p>${error.message}</p>
-                    </div>
-                `;
-            }
-        }
-
-        // ==================== VALIDAÇÃO DE ARQUIVOS ====================
-        function validarArquivo(event) {
-            const file = event.target.files[0];
-            const feedback = document.getElementById('fileFeedback');
-            
-            if (!file) {
-                feedback.innerHTML = '';
-                return;
-            }
-            
-            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-            adicionarLog('INFO', `Arquivo selecionado: ${file.name} (${sizeMB}MB)`);
-            
-            if (file.size > 10 * 1024 * 1024) { // 10MB
-                feedback.innerHTML = `
-                    <div class="alert alert-warning">
-                        ⚠️ Arquivo grande: ${file.name} (${sizeMB}MB)
-                        <br>Limite recomendado: 10MB
-                    </div>
-                `;
-            } else {
-                feedback.innerHTML = `
-                    <div class="alert alert-info">
-                        📄 Arquivo selecionado: ${file.name} (${sizeMB}MB)
-                    </div>
-                `;
-            }
-        }
-
-        // ==================== TESTE DE UPLOAD ====================
-        async function handleUpload(event) {
-            event.preventDefault();
-            
-            adicionarLog('INFO', 'Iniciando teste de upload...');
-            
-            const fileInput = document.getElementById('arquivo');
-            const categoria = document.getElementById('categoria').value;
-            const descricao = document.getElementById('descricao').value;
-            const resultDiv = document.getElementById('resultadoUpload');
-            
-            // Validar arquivo
-            if (!fileInput.files || fileInput.files.length === 0) {
-                resultDiv.innerHTML = `
-                    <div class="alert alert-danger">
-                        ❌ Nenhum arquivo selecionado
-                    </div>
-                `;
-                return;
-            }
-            
-            const arquivo = fileInput.files[0];
-            adicionarLog('INFO', `Arquivo: ${arquivo.name}, Tamanho: ${arquivo.size} bytes, Tipo: ${arquivo.type}`);
-            
-            // Mostrar progresso
-            resultDiv.innerHTML = `
-                <div class="alert alert-info">
-                    🔄 Enviando arquivo: ${arquivo.name}...
-                </div>
-            `;
+            log('info', 'Iniciando teste de conectividade...');
+            log('info', `Enviando requisição para: ${SCRIPT_URL}`);
             
             try {
-                // Criar FormData com TODOS os campos possíveis
-                const formData = new FormData();
-                formData.append('action', 'uploadFile');
-                formData.append('email', 'teste@upload.com');
-                formData.append('category', categoria);
-                formData.append('description', descricao);
-                
-                // MÚLTIPLAS FORMAS DE ENVIAR O ARQUIVO
-                formData.append('arquivo', arquivo);
-                formData.append('file', arquivo);
-                formData.append('uploadFile', arquivo);
-                formData.append('uploadFile_0', arquivo);
-                formData.append('document', arquivo);
-                formData.append('attachment', arquivo);
-                
-                adicionarLog('INFO', `FormData criado com campos: ${Array.from(formData.keys()).join(', ')}`);
-                adicionarLog('INFO', `Enviando para: ${CONFIG.GOOGLE_APPS_SCRIPT_URL}`);
-                
-                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    body: formData
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
                 
-                adicionarLog('INFO', `Response status: ${response.status}`);
+                log('info', `Response status: ${response.status}`);
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
+                const text = await response.text();
+                log('info', `Response text: ${text.substring(0, 200)}...`);
                 
-                const responseText = await response.text();
-                adicionarLog('INFO', `Response text: ${responseText.substring(0, 300)}...`);
+                const result = JSON.parse(text);
+                log('success', 'Resposta JSON válida recebida');
                 
-                let result;
-                try {
-                    result = JSON.parse(responseText);
-                    adicionarLog('SUCCESS', 'Resposta do upload processada');
-                } catch (parseError) {
-                    adicionarLog('ERROR', `Erro parse upload: ${parseError.message}`);
-                    throw new Error(`Resposta inválida: ${responseText.substring(0, 100)}`);
-                }
-                
-                // Mostrar resultado
-                if (result.success) {
-                    adicionarLog('SUCCESS', `Upload bem-sucedido: ${result.message}`);
+                if (result.success !== false) {
+                    const versao = result.version || 'Desconhecida';
+                    log('success', `Conectividade OK - Versão: ${versao}`);
                     
-                    let html = `
-                        <div class="alert alert-success">
-                            <h6>✅ ${result.message}</h6>
-                        </div>
-                    `;
+                    mostrarStatus('status-conectividade', 'success', `
+                        ✅ CONECTIVIDADE OK!<br>
+                        <strong>Versão:</strong> ${versao}<br>
+                        <strong>Timestamp:</strong> ${result.timestamp || 'N/A'}<br><br>
+                        ✅ Google Apps Script está respondendo<br>
+                        ✅ Pode prosseguir para verificação de IDs
+                    `);
                     
-                    if (result.data && result.data.arquivosSalvos && result.data.arquivosSalvos.length > 0) {
-                        html += '<div class="mt-3"><h6>📁 Arquivos salvos:</h6><ul>';
-                        result.data.arquivosSalvos.forEach(arquivo => {
-                            html += `<li><a href="${arquivo.url}" target="_blank">${arquivo.nome}</a> (${arquivo.tamanho} bytes)</li>`;
-                        });
-                        html += '</ul></div>';
-                    }
-                    
-                    if (result.data && result.data.debug) {
-                        html += `
-                            <div class="mt-3">
-                                <small class="text-muted">
-                                    <strong>🔧 Debug:</strong> ${result.data.debug.totalEncontrados || 0} arquivos encontrados
-                                </small>
-                            </div>
-                        `;
-                    }
-                    
-                    resultDiv.innerHTML = html;
-                    
-                    // Limpar formulário
-                    document.getElementById('uploadForm').reset();
-                    document.getElementById('fileFeedback').innerHTML = '';
+                    // Habilitar próxima etapa
+                    document.querySelector('#etapa2 button').disabled = false;
+                    ativarEtapa(2);
                     
                 } else {
-                    adicionarLog('ERROR', `Upload falhou: ${result.error || result.message}`);
-                    
-                    let html = `
-                        <div class="alert alert-danger">
-                            <h6>❌ ${result.error || result.message}</h6>
-                        </div>
-                    `;
-                    
-                    if (result.debug) {
-                        html += `
-                            <div class="mt-3">
-                                <small class="text-muted">
-                                    <strong>🔧 Debug:</strong><br>
-                                    Parâmetros: ${result.debug.parameterKeys?.join(', ') || 'nenhum'}<br>
-                                    Parameters: ${result.debug.parametersKeys?.join(', ') || 'nenhum'}<br>
-                                    Arquivos encontrados: ${result.debug.filesFound || 0}
-                                </small>
-                            </div>
-                        `;
-                    }
-                    
-                    resultDiv.innerHTML = html;
+                    throw new Error(result.message || 'Resposta indica falha');
                 }
                 
             } catch (error) {
-                adicionarLog('ERROR', `Erro no upload: ${error.message}`);
+                log('error', `Erro na conectividade: ${error.message}`);
                 
-                resultDiv.innerHTML = `
-                    <div class="alert alert-danger">
-                        <h6>❌ Erro no upload</h6>
-                        <p>${error.message}</p>
-                    </div>
-                `;
+                mostrarStatus('status-conectividade', 'error', `
+                    ❌ ERRO DE CONECTIVIDADE<br>
+                    Não foi possível conectar ao Google Apps Script.<br><br>
+                    <strong>Erro:</strong> ${error.message}<br><br>
+                    🔧 VERIFICAÇÕES:<br>
+                    1. URL do Google Apps Script está correta?<br>
+                    2. Implantação está ativa?<br>
+                    3. Permissões estão configuradas?
+                `);
             }
         }
-
-        // ==================== INICIALIZAÇÃO ====================
-        document.addEventListener('DOMContentLoaded', function() {
-            adicionarLog('INFO', `Sistema iniciado - ${CONFIG.VERSION}`);
+        
+        // ETAPA 2: VERIFICAR IDs
+        async function verificarIDs() {
+            log('info', 'Iniciando verificação de IDs...');
             
-            // Configurar formulário
-            const form = document.getElementById('uploadForm');
-            if (form) {
-                form.addEventListener('submit', handleUpload);
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=descobrirIDs`, {
+                    method: 'GET'
+                });
+                
+                const text = await response.text();
+                log('info', `Response IDs: ${text.substring(0, 200)}...`);
+                
+                const result = JSON.parse(text);
+                
+                if (result.success) {
+                    const planilha = result.data?.spreadsheetName || 'Desconhecida';
+                    const pasta = result.data?.folderName || 'Desconhecida';
+                    
+                    log('success', `IDs verificados: Planilha=${planilha}, Pasta=${pasta}`);
+                    
+                    mostrarStatus('status-ids', 'success', `
+                        ✅ VERIFICAÇÃO OK!<br>
+                        <strong>Planilha:</strong> ${planilha}<br>
+                        <strong>Pasta:</strong> ${pasta}<br><br>
+                        ✅ IDs estão funcionando<br>
+                        ✅ Pode prosseguir para upload
+                    `);
+                    
+                    // Habilitar próxima etapa
+                    ativarEtapa(3);
+                    
+                } else {
+                    throw new Error(result.error || result.message || 'Falha na verificação');
+                }
+                
+            } catch (error) {
+                log('error', `Erro na verificação: ${error.message}`);
+                
+                mostrarStatus('status-ids', 'error', `
+                    ❌ ERRO NA VERIFICAÇÃO<br>
+                    <strong>Erro:</strong> ${error.message}<br><br>
+                    🔧 POSSÍVEIS CAUSAS:<br>
+                    1. IDs da planilha ou pasta incorretos<br>
+                    2. Permissões insuficientes<br>
+                    3. Planilha ou pasta foi movida/deletada
+                `);
             }
+        }
+        
+        // FUNÇÃO QUANDO ARQUIVO É SELECIONADO
+        function arquivoSelecionado() {
+            const input = document.getElementById('arquivo');
+            const file = input.files[0];
             
-            // Configurar validação de arquivo
-            const fileInput = document.getElementById('arquivo');
-            if (fileInput) {
-                fileInput.addEventListener('change', validarArquivo);
-            }
-            
-            // Mostrar status inicial
-            const statusDiv = document.getElementById('status');
-            if (statusDiv) {
-                statusDiv.innerHTML = `
-                    <div class="alert alert-info">
-                        ✅ Sistema carregado<br>
-                        <small>${CONFIG.VERSION}</small>
+            if (file) {
+                arquivoSelecionadoGlobal = file;
+                
+                const tamanhoMB = (file.size / 1024 / 1024).toFixed(2);
+                
+                log('info', `Arquivo selecionado: ${file.name} (${tamanhoMB}MB)`);
+                
+                document.getElementById('arquivo-info').innerHTML = `
+                    <div class="file-info">
+                        📁 <strong>Arquivo selecionado:</strong> ${file.name} (${tamanhoMB}MB)<br>
+                        <strong>Tipo:</strong> ${file.type || 'Desconhecido'}<br>
+                        <strong>Tamanho:</strong> ${file.size} bytes
                     </div>
                 `;
                 
-                // Auto-remover após 3 segundos
-                setTimeout(() => {
-                    statusDiv.innerHTML = '';
-                }, 3000);
+                // Habilitar botão de upload
+                document.getElementById('btn-upload').disabled = false;
+                
+                // Verificar tamanho (limite 10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    mostrarStatus('status-upload', 'error', `
+                        ⚠️ ARQUIVO MUITO GRANDE<br>
+                        Tamanho: ${tamanhoMB}MB (máximo: 10MB)<br>
+                        Google Apps Script tem limite de 10MB por arquivo.
+                    `);
+                    document.getElementById('btn-upload').disabled = true;
+                }
+                
+            } else {
+                arquivoSelecionadoGlobal = null;
+                document.getElementById('arquivo-info').innerHTML = '';
+                document.getElementById('btn-upload').disabled = true;
+            }
+        }
+        
+        // ETAPA 3: UPLOAD BASE64
+        async function testarUploadBase64() {
+            if (!arquivoSelecionadoGlobal) {
+                log('error', 'Nenhum arquivo selecionado');
+                return;
             }
             
-            // Inicializar etapa 1
-            atualizarEtapa(1);
+            log('info', 'Iniciando conversão para Base64...');
             
-            adicionarLog('SUCCESS', 'Sistema pronto - Inicie com TESTE DE CONECTIVIDADE');
-        });
+            // Mostrar progresso
+            document.getElementById('progress').style.display = 'block';
+            document.getElementById('progress-bar').style.width = '10%';
+            
+            try {
+                // CONVERTER ARQUIVO PARA BASE64
+                const base64 = await converterParaBase64(arquivoSelecionadoGlobal);
+                
+                log('success', `Arquivo convertido para Base64 (${base64.length} caracteres)`);
+                document.getElementById('progress-bar').style.width = '50%';
+                
+                // PREPARAR DADOS
+                const dados = {
+                    action: 'uploadBase64',
+                    email: 'teste@base64.com',
+                    category: document.getElementById('categoria').value,
+                    description: document.getElementById('descricao').value,
+                    fileName: arquivoSelecionadoGlobal.name,
+                    fileType: arquivoSelecionadoGlobal.type,
+                    fileSize: arquivoSelecionadoGlobal.size,
+                    fileBase64: base64
+                };
+                
+                log('info', `Enviando arquivo via Base64: ${arquivoSelecionadoGlobal.name}`);
+                log('info', `Dados: ${Object.keys(dados).join(', ')}`);
+                
+                // ENVIAR VIA POST
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams(dados)
+                });
+                
+                document.getElementById('progress-bar').style.width = '80%';
+                
+                log('info', `Response status: ${response.status}`);
+                
+                const text = await response.text();
+                log('info', `Response text: ${text.substring(0, 300)}...`);
+                
+                const result = JSON.parse(text);
+                log('success', 'Resposta do upload processada');
+                
+                document.getElementById('progress-bar').style.width = '100%';
+                
+                if (result.success) {
+                    log('success', `Upload bem-sucedido: ${result.message}`);
+                    
+                    let arquivosInfo = '';
+                    if (result.data && result.data.arquivosSalvos) {
+                        result.data.arquivosSalvos.forEach(arquivo => {
+                            arquivosInfo += `
+                                📁 <strong>${arquivo.nome}</strong><br>
+                                🔗 <a href="${arquivo.url}" target="_blank">Abrir no Drive</a><br>
+                                📊 ${(arquivo.tamanho / 1024).toFixed(1)} KB - ${arquivo.tipo}<br><br>
+                            `;
+                        });
+                    }
+                    
+                    mostrarStatus('status-upload', 'success', `
+                        ✅ ${result.message}<br><br>
+                        ${arquivosInfo}
+                        🎉 <strong>UPLOAD BASE64 FUNCIONOU!</strong><br>
+                        ✅ Arquivo convertido para Base64<br>
+                        ✅ Enviado como texto<br>
+                        ✅ Salvo no Google Drive<br>
+                        ✅ Registrado na planilha
+                    `);
+                    
+                } else {
+                    log('error', `Upload falhou: ${result.error || result.message}`);
+                    
+                    mostrarStatus('status-upload', 'error', `
+                        ❌ ${result.error || result.message}<br><br>
+                        🔧 Debug:<br>
+                        ${result.debug ? JSON.stringify(result.debug, null, 2) : 'Nenhum debug disponível'}
+                    `);
+                }
+                
+            } catch (error) {
+                log('error', `Erro no upload Base64: ${error.message}`);
+                
+                mostrarStatus('status-upload', 'error', `
+                    ❌ ERRO NO UPLOAD BASE64<br>
+                    <strong>Erro:</strong> ${error.message}<br><br>
+                    🔧 POSSÍVEIS CAUSAS:<br>
+                    1. Arquivo muito grande para conversão Base64<br>
+                    2. Erro na comunicação com Google Apps Script<br>
+                    3. Problema na conversão do arquivo
+                `);
+            } finally {
+                // Esconder progresso
+                setTimeout(() => {
+                    document.getElementById('progress').style.display = 'none';
+                    document.getElementById('progress-bar').style.width = '0%';
+                }, 2000);
+            }
+        }
+        
+        // FUNÇÃO PARA CONVERTER ARQUIVO PARA BASE64
+        function converterParaBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = function() {
+                    // Remover prefixo "data:tipo/mime;base64,"
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                
+                reader.onerror = function() {
+                    reject(new Error('Erro ao ler arquivo'));
+                };
+                
+                reader.readAsDataURL(file);
+            });
+        }
     </script>
 </body>
 </html>
