@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema CDR Sul Tocantins - Gestão de Projetos</title>
+    <title>Sistema CDR Sul Tocantins</title>
     <style>
         * {
             margin: 0;
@@ -26,17 +26,18 @@
             padding: 20px;
         }
 
+        /* ==================== LOGIN STYLES ==================== */
         .login-container {
             background: white;
-            border-radius: 15px;
+            border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
             max-width: 500px;
             width: 100%;
-            animation: slideIn 0.5s ease-out;
+            animation: slideUp 0.6s ease-out;
         }
 
-        @keyframes slideIn {
+        @keyframes slideUp {
             from {
                 opacity: 0;
                 transform: translateY(30px);
@@ -48,52 +49,28 @@
         }
 
         .login-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
             color: white;
             padding: 40px 30px;
             text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .login-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: shimmer 3s ease-in-out infinite;
-        }
-
-        @keyframes shimmer {
-            0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(180deg); }
         }
 
         .logo {
-            width: 280px;
+            width: 300px;
             height: auto;
             margin-bottom: 20px;
             filter: brightness(0) invert(1);
-            position: relative;
-            z-index: 1;
         }
 
         .login-header h1 {
-            font-size: 28px;
+            font-size: 24px;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            position: relative;
-            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
         .login-header p {
-            font-size: 16px;
             opacity: 0.9;
-            position: relative;
-            z-index: 1;
+            font-size: 16px;
         }
 
         .login-form-container {
@@ -104,12 +81,11 @@
             text-align: center;
             margin-bottom: 30px;
             color: #333;
-            font-size: 24px;
+            font-size: 28px;
         }
 
         .form-group {
-            margin-bottom: 20px;
-            position: relative;
+            margin-bottom: 25px;
         }
 
         .form-group label {
@@ -117,58 +93,43 @@
             margin-bottom: 8px;
             font-weight: 600;
             color: #555;
-            transition: color 0.3s ease;
         }
 
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
+        .form-group input {
             width: 100%;
-            padding: 12px 15px;
+            padding: 15px;
             border: 2px solid #e1e5e9;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
             transition: all 0.3s ease;
-            background: white;
+            background: #f8f9fa;
         }
 
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
+        .form-group input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .form-group input:focus + label,
-        .form-group select:focus + label,
-        .form-group textarea:focus + label {
-            color: #667eea;
+            border-color: #4a90e2;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
         }
 
         .btn-primary {
             width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px;
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
             color: white;
             border: none;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 18px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 20px rgba(74, 144, 226, 0.3);
         }
 
         .btn-primary:disabled {
@@ -177,118 +138,86 @@
             transform: none;
         }
 
-        .btn-loading {
-            background: linear-gradient(135deg, #94a3f3 0%, #9d7bc4 100%) !important;
+        .btn-primary.btn-loading {
+            color: transparent;
         }
 
-        .loading-spinner {
+        .btn-primary .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 20px;
             height: 20px;
             border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
             border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
+            animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
         .register-link {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 25px;
             color: #666;
         }
 
         .register-link a {
-            color: #667eea;
+            color: #4a90e2;
             text-decoration: none;
             font-weight: 600;
-            transition: color 0.3s ease;
         }
 
         .register-link a:hover {
-            color: #764ba2;
             text-decoration: underline;
         }
 
-        .footer {
-            background: #f8f9fa;
-            padding: 20px;
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-        }
-
-        /* Dashboard Styles */
+        /* ==================== DASHBOARD STYLES ==================== */
         .dashboard {
             background: white;
-            min-height: 100vh;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 1200px;
+            min-height: 80vh;
+            animation: slideUp 0.6s ease-out;
         }
 
         .dashboard-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
             color: white;
             padding: 20px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .dashboard-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            animation: slideRight 3s ease-in-out infinite;
-        }
-
-        @keyframes slideRight {
-            0% { left: -100%; }
-            50% { left: 100%; }
-            100% { left: 100%; }
+            flex-wrap: wrap;
         }
 
         .header-left {
             display: flex;
             align-items: center;
             gap: 20px;
-            position: relative;
-            z-index: 1;
         }
 
         .header-logo {
-            width: 60px;
+            width: 80px;
             height: auto;
             filter: brightness(0) invert(1);
-            transition: transform 0.3s ease;
-        }
-
-        .header-logo:hover {
-            transform: scale(1.1) rotate(5deg);
         }
 
         .user-info h2 {
-            margin: 0;
             font-size: 24px;
+            margin-bottom: 5px;
         }
 
         .user-info p {
-            margin: 5px 0 0 0;
             opacity: 0.9;
+            font-size: 14px;
         }
 
         .admin-badge {
@@ -297,31 +226,24 @@
             padding: 4px 8px;
             border-radius: 12px;
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 600;
             margin-left: 10px;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
         }
 
         .btn-logout {
             background: rgba(255,255,255,0.2);
             color: white;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 2px solid rgba(255,255,255,0.3);
             padding: 10px 20px;
-            border-radius: 6px;
+            border-radius: 25px;
             cursor: pointer;
+            font-weight: 600;
             transition: all 0.3s ease;
-            position: relative;
-            z-index: 1;
         }
 
         .btn-logout:hover {
             background: rgba(255,255,255,0.3);
-            transform: translateY(-2px);
+            border-color: rgba(255,255,255,0.5);
         }
 
         .dashboard-nav {
@@ -330,114 +252,52 @@
             display: flex;
             border-bottom: 1px solid #e1e5e9;
             overflow-x: auto;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        .dashboard-nav::-webkit-scrollbar {
-            display: none;
         }
 
         .nav-btn {
             background: none;
             border: none;
-            padding: 15px 25px;
+            padding: 20px 25px;
             cursor: pointer;
-            font-size: 16px;
+            font-weight: 600;
             color: #666;
-            border-bottom: 3px solid transparent;
             transition: all 0.3s ease;
             white-space: nowrap;
-            min-width: 120px;
+            border-bottom: 3px solid transparent;
         }
 
         .nav-btn:hover {
             background: #e9ecef;
-            color: #333;
-            transform: translateY(-2px);
+            color: #4a90e2;
         }
 
         .nav-btn.active {
-            color: #667eea;
-            border-bottom-color: #667eea;
+            color: #4a90e2;
+            border-bottom-color: #4a90e2;
             background: white;
-            font-weight: 600;
         }
 
         .dashboard-content {
             padding: 30px;
-            max-width: 1200px;
-            margin: 0 auto;
-            animation: slideUp 0.5s ease-out;
+            min-height: 400px;
         }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .overview-tab h3,
-        .reports-tab h3,
-        .activities-tab h3,
-        .files-tab h3,
-        .admin-tab h3 {
-            margin-bottom: 30px;
-            color: #333;
-            font-size: 28px;
-            text-align: center;
-            position: relative;
-        }
-
-        .overview-tab h3::after,
-        .reports-tab h3::after,
-        .activities-tab h3::after,
-        .files-tab h3::after,
-        .admin-tab h3::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 3px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 2px;
-        }
-
+        /* ==================== CARDS ==================== */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
 
         .stat-card {
             background: white;
-            padding: 25px;
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 25px;
             text-align: center;
-            border-left: 4px solid #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: 1px solid #e1e5e9;
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
-            transition: left 0.5s ease;
         }
 
         .stat-card:hover {
@@ -445,159 +305,187 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
 
-        .stat-card:hover::before {
-            left: 100%;
-        }
-
-        .stat-card h4 {
-            color: #666;
-            margin-bottom: 10px;
-            font-size: 16px;
-            position: relative;
-            z-index: 1;
-        }
-
         .stat-number {
             font-size: 36px;
-            font-weight: bold;
-            color: #667eea;
-            position: relative;
-            z-index: 1;
-        }
-
-        .project-info {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .project-info:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }
-
-        .project-info h4 {
-            margin-bottom: 15px;
-            color: #333;
-            font-size: 20px;
-        }
-
-        .project-info p {
-            margin-bottom: 8px;
-            color: #666;
-            line-height: 1.6;
-        }
-
-        .form-actions {
-            margin-top: 30px;
-        }
-
-        .admin-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .admin-sections {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .admin-section {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .admin-section:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }
-
-        .admin-section h4 {
-            margin-bottom: 15px;
-            color: #333;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
-            font-size: 18px;
-        }
-
-        .admin-item {
-            padding: 10px;
-            border-bottom: 1px solid #e1e5e9;
+            font-weight: 700;
+            color: #4a90e2;
             margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* ==================== FORMS ==================== */
+        .form-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: 1px solid #e1e5e9;
+        }
+
+        .form-card h3 {
+            margin-bottom: 25px;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #4a90e2;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background: #f8f9ff;
             transition: all 0.3s ease;
-            border-radius: 5px;
+            cursor: pointer;
         }
 
-        .admin-item:hover {
-            background: #f8f9fa;
-            transform: translateX(5px);
+        .file-upload-area:hover {
+            border-color: #357abd;
+            background: #f0f4ff;
         }
 
-        .admin-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
+        .file-upload-area.dragover {
+            border-color: #357abd;
+            background: #e8f2ff;
         }
 
-        /* Progress Bar */
+        .file-info {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        /* ==================== PROGRESS ==================== */
         .progress-container {
             margin-top: 15px;
             background: #f0f0f0;
             border-radius: 10px;
             overflow: hidden;
             height: 8px;
-            display: none;
         }
 
         .progress-bar {
             height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(90deg, #4a90e2, #357abd);
             width: 0%;
             transition: width 0.3s ease;
-            border-radius: 10px;
         }
 
         .upload-status {
             margin-top: 10px;
             padding: 10px;
             border-radius: 8px;
-            font-size: 14px;
-            display: none;
-        }
-
-        .upload-status.info {
-            background: #e3f2fd;
-            border: 1px solid #2196f3;
-            color: #1976d2;
+            font-weight: 600;
+            text-align: center;
         }
 
         .upload-status.success {
-            background: #e8f5e8;
-            border: 1px solid #4caf50;
-            color: #2e7d32;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
         .upload-status.error {
-            background: #ffe8e8;
-            border: 1px solid #f44336;
-            color: #c62828;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
-        /* Responsive */
+        /* ==================== LOADING OVERLAY ==================== */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4a90e2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        .loading-content h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .loading-content p {
+            color: #666;
+        }
+
+        /* ==================== TOAST ==================== */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border-left: 4px solid #4a90e2;
+            max-width: 400px;
+            transform: translateX(450px);
+            transition: transform 0.3s ease;
+            z-index: 10000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left-color: #4caf50;
+        }
+
+        .toast.error {
+            border-left-color: #f44336;
+        }
+
+        /* ==================== RESPONSIVE ==================== */
         @media (max-width: 768px) {
             .main-container {
                 padding: 10px;
             }
 
             .login-container {
-                margin: 10px;
+                margin: 0;
             }
 
             .login-header {
@@ -605,11 +493,7 @@
             }
 
             .logo {
-                width: 220px;
-            }
-
-            .login-header h1 {
-                font-size: 24px;
+                width: 200px;
             }
 
             .login-form-container {
@@ -620,7 +504,6 @@
                 flex-direction: column;
                 gap: 15px;
                 text-align: center;
-                padding: 20px;
             }
 
             .header-left {
@@ -629,52 +512,43 @@
             }
 
             .dashboard-nav {
-                flex-wrap: nowrap;
-                justify-content: flex-start;
+                flex-wrap: wrap;
             }
 
             .nav-btn {
-                flex: 0 0 auto;
-                padding: 12px 20px;
-                font-size: 14px;
-                min-width: 100px;
+                flex: 1;
+                min-width: 120px;
             }
 
             .dashboard-content {
-                padding: 20px 15px;
+                padding: 20px;
             }
 
             .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+            }
+
+            .form-row {
                 grid-template-columns: 1fr;
                 gap: 15px;
             }
 
-            .admin-sections {
-                grid-template-columns: 1fr;
+            .toast {
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                transform: translateY(-100px);
             }
 
-            .overview-tab h3,
-            .reports-tab h3,
-            .activities-tab h3,
-            .files-tab h3,
-            .admin-tab h3 {
-                font-size: 24px;
-            }
-
-            .form-group input,
-            .form-group select,
-            .form-group textarea {
-                font-size: 16px; /* Evita zoom no iOS */
+            .toast.show {
+                transform: translateY(0);
             }
         }
 
         @media (max-width: 480px) {
-            .login-header {
-                padding: 20px 15px;
-            }
-
             .logo {
-                width: 180px;
+                width: 150px;
             }
 
             .login-header h1 {
@@ -685,114 +559,17 @@
                 font-size: 14px;
             }
 
-            .login-form-container {
-                padding: 20px 15px;
-            }
-
-            .dashboard-content {
-                padding: 15px 10px;
+            .login-form-container h2 {
+                font-size: 24px;
             }
 
             .stat-card {
-                padding: 20px 15px;
+                padding: 20px;
             }
 
             .stat-number {
                 font-size: 28px;
             }
-
-            .nav-btn {
-                padding: 10px 15px;
-                font-size: 13px;
-                min-width: 80px;
-            }
-        }
-
-        /* File validation styles */
-        .file-info {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        .file-info.success {
-            background: #e8f5e8;
-            border: 1px solid #4caf50;
-            color: #2e7d32;
-        }
-
-        .file-info.error {
-            background: #ffe8e8;
-            border: 1px solid #f44336;
-            color: #c62828;
-        }
-
-        .file-info.warning {
-            background: #fff3e0;
-            border: 1px solid #ff9800;
-            color: #ef6c00;
-        }
-
-        /* Toast notifications */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 1000;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            max-width: 300px;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast.success {
-            border-left: 4px solid #4caf50;
-        }
-
-        .toast.error {
-            border-left: 4px solid #f44336;
-        }
-
-        .toast.info {
-            border-left: 4px solid #2196f3;
-        }
-
-        /* Loading overlay */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        .loading-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .loading-content .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border-width: 4px;
-            margin: 0 auto 20px;
         }
     </style>
 </head>
@@ -814,7 +591,7 @@
         // ==================== CONFIGURAÇÕES ====================
         const CONFIG = {
             GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec',
-            VERSION: 'SISTEMA FINAL OTIMIZADO v1.0',
+            VERSION: 'SISTEMA FINAL CORRIGIDO v1.0',
             DEBUG: true,
             MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB em bytes
             MAX_TOTAL_SIZE: 50 * 1024 * 1024, // 50MB total
@@ -877,6 +654,9 @@
             if (loading) {
                 button.disabled = true;
                 button.classList.add('btn-loading');
+                if (!button.getAttribute('data-original-text')) {
+                    button.setAttribute('data-original-text', button.innerHTML);
+                }
                 button.innerHTML = `
                     <div class="loading-spinner"></div>
                     ${text || 'Processando...'}
@@ -884,7 +664,7 @@
             } else {
                 button.disabled = false;
                 button.classList.remove('btn-loading');
-                button.innerHTML = text || button.getAttribute('data-original-text') || 'Enviar';
+                button.innerHTML = button.getAttribute('data-original-text') || text || 'Enviar';
             }
         }
 
@@ -905,34 +685,28 @@
                 container.appendChild(statusContainer);
             }
             
-            if (progress > 0) {
-                progressContainer.style.display = 'block';
-                progressContainer.querySelector('.progress-bar').style.width = progress + '%';
-            } else {
-                progressContainer.style.display = 'none';
-            }
+            const progressBar = progressContainer.querySelector('.progress-bar');
+            progressBar.style.width = progress + '%';
             
             if (status) {
-                statusContainer.style.display = 'block';
                 statusContainer.textContent = status;
-                statusContainer.className = 'upload-status info';
-            } else {
-                statusContainer.style.display = 'none';
+                statusContainer.style.display = 'block';
             }
         }
 
-        // ==================== VERIFICAR SESSÃO SALVA ====================
+        // ==================== VERIFICAR SESSÃO ====================
         function checkSavedSession() {
-            try {
-                const savedUser = localStorage.getItem('cdr_user');
-                if (savedUser) {
+            const savedUser = localStorage.getItem('cdr_user');
+            if (savedUser) {
+                try {
                     currentUser = JSON.parse(savedUser);
-                    console.log('👤 Usuário recuperado:', currentUser.email);
+                    console.log('👤 Sessão encontrada:', currentUser.email);
                     showDashboard(currentUser);
                     return;
+                } catch (error) {
+                    console.error('❌ Erro ao carregar sessão:', error);
+                    localStorage.removeItem('cdr_user');
                 }
-            } catch (e) {
-                localStorage.removeItem('cdr_user');
             }
             
             showLoginScreen();
@@ -940,22 +714,14 @@
 
         // ==================== TESTAR CONECTIVIDADE ====================
         async function testConnectivity() {
-            console.log('🔍 Testando conectividade...');
-            
             try {
-                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
-                    method: 'GET',
-                    mode: 'cors'
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('✅ Conectividade OK:', data.version);
-                } else {
-                    console.log('⚠️ Resposta não OK:', response.status);
-                }
+                console.log('🌐 Testando conectividade...');
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL);
+                const result = await response.json();
+                console.log('✅ Conectividade OK:', result.version || 'Versão não informada');
             } catch (error) {
-                console.log('❌ Erro de conectividade:', error);
+                console.error('❌ Erro de conectividade:', error);
+                showToast('Problema de conexão com o servidor. Algumas funcionalidades podem não funcionar.', 'error', 5000);
             }
         }
 
@@ -966,11 +732,11 @@
                     <div class="login-header">
                         <img src="https://static.wixstatic.com/media/96b2d1_82005fa5efee493fb11c905fa9b56a83~mv2.png" alt="CDR Sul Tocantins" class="logo">
                         <h1>Sistema de Gestão de Projetos CDR Sul</h1>
-                        <p>Tudo sobre o seu projeto, reunido em um só lugar</p>
+                        <p>Faça login para acessar o sistema</p>
                     </div>
                     
                     <div class="login-form-container">
-                        <h2>Acesso ao Sistema</h2>
+                        <h2>Entrar</h2>
                         
                         <form id="loginForm" onsubmit="handleLogin(event)">
                             <div class="form-group">
@@ -989,10 +755,6 @@
                         <p class="register-link">
                             Não tem conta? <a href="#" onclick="showRegisterScreen()">Cadastre-se aqui</a>
                         </p>
-                    </div>
-                    
-                    <div class="footer">
-                        <p>Desenvolvido pela equipe do CDR Sul Tocantins - Versão 2.0</p>
                     </div>
                 </div>
             `;
@@ -1063,7 +825,7 @@
             
             console.log('🔐 Tentando login:', email);
             
-            setButtonLoading(submitBtn, true, 'Entrando...');
+            setButtonLoading(submitBtn, true, 'Fazendo login...');
             showLoading('Fazendo login...', 'Verificando suas credenciais');
             
             try {
@@ -1073,21 +835,29 @@
                     password: password
                 });
                 
+                console.log('📥 Resposta do login:', result);
+                
                 if (result.success) {
-                    console.log('✅ Login bem-sucedido:', result.user);
-                    currentUser = result.data.user;
-                    localStorage.setItem('cdr_user', JSON.stringify(currentUser));
+                    console.log('✅ Login bem-sucedido');
                     
-                    showToast('Login realizado com sucesso!', 'success');
-                    hideLoading();
+                    // Corrigir: acessar result.user ao invés de result.data.user
+                    currentUser = result.user || result.data?.user;
                     
-                    setTimeout(() => {
-                        showDashboard(currentUser);
-                    }, 500);
+                    if (currentUser) {
+                        localStorage.setItem('cdr_user', JSON.stringify(currentUser));
+                        showToast('Login realizado com sucesso!', 'success');
+                        hideLoading();
+                        
+                        setTimeout(() => {
+                            showDashboard(currentUser);
+                        }, 500);
+                    } else {
+                        throw new Error('Dados do usuário não encontrados na resposta');
+                    }
                 } else {
                     hideLoading();
                     setButtonLoading(submitBtn, false);
-                    showToast('Erro no login: ' + result.message, 'error');
+                    showToast('Erro no login: ' + (result.message || 'Credenciais inválidas'), 'error');
                 }
             } catch (error) {
                 console.error('❌ Erro no login:', error);
@@ -1138,7 +908,7 @@
                 } else {
                     hideLoading();
                     setButtonLoading(submitBtn, false);
-                    showToast('Erro no cadastro: ' + result.message, 'error');
+                    showToast('Erro no cadastro: ' + (result.message || 'Erro desconhecido'), 'error');
                 }
             } catch (error) {
                 console.error('❌ Erro no cadastro:', error);
@@ -1161,7 +931,7 @@
                             <img src="https://static.wixstatic.com/media/96b2d1_82005fa5efee493fb11c905fa9b56a83~mv2.png" alt="CDR Sul" class="header-logo">
                             <div class="user-info">
                                 <h2>Bem-vindo, ${user.name}</h2>
-                                <p>Projeto: ${user.project}</p>
+                                <p>Projeto: ${user.project || 'Não informado'}</p>
                                 ${user.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
                             </div>
                         </div>
@@ -1198,83 +968,76 @@
             if (activeBtn) activeBtn.classList.add('active');
             
             // Mostrar conteúdo
-            switch (tabName) {
+            const content = document.getElementById('dashboardContent');
+            
+            switch(tabName) {
                 case 'overview':
-                    showOverviewTab();
+                    showOverviewTab(content);
                     break;
                 case 'reports':
-                    showReportsTab();
+                    showReportsTab(content);
                     break;
                 case 'activities':
-                    showActivitiesTab();
+                    showActivitiesTab(content);
                     break;
                 case 'files':
-                    showFilesTab();
+                    showFilesTab(content);
                     break;
                 case 'admin':
-                    if (currentUser && currentUser.isAdmin) {
-                        showAdminTab();
-                    }
+                    showAdminTab(content);
                     break;
             }
         }
 
         // ==================== ABA VISÃO GERAL ====================
-        function showOverviewTab() {
-            document.getElementById('dashboardContent').innerHTML = `
-                <div class="overview-tab">
-                    <h3>Visão Geral do Projeto</h3>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <h4>Relatórios Enviados</h4>
-                            <div class="stat-number" id="statsReports">-</div>
-                        </div>
-                        <div class="stat-card">
-                            <h4>Atividades Cadastradas</h4>
-                            <div class="stat-number" id="statsActivities">-</div>
-                        </div>
-                        <div class="stat-card">
-                            <h4>Arquivos Enviados</h4>
-                            <div class="stat-number" id="statsFiles">-</div>
-                        </div>
+        function showOverviewTab(content) {
+            content.innerHTML = `
+                <h2>Visão Geral</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalReports">0</div>
+                        <div class="stat-label">Relatórios Enviados</div>
                     </div>
-                    
-                    <div class="project-info">
-                        <h4>Informações do Projeto</h4>
-                        <p><strong>Coordenador:</strong> ${currentUser.name}</p>
-                        <p><strong>Instituição:</strong> ${currentUser.institution}</p>
-                        <p><strong>Projeto:</strong> ${currentUser.project}</p>
-                        <p><strong>E-mail:</strong> ${currentUser.email}</p>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalActivities">0</div>
+                        <div class="stat-label">Atividades Cadastradas</div>
                     </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalFiles">0</div>
+                        <div class="stat-label">Arquivos Enviados</div>
+                    </div>
+                </div>
+                
+                <div class="form-card">
+                    <h3>Resumo das Atividades</h3>
+                    <p>Bem-vindo ao Sistema de Gestão de Projetos CDR Sul Tocantins!</p>
+                    <p>Use as abas acima para navegar entre as diferentes funcionalidades do sistema.</p>
                 </div>
             `;
         }
 
         // ==================== ABA RELATÓRIOS ====================
-        function showReportsTab() {
-            document.getElementById('dashboardContent').innerHTML = `
-                <div class="reports-tab">
-                    <h3>Enviar Relatório</h3>
-                    
-                    <form id="reportForm" onsubmit="handleSubmitReport(event)">
-                        <div class="form-group">
-                            <label for="reportType">Tipo de Relatório:</label>
-                            <select id="reportType" required>
-                                <option value="Relatório Parcial">Relatório Parcial</option>
-                                <option value="Relatório Final">Relatório Final</option>
-                                <option value="Relatório de Atividade">Relatório de Atividade</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="reportDate">Data do Relatório:</label>
-                            <input type="date" id="reportDate" value="${new Date().toISOString().split('T')[0]}" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="reportTitle">Título:</label>
-                            <input type="text" id="reportTitle" required>
+        function showReportsTab(content) {
+            content.innerHTML = `
+                <h2>Enviar Relatório</h2>
+                <div class="form-card">
+                    <h3>Novo Relatório</h3>
+                    <form id="reportForm" onsubmit="handleReportSubmit(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="reportTitle">Título do Relatório:</label>
+                                <input type="text" id="reportTitle" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reportCategory">Categoria:</label>
+                                <select id="reportCategory" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Mensal">Relatório Mensal</option>
+                                    <option value="Trimestral">Relatório Trimestral</option>
+                                    <option value="Anual">Relatório Anual</option>
+                                    <option value="Especial">Relatório Especial</option>
+                                </select>
+                            </div>
                         </div>
                         
                         <div class="form-group">
@@ -1283,47 +1046,55 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="reportFiles">Arquivos (PDF, DOC, DOCX - máximo 10MB cada):</label>
-                            <input type="file" id="reportFiles" multiple accept=".pdf,.doc,.docx" onchange="validateFiles(this)">
-                            <div id="reportFilesInfo"></div>
+                            <label>Arquivo do Relatório (PDF, DOC, DOCX):</label>
+                            <div class="file-upload-area" onclick="document.getElementById('reportFile').click()">
+                                <p>📄 Clique aqui para selecionar o arquivo</p>
+                                <p><small>Máximo 10MB - Formatos: PDF, DOC, DOCX</small></p>
+                            </div>
+                            <input type="file" id="reportFile" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileSelect(this, 'reportFileInfo')">
+                            <div id="reportFileInfo" class="file-info"></div>
                         </div>
                         
-                        <div class="form-actions">
-                            <button type="submit" class="btn-primary" data-original-text="Enviar Relatório">Enviar Relatório</button>
-                        </div>
+                        <button type="submit" class="btn-primary" data-original-text="Enviar Relatório">Enviar Relatório</button>
                     </form>
                 </div>
             `;
         }
 
         // ==================== ABA ATIVIDADES ====================
-        function showActivitiesTab() {
-            document.getElementById('dashboardContent').innerHTML = `
-                <div class="activities-tab">
-                    <h3>Cadastrar Atividade</h3>
-                    
-                    <form id="activityForm" onsubmit="handleSubmitActivity(event)">
-                        <div class="form-group">
-                            <label for="activityType">Tipo de Atividade:</label>
-                            <select id="activityType" required>
-                                <option value="Reunião">Reunião</option>
-                                <option value="Workshop">Workshop</option>
-                                <option value="Palestra">Palestra</option>
-                                <option value="Curso">Curso</option>
-                                <option value="Evento">Evento</option>
-                                <option value="Pesquisa de Campo">Pesquisa de Campo</option>
-                                <option value="Outra">Outra</option>
-                            </select>
+        function showActivitiesTab(content) {
+            content.innerHTML = `
+                <h2>Cadastrar Atividade</h2>
+                <div class="form-card">
+                    <h3>Nova Atividade</h3>
+                    <form id="activityForm" onsubmit="handleActivitySubmit(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="activityTitle">Título da Atividade:</label>
+                                <input type="text" id="activityTitle" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="activityDate">Data:</label>
+                                <input type="date" id="activityDate" required>
+                            </div>
                         </div>
                         
-                        <div class="form-group">
-                            <label for="activityDate">Data da Atividade:</label>
-                            <input type="date" id="activityDate" value="${new Date().toISOString().split('T')[0]}" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="activityTitle">Título da Atividade:</label>
-                            <input type="text" id="activityTitle" required>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="activityLocation">Local:</label>
+                                <input type="text" id="activityLocation" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="activityType">Tipo:</label>
+                                <select id="activityType" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Reunião">Reunião</option>
+                                    <option value="Workshop">Workshop</option>
+                                    <option value="Treinamento">Treinamento</option>
+                                    <option value="Evento">Evento</option>
+                                    <option value="Visita Técnica">Visita Técnica</option>
+                                </select>
+                            </div>
                         </div>
                         
                         <div class="form-group">
@@ -1332,434 +1103,402 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="activityLocation">Local:</label>
-                            <input type="text" id="activityLocation">
+                            <label>Anexos (Fotos, Documentos):</label>
+                            <div class="file-upload-area" onclick="document.getElementById('activityFiles').click()">
+                                <p>📎 Clique aqui para selecionar arquivos</p>
+                                <p><small>Máximo 10MB por arquivo - Múltiplos arquivos permitidos</small></p>
+                            </div>
+                            <input type="file" id="activityFiles" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display: none;" onchange="handleFileSelect(this, 'activityFileInfo')">
+                            <div id="activityFileInfo" class="file-info"></div>
                         </div>
                         
-                        <div class="form-group">
-                            <label for="activityParticipants">Participantes:</label>
-                            <textarea id="activityParticipants" rows="2" placeholder="Liste os participantes da atividade"></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="activityFiles">Arquivos (Fotos, Documentos - máximo 10MB cada):</label>
-                            <input type="file" id="activityFiles" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="validateFiles(this)">
-                            <div id="activityFilesInfo"></div>
-                        </div>
-                        
-                        <div class="form-actions">
-                            <button type="submit" class="btn-primary" data-original-text="Cadastrar Atividade">Cadastrar Atividade</button>
-                        </div>
+                        <button type="submit" class="btn-primary" data-original-text="Cadastrar Atividade">Cadastrar Atividade</button>
                     </form>
                 </div>
             `;
         }
 
         // ==================== ABA ARQUIVOS ====================
-        function showFilesTab() {
-            document.getElementById('dashboardContent').innerHTML = `
-                <div class="files-tab">
-                    <h3>Enviar Arquivos</h3>
-                    
-                    <form id="filesForm" onsubmit="handleUploadFiles(event)">
-                        <div class="form-group">
-                            <label for="fileCategory">Categoria:</label>
-                            <select id="fileCategory" required>
-                                <option value="Documentos">Documentos</option>
-                                <option value="Fotos">Fotos</option>
-                                <option value="Planilhas">Planilhas</option>
-                                <option value="Apresentações">Apresentações</option>
-                                <option value="Outros">Outros</option>
-                            </select>
+        function showFilesTab(content) {
+            content.innerHTML = `
+                <h2>Enviar Arquivos</h2>
+                <div class="form-card">
+                    <h3>Upload de Arquivos</h3>
+                    <form id="filesForm" onsubmit="handleFilesSubmit(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="filesCategory">Categoria:</label>
+                                <select id="filesCategory" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Documentos">Documentos</option>
+                                    <option value="Imagens">Imagens</option>
+                                    <option value="Planilhas">Planilhas</option>
+                                    <option value="Apresentações">Apresentações</option>
+                                    <option value="Outros">Outros</option>
+                                </select>
+                            </div>
                         </div>
                         
                         <div class="form-group">
-                            <label for="fileDescription">Descrição:</label>
-                            <textarea id="fileDescription" rows="3" placeholder="Descreva os arquivos que está enviando"></textarea>
+                            <label for="filesDescription">Descrição:</label>
+                            <textarea id="filesDescription" rows="3" required placeholder="Descreva os arquivos que está enviando..."></textarea>
                         </div>
                         
                         <div class="form-group">
-                            <label for="uploadFiles">Selecionar Arquivos (máximo 10MB cada):</label>
-                            <input type="file" id="uploadFiles" multiple required onchange="validateFiles(this)">
-                            <div id="uploadFilesInfo"></div>
+                            <label>Selecionar Arquivos:</label>
+                            <div class="file-upload-area" onclick="document.getElementById('uploadFiles').click()">
+                                <p>📁 Clique aqui para selecionar arquivos</p>
+                                <p><small>Máximo 10MB por arquivo - Múltiplos arquivos permitidos</small></p>
+                            </div>
+                            <input type="file" id="uploadFiles" multiple style="display: none;" onchange="handleFileSelect(this, 'uploadFileInfo')">
+                            <div id="uploadFileInfo" class="file-info"></div>
                         </div>
                         
-                        <div class="form-actions">
-                            <button type="submit" class="btn-primary" data-original-text="Enviar Arquivos">Enviar Arquivos</button>
-                        </div>
+                        <button type="submit" class="btn-primary" data-original-text="Enviar Arquivos">Enviar Arquivos</button>
                     </form>
                 </div>
             `;
         }
 
         // ==================== ABA ADMIN ====================
-        function showAdminTab() {
-            if (!currentUser || !currentUser.isAdmin) return;
+        function showAdminTab(content) {
+            if (!currentUser.isAdmin) {
+                content.innerHTML = '<p>Acesso negado. Apenas administradores podem acessar esta seção.</p>';
+                return;
+            }
             
-            document.getElementById('dashboardContent').innerHTML = `
-                <div class="admin-tab">
-                    <h3>Painel Administrativo</h3>
-                    
-                    <div class="admin-stats">
-                        <div class="stat-card">
-                            <h4>Total de Usuários</h4>
-                            <div class="stat-number" id="adminStatsUsers">-</div>
-                        </div>
-                        <div class="stat-card">
-                            <h4>Total de Relatórios</h4>
-                            <div class="stat-number" id="adminStatsReports">-</div>
-                        </div>
-                        <div class="stat-card">
-                            <h4>Total de Atividades</h4>
-                            <div class="stat-number" id="adminStatsActivities">-</div>
-                        </div>
+            content.innerHTML = `
+                <h2>Painel Administrativo</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="adminTotalUsers">0</div>
+                        <div class="stat-label">Usuários Cadastrados</div>
                     </div>
-                    
-                    <div class="admin-sections">
-                        <div class="admin-section">
-                            <h4>Usuários Cadastrados</h4>
-                            <div id="adminUsersList">Carregando...</div>
-                        </div>
-                        
-                        <div class="admin-section">
-                            <h4>Relatórios Recentes</h4>
-                            <div id="adminReportsList">Carregando...</div>
-                        </div>
-                        
-                        <div class="admin-section">
-                            <h4>Atividades Recentes</h4>
-                            <div id="adminActivitiesList">Carregando...</div>
-                        </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="adminTotalReports">0</div>
+                        <div class="stat-label">Total de Relatórios</div>
                     </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="adminTotalActivities">0</div>
+                        <div class="stat-label">Total de Atividades</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="adminTotalFiles">0</div>
+                        <div class="stat-label">Total de Arquivos</div>
+                    </div>
+                </div>
+                
+                <div class="form-card">
+                    <h3>Usuários Recentes</h3>
+                    <div id="adminUsersList">Carregando...</div>
+                </div>
+                
+                <div class="form-card">
+                    <h3>Relatórios Recentes</h3>
+                    <div id="adminReportsList">Carregando...</div>
+                </div>
+                
+                <div class="form-card">
+                    <h3>Atividades Recentes</h3>
+                    <div id="adminActivitiesList">Carregando...</div>
                 </div>
             `;
             
             loadAdminData();
         }
 
-        // ==================== VALIDAR ARQUIVOS ====================
-        function validateFiles(input) {
+        // ==================== MANIPULAR SELEÇÃO DE ARQUIVOS ====================
+        function handleFileSelect(input, infoElementId) {
+            const infoElement = document.getElementById(infoElementId);
             const files = input.files;
-            const infoDiv = document.getElementById(input.id + 'Info');
             
-            if (!files || files.length === 0) {
-                infoDiv.innerHTML = '';
+            if (files.length === 0) {
+                infoElement.style.display = 'none';
                 return;
             }
             
             let totalSize = 0;
-            let validFiles = [];
-            let errors = [];
+            let fileList = '';
+            let hasError = false;
             
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+                const fileSize = file.size;
+                const fileSizeMB = (fileSize / (1024 * 1024)).toFixed(2);
                 
-                // Verificar tamanho individual
-                if (file.size > CONFIG.MAX_FILE_SIZE) {
-                    errors.push(`${file.name}: ${fileSizeMB}MB (máximo: 10MB)`);
-                    continue;
+                totalSize += fileSize;
+                
+                if (fileSize > CONFIG.MAX_FILE_SIZE) {
+                    fileList += `<div style="color: #d32f2f;">❌ ${file.name} (${fileSizeMB}MB) - Muito grande!</div>`;
+                    hasError = true;
+                } else {
+                    fileList += `<div style="color: #2e7d32;">✅ ${file.name} (${fileSizeMB}MB)</div>`;
                 }
-                
-                totalSize += file.size;
-                validFiles.push({
-                    name: file.name,
-                    size: fileSizeMB,
-                    type: file.type
-                });
             }
             
-            // Verificar tamanho total
+            const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+            
             if (totalSize > CONFIG.MAX_TOTAL_SIZE) {
-                const totalSizeMB = (totalSize / 1024 / 1024).toFixed(2);
-                errors.push(`Tamanho total: ${totalSizeMB}MB (máximo: 50MB)`);
+                fileList += `<div style="color: #d32f2f; font-weight: bold; margin-top: 10px;">❌ Tamanho total: ${totalSizeMB}MB (Máximo: 50MB)</div>`;
+                hasError = true;
+            } else {
+                fileList += `<div style="color: #2e7d32; font-weight: bold; margin-top: 10px;">✅ Tamanho total: ${totalSizeMB}MB</div>`;
             }
             
-            // Mostrar informações
-            let html = '';
+            infoElement.innerHTML = fileList;
+            infoElement.className = hasError ? 'file-info show error' : 'file-info show success';
+            infoElement.style.display = 'block';
             
-            if (validFiles.length > 0) {
-                html += '<div class="file-info success">';
-                html += '<h4>✅ Arquivos Válidos:</h4>';
-                validFiles.forEach(file => {
-                    html += `<p>📁 ${file.name} (${file.size}MB)</p>`;
-                });
-                html += '</div>';
-            }
-            
-            if (errors.length > 0) {
-                html += '<div class="file-info error">';
-                html += '<h4>❌ Problemas Encontrados:</h4>';
-                errors.forEach(error => {
-                    html += `<p>⚠️ ${error}</p>`;
-                });
-                html += '</div>';
-            }
-            
-            infoDiv.innerHTML = html;
-        }
-
-        // ==================== PROCESSAR ENVIO DE RELATÓRIO ====================
-        async function handleSubmitReport(event) {
-            event.preventDefault();
-            
-            const reportType = document.getElementById('reportType').value;
-            const reportDate = document.getElementById('reportDate').value;
-            const title = document.getElementById('reportTitle').value;
-            const description = document.getElementById('reportDescription').value;
-            const files = document.getElementById('reportFiles').files;
-            const submitBtn = event.target.querySelector('button[type="submit"]');
-            const infoDiv = document.getElementById('reportFilesInfo');
-            
-            console.log('📄 Enviando relatório:', title);
-            
-            setButtonLoading(submitBtn, true, 'Enviando Relatório...');
-            showUploadProgress(infoDiv, 10, 'Preparando arquivos...');
-            
-            try {
-                showUploadProgress(infoDiv, 30, 'Convertendo arquivos para Base64...');
-                
-                const result = await uploadFilesBase64({
-                    action: 'submitReport',
-                    userEmail: currentUser.email,
-                    reportType: reportType,
-                    reportDate: reportDate,
-                    title: title,
-                    description: description
-                }, files, (progress) => {
-                    showUploadProgress(infoDiv, 30 + (progress * 0.6), 'Enviando arquivos...');
-                });
-                
-                if (result.success) {
-                    showUploadProgress(infoDiv, 100, 'Relatório enviado com sucesso!');
-                    showToast('Relatório enviado com sucesso!', 'success');
-                    
-                    document.getElementById('reportForm').reset();
-                    setTimeout(() => {
-                        infoDiv.innerHTML = '';
-                    }, 3000);
-                    
-                    loadUserData();
-                } else {
-                    showUploadProgress(infoDiv, 0);
-                    showToast('Erro ao enviar relatório: ' + result.message, 'error');
-                }
-            } catch (error) {
-                console.error('❌ Erro ao enviar relatório:', error);
-                showUploadProgress(infoDiv, 0);
-                showToast('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
-            } finally {
-                setButtonLoading(submitBtn, false);
-            }
-        }
-
-        // ==================== PROCESSAR CADASTRO DE ATIVIDADE ====================
-        async function handleSubmitActivity(event) {
-            event.preventDefault();
-            
-            const activityType = document.getElementById('activityType').value;
-            const activityDate = document.getElementById('activityDate').value;
-            const title = document.getElementById('activityTitle').value;
-            const description = document.getElementById('activityDescription').value;
-            const location = document.getElementById('activityLocation').value;
-            const participants = document.getElementById('activityParticipants').value;
-            const files = document.getElementById('activityFiles').files;
-            const submitBtn = event.target.querySelector('button[type="submit"]');
-            const infoDiv = document.getElementById('activityFilesInfo');
-            
-            console.log('🎯 Cadastrando atividade:', title);
-            
-            setButtonLoading(submitBtn, true, 'Cadastrando Atividade...');
-            showUploadProgress(infoDiv, 10, 'Preparando dados da atividade...');
-            
-            try {
-                showUploadProgress(infoDiv, 30, 'Processando arquivos...');
-                
-                const result = await uploadFilesBase64({
-                    action: 'submitActivity',
-                    userEmail: currentUser.email,
-                    activityType: activityType,
-                    activityDate: activityDate,
-                    title: title,
-                    description: description,
-                    location: location,
-                    participants: participants
-                }, files, (progress) => {
-                    showUploadProgress(infoDiv, 30 + (progress * 0.6), 'Enviando arquivos...');
-                });
-                
-                if (result.success) {
-                    showUploadProgress(infoDiv, 100, 'Atividade cadastrada com sucesso!');
-                    showToast('Atividade cadastrada com sucesso!', 'success');
-                    
-                    document.getElementById('activityForm').reset();
-                    setTimeout(() => {
-                        infoDiv.innerHTML = '';
-                    }, 3000);
-                    
-                    loadUserData();
-                } else {
-                    showUploadProgress(infoDiv, 0);
-                    showToast('Erro ao cadastrar atividade: ' + result.message, 'error');
-                }
-            } catch (error) {
-                console.error('❌ Erro ao cadastrar atividade:', error);
-                showUploadProgress(infoDiv, 0);
-                showToast('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
-            } finally {
-                setButtonLoading(submitBtn, false);
-            }
-        }
-
-        // ==================== PROCESSAR UPLOAD DE ARQUIVOS ====================
-        async function handleUploadFiles(event) {
-            event.preventDefault();
-            
-            const category = document.getElementById('fileCategory').value;
-            const description = document.getElementById('fileDescription').value;
-            const files = document.getElementById('uploadFiles').files;
-            const submitBtn = event.target.querySelector('button[type="submit"]');
-            const infoDiv = document.getElementById('uploadFilesInfo');
-            
-            console.log('📁 Enviando arquivos, categoria:', category);
-            
-            setButtonLoading(submitBtn, true, 'Enviando Arquivos...');
-            showUploadProgress(infoDiv, 10, 'Preparando arquivos para upload...');
-            
-            try {
-                showUploadProgress(infoDiv, 30, 'Convertendo arquivos...');
-                
-                const result = await uploadFilesBase64({
-                    action: 'uploadFiles',
-                    userEmail: currentUser.email,
-                    category: category,
-                    description: description
-                }, files, (progress) => {
-                    showUploadProgress(infoDiv, 30 + (progress * 0.6), `Enviando ${files.length} arquivo(s)...`);
-                });
-                
-                if (result.success) {
-                    showUploadProgress(infoDiv, 100, `${files.length} arquivo(s) enviado(s) com sucesso!`);
-                    showToast(`${files.length} arquivo(s) enviado(s) com sucesso!`, 'success');
-                    
-                    document.getElementById('filesForm').reset();
-                    setTimeout(() => {
-                        infoDiv.innerHTML = '';
-                    }, 3000);
-                    
-                    loadUserData();
-                } else {
-                    showUploadProgress(infoDiv, 0);
-                    showToast('Erro ao enviar arquivos: ' + result.message, 'error');
-                }
-            } catch (error) {
-                console.error('❌ Erro ao enviar arquivos:', error);
-                showUploadProgress(infoDiv, 0);
-                showToast('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
-            } finally {
-                setButtonLoading(submitBtn, false);
-            }
-        }
-
-        // ==================== UPLOAD DE ARQUIVOS VIA BASE64 ====================
-        async function uploadFilesBase64(data, files, progressCallback = null) {
-            console.log('🚀 Iniciando upload Base64...');
-            
-            // Se não há arquivos, enviar apenas dados
-            if (!files || files.length === 0) {
-                if (progressCallback) progressCallback(100);
-                return await sendRequest(data);
-            }
-            
-            // Converter arquivos para Base64
-            const filesBase64 = [];
-            
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                
-                // Verificar tamanho
-                if (file.size > CONFIG.MAX_FILE_SIZE) {
-                    throw new Error(`Arquivo ${file.name} é muito grande (${(file.size / 1024 / 1024).toFixed(2)}MB). Máximo: 10MB`);
-                }
-                
-                console.log(`📁 Convertendo ${file.name} para Base64...`);
-                
-                const base64 = await convertFileToBase64(file);
-                
-                filesBase64.push({
-                    name: file.name,
-                    type: file.type,
-                    size: file.size,
-                    base64: base64
-                });
-                
-                if (progressCallback) {
-                    const progress = ((i + 1) / files.length) * 100;
-                    progressCallback(progress);
-                }
-                
-                console.log(`✅ ${file.name} convertido (${base64.length} caracteres)`);
-            }
-            
-            // Adicionar arquivos aos dados
-            data.filesBase64 = JSON.stringify(filesBase64);
-            
-            console.log(`📤 Enviando ${filesBase64.length} arquivo(s) via Base64...`);
-            
-            return await sendRequest(data);
+            return !hasError;
         }
 
         // ==================== CONVERTER ARQUIVO PARA BASE64 ====================
-        function convertFileToBase64(file) {
+        function fileToBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                
-                reader.onload = function() {
-                    // Remover prefixo "data:tipo/mime;base64,"
-                    const base64 = reader.result.split(',')[1];
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    const base64 = reader.result.split(',')[1]; // Remove o prefixo data:...;base64,
                     resolve(base64);
                 };
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        // ==================== PROCESSAR ENVIO DE RELATÓRIO ====================
+        async function handleReportSubmit(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('reportTitle').value;
+            const category = document.getElementById('reportCategory').value;
+            const description = document.getElementById('reportDescription').value;
+            const fileInput = document.getElementById('reportFile');
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            
+            if (!fileInput.files.length) {
+                showToast('Por favor, selecione um arquivo para o relatório.', 'error');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            
+            if (file.size > CONFIG.MAX_FILE_SIZE) {
+                showToast('Arquivo muito grande. Máximo permitido: 10MB', 'error');
+                return;
+            }
+            
+            console.log('📄 Enviando relatório:', title);
+            
+            setButtonLoading(submitBtn, true, 'Enviando relatório...');
+            showLoading('Enviando relatório...', 'Convertendo arquivo e enviando para o servidor');
+            
+            try {
+                const fileBase64 = await fileToBase64(file);
                 
-                reader.onerror = function() {
-                    reject(new Error('Erro ao ler arquivo para conversão Base64'));
+                const result = await sendRequest({
+                    action: 'uploadFile',
+                    email: currentUser.email,
+                    category: 'Relatórios',
+                    description: description,
+                    title: title,
+                    reportCategory: category,
+                    fileName: file.name,
+                    fileType: file.type,
+                    fileSize: file.size,
+                    fileBase64: fileBase64
+                });
+                
+                if (result.success) {
+                    hideLoading();
+                    showToast('Relatório enviado com sucesso!', 'success');
+                    document.getElementById('reportForm').reset();
+                    document.getElementById('reportFileInfo').style.display = 'none';
+                    loadUserData(); // Atualizar estatísticas
+                } else {
+                    hideLoading();
+                    showToast('Erro ao enviar relatório: ' + (result.message || 'Erro desconhecido'), 'error');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao enviar relatório:', error);
+                hideLoading();
+                showToast('Erro de conexão. Tente novamente.', 'error');
+            } finally {
+                setButtonLoading(submitBtn, false);
+            }
+        }
+
+        // ==================== PROCESSAR ENVIO DE ATIVIDADE ====================
+        async function handleActivitySubmit(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('activityTitle').value;
+            const date = document.getElementById('activityDate').value;
+            const location = document.getElementById('activityLocation').value;
+            const type = document.getElementById('activityType').value;
+            const description = document.getElementById('activityDescription').value;
+            const fileInput = document.getElementById('activityFiles');
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            
+            console.log('🎯 Enviando atividade:', title);
+            
+            setButtonLoading(submitBtn, true, 'Cadastrando atividade...');
+            showLoading('Cadastrando atividade...', 'Processando dados e arquivos');
+            
+            try {
+                let fileData = null;
+                
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0]; // Por simplicidade, enviar apenas o primeiro arquivo
+                    
+                    if (file.size > CONFIG.MAX_FILE_SIZE) {
+                        hideLoading();
+                        setButtonLoading(submitBtn, false);
+                        showToast('Arquivo muito grande. Máximo permitido: 10MB', 'error');
+                        return;
+                    }
+                    
+                    const fileBase64 = await fileToBase64(file);
+                    fileData = {
+                        fileName: file.name,
+                        fileType: file.type,
+                        fileSize: file.size,
+                        fileBase64: fileBase64
+                    };
+                }
+                
+                const requestData = {
+                    action: 'uploadFile',
+                    email: currentUser.email,
+                    category: 'Atividades',
+                    description: description,
+                    title: title,
+                    activityDate: date,
+                    activityLocation: location,
+                    activityType: type
                 };
                 
-                reader.readAsDataURL(file);
-            });
+                // Adicionar dados do arquivo se existir
+                if (fileData) {
+                    Object.assign(requestData, fileData);
+                }
+                
+                const result = await sendRequest(requestData);
+                
+                if (result.success) {
+                    hideLoading();
+                    showToast('Atividade cadastrada com sucesso!', 'success');
+                    document.getElementById('activityForm').reset();
+                    document.getElementById('activityFileInfo').style.display = 'none';
+                    loadUserData(); // Atualizar estatísticas
+                } else {
+                    hideLoading();
+                    showToast('Erro ao cadastrar atividade: ' + (result.message || 'Erro desconhecido'), 'error');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao cadastrar atividade:', error);
+                hideLoading();
+                showToast('Erro de conexão. Tente novamente.', 'error');
+            } finally {
+                setButtonLoading(submitBtn, false);
+            }
+        }
+
+        // ==================== PROCESSAR ENVIO DE ARQUIVOS ====================
+        async function handleFilesSubmit(event) {
+            event.preventDefault();
+            
+            const category = document.getElementById('filesCategory').value;
+            const description = document.getElementById('filesDescription').value;
+            const fileInput = document.getElementById('uploadFiles');
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            
+            if (!fileInput.files.length) {
+                showToast('Por favor, selecione pelo menos um arquivo.', 'error');
+                return;
+            }
+            
+            console.log('📁 Enviando arquivos:', fileInput.files.length);
+            
+            setButtonLoading(submitBtn, true, 'Enviando arquivos...');
+            showLoading('Enviando arquivos...', 'Processando múltiplos arquivos');
+            
+            try {
+                let successCount = 0;
+                let errorCount = 0;
+                
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    const file = fileInput.files[i];
+                    
+                    if (file.size > CONFIG.MAX_FILE_SIZE) {
+                        console.warn('❌ Arquivo muito grande:', file.name);
+                        errorCount++;
+                        continue;
+                    }
+                    
+                    try {
+                        const fileBase64 = await fileToBase64(file);
+                        
+                        const result = await sendRequest({
+                            action: 'uploadFile',
+                            email: currentUser.email,
+                            category: category,
+                            description: description,
+                            fileName: file.name,
+                            fileType: file.type,
+                            fileSize: file.size,
+                            fileBase64: fileBase64
+                        });
+                        
+                        if (result.success) {
+                            successCount++;
+                        } else {
+                            errorCount++;
+                        }
+                    } catch (error) {
+                        console.error('❌ Erro ao processar arquivo:', file.name, error);
+                        errorCount++;
+                    }
+                }
+                
+                hideLoading();
+                
+                if (successCount > 0) {
+                    showToast(`${successCount} arquivo(s) enviado(s) com sucesso!`, 'success');
+                    document.getElementById('filesForm').reset();
+                    document.getElementById('uploadFileInfo').style.display = 'none';
+                    loadUserData(); // Atualizar estatísticas
+                }
+                
+                if (errorCount > 0) {
+                    showToast(`${errorCount} arquivo(s) falharam no envio.`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('❌ Erro geral no envio de arquivos:', error);
+                hideLoading();
+                showToast('Erro de conexão. Tente novamente.', 'error');
+            } finally {
+                setButtonLoading(submitBtn, false);
+            }
         }
 
         // ==================== CARREGAR DADOS DO USUÁRIO ====================
         async function loadUserData() {
-            if (!currentUser) return;
-            
             try {
+                console.log('📊 Carregando dados do usuário...');
+                
                 const result = await sendRequest({
-                    action: 'getUserData',
-                    userEmail: currentUser.email
+                    action: 'getUserStats',
+                    email: currentUser.email
                 });
                 
-                if (result.success) {
+                if (result.success && result.data) {
                     const data = result.data;
                     
-                    const statsReports = document.getElementById('statsReports');
-                    const statsActivities = document.getElementById('statsActivities');
-                    const statsFiles = document.getElementById('statsFiles');
-                    
-                    if (statsReports) {
-                        statsReports.textContent = data.reports || 0;
-                        statsReports.style.animation = 'none';
-                        setTimeout(() => statsReports.style.animation = 'pulse 2s ease-in-out infinite', 100);
-                    }
-                    if (statsActivities) {
-                        statsActivities.textContent = data.activities || 0;
-                        statsActivities.style.animation = 'none';
-                        setTimeout(() => statsActivities.style.animation = 'pulse 2s ease-in-out infinite', 200);
-                    }
-                    if (statsFiles) {
-                        statsFiles.textContent = data.files || 0;
-                        statsFiles.style.animation = 'none';
-                        setTimeout(() => statsFiles.style.animation = 'pulse 2s ease-in-out infinite', 300);
-                    }
+                    // Animar contadores
+                    animateCounter('totalReports', data.totalReports || 0);
+                    animateCounter('totalActivities', data.totalActivities || 0);
+                    animateCounter('totalFiles', data.totalFiles || 0);
                     
                     console.log('✅ Dados do usuário carregados:', data);
                 }
@@ -1770,31 +1509,34 @@
 
         // ==================== CARREGAR DADOS ADMINISTRATIVOS ====================
         async function loadAdminData() {
-            if (!currentUser || !currentUser.isAdmin) return;
-            
-            showLoading('Carregando dados administrativos...', 'Coletando estatísticas do sistema');
+            if (!currentUser.isAdmin) return;
             
             try {
+                console.log('👑 Carregando dados administrativos...');
+                showLoading('Carregando dados administrativos...', 'Coletando estatísticas do sistema');
+                
                 const result = await sendRequest({
-                    action: 'getAdminData'
+                    action: 'getAdminData',
+                    email: currentUser.email
                 });
                 
-                if (result.success) {
+                if (result.success && result.data) {
                     const data = result.data;
                     
-                    // Animar contadores
-                    animateCounter('adminStatsUsers', data.totalUsers || 0);
-                    animateCounter('adminStatsReports', data.totalReports || 0);
-                    animateCounter('adminStatsActivities', data.totalActivities || 0);
+                    // Animar contadores administrativos
+                    animateCounter('adminTotalUsers', data.totalUsers || 0);
+                    animateCounter('adminTotalReports', data.totalReports || 0);
+                    animateCounter('adminTotalActivities', data.totalActivities || 0);
+                    animateCounter('adminTotalFiles', data.totalFiles || 0);
                     
                     // Usuários
                     const usersList = document.getElementById('adminUsersList');
-                    if (data.users && data.users.length > 0) {
-                        usersList.innerHTML = data.users.map(user => 
+                    if (data.recentUsers && data.recentUsers.length > 0) {
+                        usersList.innerHTML = data.recentUsers.map(user => 
                             `<div class="admin-item">
                                 <strong>${user.name || 'Nome não informado'}</strong><br>
                                 ${user.email}<br>
-                                <small>${user.institution || 'Instituição não informada'} - ${user.project || 'Projeto não informado'}</small>
+                                <small>${user.institution || 'Instituição não informada'}</small>
                             </div>`
                         ).join('');
                     } else {
@@ -1875,8 +1617,10 @@
                 }
                 
                 const text = await response.text();
+                console.log('📥 Resposta bruta:', text);
+                
                 const result = JSON.parse(text);
-                console.log('📥 Resposta recebida:', result);
+                console.log('📥 Resposta processada:', result);
                 return result;
                 
             } catch (error) {
