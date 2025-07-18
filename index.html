@@ -229,7 +229,7 @@
         }
 
         .header-logo {
-            width: 120px;
+            width: 200px;
             height: auto;
             filter: brightness(0) invert(1);
         }
@@ -406,6 +406,26 @@
             font-size: 14px;
         }
 
+        .data-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .data-item h6 {
+            margin: 0 0 5px 0;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .data-item p {
+            margin: 0;
+            color: #666;
+            font-size: 12px;
+        }
+
         /* Progress bar styles */
         .progress-container {
             margin-top: 15px;
@@ -464,6 +484,10 @@
                 justify-content: center;
             }
 
+            .header-logo {
+                width: 150px;
+            }
+
             .nav-tabs {
                 flex-direction: column;
             }
@@ -495,7 +519,7 @@
 
         @media (max-width: 480px) {
             .header-logo {
-                width: 80px;
+                width: 120px;
             }
 
             .user-info h2 {
@@ -518,7 +542,7 @@
         // ==================== CONFIGURAÇÕES ====================
         const CONFIG = {
             GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec',
-            VERSION: 'SISTEMA COMPLETO BASE64 v2.0',
+            VERSION: 'SISTEMA COMPLETO BASE64 v2.1',
             DEBUG: true,
             MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB em bytes
             MAX_TOTAL_SIZE: 50 * 1024 * 1024, // 50MB total
@@ -1068,6 +1092,10 @@
                             <h4>Total de Atividades</h4>
                             <div class="stat-number" id="adminStatsActivities">-</div>
                         </div>
+                        <div class="stat-card">
+                            <h4>Total de Arquivos</h4>
+                            <div class="stat-number" id="adminStatsFiles">-</div>
+                        </div>
                     </div>
                     
                     <div class="admin-sections">
@@ -1084,6 +1112,11 @@
                         <div class="admin-section">
                             <h4>🎯 Atividades Recentes</h4>
                             <div id="adminActivitiesList">Carregando atividades...</div>
+                        </div>
+                        
+                        <div class="admin-section">
+                            <h4>📁 Arquivos Recentes</h4>
+                            <div id="adminFilesList">Carregando arquivos...</div>
                         </div>
                     </div>
                 </div>
@@ -1109,17 +1142,24 @@
             if (!currentUser) return;
             
             try {
+                // Simular geração de PDF (já que não temos backend real)
+                alert('📄 Funcionalidade de geração de PDF será implementada no backend do Google Apps Script.\n\nEsta função irá:\n• Coletar todos os dados do usuário\n• Gerar um PDF formatado\n• Retornar o link para download\n\nPor enquanto, esta é uma demonstração da interface.');
+                
+                console.log('📄 Gerando relatório PDF para:', currentUser.email);
+                
+                // Aqui seria a chamada real para o backend:
+                /*
                 const result = await sendRequest({
                     action: 'generateUserReport',
                     userEmail: currentUser.email
                 });
                 
                 if (result.success && result.data.pdfUrl) {
-                    // Abrir PDF em nova aba
                     window.open(result.data.pdfUrl, '_blank');
                 } else {
                     alert('Erro ao gerar relatório: ' + (result.message || 'Erro desconhecido'));
                 }
+                */
             } catch (error) {
                 console.error('❌ Erro ao gerar relatório:', error);
                 alert('Erro de conexão. Tente novamente.');
@@ -1131,6 +1171,13 @@
             if (!currentUser || !currentUser.isAdmin) return;
             
             try {
+                // Simular geração de PDF (já que não temos backend real)
+                alert(`📄 Funcionalidade de geração de PDF será implementada no backend do Google Apps Script.\n\nEsta função irá gerar um relatório completo para: ${userEmail}\n\nIncluindo:\n• Dados pessoais\n• Relatórios enviados\n• Atividades cadastradas\n• Arquivos enviados\n\nPor enquanto, esta é uma demonstração da interface.`);
+                
+                console.log('📄 Gerando relatório PDF para usuário:', userEmail);
+                
+                // Aqui seria a chamada real para o backend:
+                /*
                 const result = await sendRequest({
                     action: 'generateUserReport',
                     userEmail: userEmail,
@@ -1138,11 +1185,11 @@
                 });
                 
                 if (result.success && result.data.pdfUrl) {
-                    // Abrir PDF em nova aba
                     window.open(result.data.pdfUrl, '_blank');
                 } else {
                     alert('Erro ao gerar relatório: ' + (result.message || 'Erro desconhecido'));
                 }
+                */
             } catch (error) {
                 console.error('❌ Erro ao gerar relatório:', error);
                 alert('Erro de conexão. Tente novamente.');
@@ -1517,9 +1564,11 @@
                 if (result.success) {
                     const data = result.data;
                     
+                    // Atualizar estatísticas
                     document.getElementById('adminStatsUsers').textContent = data.totalUsers || 0;
                     document.getElementById('adminStatsReports').textContent = data.totalReports || 0;
                     document.getElementById('adminStatsActivities').textContent = data.totalActivities || 0;
+                    document.getElementById('adminStatsFiles').textContent = data.totalFiles || 0;
                     
                     // Carregar lista de usuários
                     const usersList = document.getElementById('adminUsersList');
@@ -1538,6 +1587,45 @@
                         `).join('');
                     } else {
                         usersList.innerHTML = '<p>Nenhum usuário cadastrado.</p>';
+                    }
+                    
+                    // Carregar relatórios recentes
+                    const reportsList = document.getElementById('adminReportsList');
+                    if (data.reports && data.reports.length > 0) {
+                        reportsList.innerHTML = data.reports.map(report => `
+                            <div class="data-item">
+                                <h6>${report.title}</h6>
+                                <p><strong>Tipo:</strong> ${report.type} | <strong>Data:</strong> ${report.date} | <strong>Usuário:</strong> ${report.userEmail}</p>
+                            </div>
+                        `).join('');
+                    } else {
+                        reportsList.innerHTML = '<p>Nenhum relatório encontrado.</p>';
+                    }
+                    
+                    // Carregar atividades recentes
+                    const activitiesList = document.getElementById('adminActivitiesList');
+                    if (data.activities && data.activities.length > 0) {
+                        activitiesList.innerHTML = data.activities.map(activity => `
+                            <div class="data-item">
+                                <h6>${activity.title}</h6>
+                                <p><strong>Tipo:</strong> ${activity.type} | <strong>Data:</strong> ${activity.date} | <strong>Usuário:</strong> ${activity.userEmail}</p>
+                            </div>
+                        `).join('');
+                    } else {
+                        activitiesList.innerHTML = '<p>Nenhuma atividade encontrada.</p>';
+                    }
+                    
+                    // Carregar arquivos recentes
+                    const filesList = document.getElementById('adminFilesList');
+                    if (data.files && data.files.length > 0) {
+                        filesList.innerHTML = data.files.map(file => `
+                            <div class="data-item">
+                                <h6>${file.name}</h6>
+                                <p><strong>Categoria:</strong> ${file.category} | <strong>Tamanho:</strong> ${(file.size / 1024 / 1024).toFixed(2)}MB | <strong>Usuário:</strong> ${file.userEmail}</p>
+                            </div>
+                        `).join('');
+                    } else {
+                        filesList.innerHTML = '<p>Nenhum arquivo encontrado.</p>';
                     }
                     
                     console.log('✅ Dados administrativos carregados:', data);
