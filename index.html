@@ -169,16 +169,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        .btn-loading-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 14px;
-            white-space: nowrap;
-        }
-
         .register-link {
             text-align: center;
             margin-top: 20px;
@@ -542,8 +532,8 @@
         // ==================== CONFIGURAÇÕES ====================
         const CONFIG = {
             GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec',
-            VERSION: 'SISTEMA COMPLETO BASE64 v2.1',
-            DEBUG: true,
+            VERSION: 'SISTEMA FINAL SEGURO v3.1',
+            DEBUG: false,
             MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB em bytes
             MAX_TOTAL_SIZE: 50 * 1024 * 1024, // 50MB total
             SUPPORTED_FORMATS: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'zip', 'rar', 'xlsx', 'ppt', 'xls']
@@ -615,7 +605,7 @@
                     <div class="login-form-container">
                         <h2>Acesso ao Sistema</h2>
                         
-                        <form id="loginForm" onsubmit="handleLogin(event)">
+                        <form id="loginForm">
                             <div class="form-group">
                                 <label for="loginEmail">E-mail:</label>
                                 <input type="email" id="loginEmail" required>
@@ -637,10 +627,13 @@
                     </div>
                     
                     <div class="footer">
-                        <p>Desenvolvido pela equipe do CDR Sul Tocantins - Versão 2.0</p>
+                        <p>Desenvolvido pela equipe do CDR Sul Tocantins - Versão 3.1</p>
                     </div>
                 </div>
             `;
+            
+            // Adicionar event listener para o formulário
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
         }
 
         // ==================== MOSTRAR TELA DE CADASTRO ====================
@@ -656,7 +649,7 @@
                     <div class="login-form-container">
                         <h2>Criar Conta</h2>
                         
-                        <form id="registerForm" onsubmit="handleRegister(event)">
+                        <form id="registerForm">
                             <div class="form-group">
                                 <label for="registerName">Nome Completo:</label>
                                 <input type="text" id="registerName" required>
@@ -698,6 +691,9 @@
                     </div>
                 </div>
             `;
+            
+            // Adicionar event listener para o formulário
+            document.getElementById('registerForm').addEventListener('submit', handleRegister);
         }
 
         // ==================== PROCESSAR LOGIN ====================
@@ -717,24 +713,38 @@
             btnText.textContent = 'Fazendo login...';
             
             try {
-                const result = await sendRequest({
-                    action: 'login',
-                    email: email,
-                    password: password
+                // Fazer requisição real para o Google Apps Script
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'login',
+                        email: email,
+                        password: password
+                    })
                 });
                 
-                if (result.success) {
-                    console.log('✅ Login bem-sucedido:', result.user);
-                    currentUser = result.data.user;
-                    localStorage.setItem('cdr_user', JSON.stringify(currentUser));
+                if (response.ok) {
+                    const result = await response.json();
                     
-                    // Feedback de sucesso
-                    btnText.textContent = 'Login realizado!';
-                    setTimeout(() => {
-                        showDashboard(currentUser);
-                    }, 500);
+                    if (result.success && result.user) {
+                        console.log('✅ Login bem-sucedido:', result.user);
+                        currentUser = result.user;
+                        localStorage.setItem('cdr_user', JSON.stringify(currentUser));
+                        
+                        // Feedback de sucesso
+                        btnText.textContent = 'Login realizado!';
+                        setTimeout(() => {
+                            showDashboard(currentUser);
+                        }, 500);
+                    } else {
+                        alert(result.message || 'Credenciais inválidas.');
+                    }
                 } else {
-                    alert('Erro no login: ' + result.message);
+                    throw new Error('Erro de conexão');
                 }
             } catch (error) {
                 console.error('❌ Erro no login:', error);
@@ -775,23 +785,37 @@
             btnText.textContent = 'Criando conta...';
             
             try {
-                const result = await sendRequest({
-                    action: 'register',
-                    name: name,
-                    email: email,
-                    institution: institution,
-                    project: project,
-                    password: password
+                // Fazer requisição real para o Google Apps Script
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'register',
+                        name: name,
+                        email: email,
+                        institution: institution,
+                        project: project,
+                        password: password
+                    })
                 });
                 
-                if (result.success) {
-                    btnText.textContent = 'Conta criada!';
-                    alert('Conta criada com sucesso! Faça login para continuar.');
-                    setTimeout(() => {
-                        showLoginScreen();
-                    }, 500);
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        btnText.textContent = 'Conta criada!';
+                        alert('Conta criada com sucesso! Faça login para continuar.');
+                        setTimeout(() => {
+                            showLoginScreen();
+                        }, 500);
+                    } else {
+                        alert(result.message || 'Erro ao criar conta.');
+                    }
                 } else {
-                    alert('Erro no cadastro: ' + result.message);
+                    throw new Error('Erro de conexão');
                 }
             } catch (error) {
                 console.error('❌ Erro no cadastro:', error);
@@ -888,11 +912,105 @@
                     </div>
                     
                     <div class="admin-section">
-                        <h4>Últimas Atividades</h4>
+                        <h4>📄 Últimos Relatórios</h4>
+                        <div id="recentReports">Carregando...</div>
+                    </div>
+                    
+                    <div class="admin-section">
+                        <h4>🎯 Últimas Atividades</h4>
                         <div id="recentActivities">Carregando...</div>
+                    </div>
+                    
+                    <div class="admin-section">
+                        <h4>📁 Últimos Arquivos</h4>
+                        <div id="recentFiles">Carregando...</div>
                     </div>
                 </div>
             `;
+            
+            // Carregar dados específicos da visão geral
+            loadOverviewData();
+        }
+
+        // ==================== CARREGAR DADOS DA VISÃO GERAL ====================
+        async function loadOverviewData() {
+            if (!currentUser) return;
+            
+            try {
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'getUserData',
+                        userEmail: currentUser.email
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        const { reports, activities, files } = result.data;
+                        
+                        // Atualizar estatísticas
+                        document.getElementById('statsReports').textContent = reports.length;
+                        document.getElementById('statsActivities').textContent = activities.length;
+                        document.getElementById('statsFiles').textContent = files.length;
+                        
+                        // Mostrar últimos relatórios
+                        const recentReportsDiv = document.getElementById('recentReports');
+                        if (reports.length > 0) {
+                            recentReportsDiv.innerHTML = reports.slice(-3).map(report => `
+                                <div class="data-item">
+                                    <h6>${report.title}</h6>
+                                    <p><strong>Tipo:</strong> ${report.type} | <strong>Data:</strong> ${formatDate(report.date)}</p>
+                                    <p>${report.description}</p>
+                                </div>
+                            `).join('');
+                        } else {
+                            recentReportsDiv.innerHTML = '<p>Nenhum relatório encontrado.</p>';
+                        }
+                        
+                        // Mostrar últimas atividades
+                        const recentActivitiesDiv = document.getElementById('recentActivities');
+                        if (activities.length > 0) {
+                            recentActivitiesDiv.innerHTML = activities.slice(-3).map(activity => `
+                                <div class="data-item">
+                                    <h6>${activity.title}</h6>
+                                    <p><strong>Tipo:</strong> ${activity.type} | <strong>Data:</strong> ${formatDate(activity.date)}</p>
+                                    <p><strong>Local:</strong> ${activity.location}</p>
+                                    <p>${activity.description}</p>
+                                </div>
+                            `).join('');
+                        } else {
+                            recentActivitiesDiv.innerHTML = '<p>Nenhuma atividade encontrada.</p>';
+                        }
+                        
+                        // Mostrar últimos arquivos
+                        const recentFilesDiv = document.getElementById('recentFiles');
+                        if (files.length > 0) {
+                            recentFilesDiv.innerHTML = files.slice(-3).map(file => `
+                                <div class="data-item">
+                                    <h6>${file.name}</h6>
+                                    <p><strong>Categoria:</strong> ${file.category} | <strong>Tamanho:</strong> ${formatFileSize(file.size)}</p>
+                                    <p>${file.description}</p>
+                                </div>
+                            `).join('');
+                        } else {
+                            recentFilesDiv.innerHTML = '<p>Nenhum arquivo encontrado.</p>';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados:', error);
+                // Mostrar mensagem de erro em vez de "Carregando..."
+                document.getElementById('recentReports').innerHTML = '<p>Erro ao carregar dados.</p>';
+                document.getElementById('recentActivities').innerHTML = '<p>Erro ao carregar dados.</p>';
+                document.getElementById('recentFiles').innerHTML = '<p>Erro ao carregar dados.</p>';
+            }
         }
 
         // ==================== ABA RELATÓRIOS ====================
@@ -903,7 +1021,7 @@
                 <div class="reports-tab">
                     <h3>Enviar Relatório</h3>
                     
-                    <form id="reportForm" onsubmit="handleSubmitReport(event)">
+                    <form id="reportForm">
                         <div class="form-group">
                             <label for="reportType">Tipo de Relatório:</label>
                             <select id="reportType" required>
@@ -949,6 +1067,9 @@
                     </form>
                 </div>
             `;
+            
+            // Adicionar event listener
+            document.getElementById('reportForm').addEventListener('submit', handleSubmitReport);
         }
 
         // ==================== ABA ATIVIDADES ====================
@@ -959,7 +1080,7 @@
                 <div class="activities-tab">
                     <h3>Cadastrar Atividade</h3>
                     
-                    <form id="activityForm" onsubmit="handleSubmitActivity(event)">
+                    <form id="activityForm">
                         <div class="form-group">
                             <label for="activityType">Tipo de Atividade:</label>
                             <select id="activityType" required>
@@ -1019,6 +1140,9 @@
                     </form>
                 </div>
             `;
+            
+            // Adicionar event listener
+            document.getElementById('activityForm').addEventListener('submit', handleSubmitActivity);
         }
 
         // ==================== ABA ARQUIVOS ====================
@@ -1029,7 +1153,7 @@
                 <div class="files-tab">
                     <h3>Enviar Arquivos</h3>
                     
-                    <form id="filesForm" onsubmit="handleUploadFiles(event)">
+                    <form id="filesForm">
                         <div class="form-group">
                             <label for="fileCategory">Categoria:</label>
                             <select id="fileCategory" required>
@@ -1067,6 +1191,9 @@
                     </form>
                 </div>
             `;
+            
+            // Adicionar event listener
+            document.getElementById('filesForm').addEventListener('submit', handleUploadFiles);
         }
 
         // ==================== ABA ADMIN ====================
@@ -1142,27 +1269,43 @@
             if (!currentUser) return;
             
             try {
-                // Simular geração de PDF (já que não temos backend real)
-                alert('📄 Funcionalidade de geração de PDF será implementada no backend do Google Apps Script.\n\nEsta função irá:\n• Coletar todos os dados do usuário\n• Gerar um PDF formatado\n• Retornar o link para download\n\nPor enquanto, esta é uma demonstração da interface.');
-                
-                console.log('📄 Gerando relatório PDF para:', currentUser.email);
-                
-                // Aqui seria a chamada real para o backend:
-                /*
-                const result = await sendRequest({
-                    action: 'generateUserReport',
-                    userEmail: currentUser.email
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'generateUserReport',
+                        userEmail: currentUser.email
+                    })
                 });
                 
-                if (result.success && result.data.pdfUrl) {
-                    window.open(result.data.pdfUrl, '_blank');
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Criar e baixar o arquivo PDF
+                        const blob = new Blob([result.pdfContent], { type: 'application/pdf' });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `relatorio_completo_${currentUser.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                        
+                        alert('📄 Relatório PDF gerado com sucesso!');
+                    } else {
+                        alert(result.message || 'Erro ao gerar relatório.');
+                    }
                 } else {
-                    alert('Erro ao gerar relatório: ' + (result.message || 'Erro desconhecido'));
+                    throw new Error('Erro de conexão');
                 }
-                */
             } catch (error) {
                 console.error('❌ Erro ao gerar relatório:', error);
-                alert('Erro de conexão. Tente novamente.');
+                alert('Erro ao gerar relatório. Tente novamente.');
             }
         }
 
@@ -1171,28 +1314,44 @@
             if (!currentUser || !currentUser.isAdmin) return;
             
             try {
-                // Simular geração de PDF (já que não temos backend real)
-                alert(`📄 Funcionalidade de geração de PDF será implementada no backend do Google Apps Script.\n\nEsta função irá gerar um relatório completo para: ${userEmail}\n\nIncluindo:\n• Dados pessoais\n• Relatórios enviados\n• Atividades cadastradas\n• Arquivos enviados\n\nPor enquanto, esta é uma demonstração da interface.`);
-                
-                console.log('📄 Gerando relatório PDF para usuário:', userEmail);
-                
-                // Aqui seria a chamada real para o backend:
-                /*
-                const result = await sendRequest({
-                    action: 'generateUserReport',
-                    userEmail: userEmail,
-                    adminRequest: true
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'generateAdminUserReport',
+                        targetUserEmail: userEmail,
+                        adminEmail: currentUser.email
+                    })
                 });
                 
-                if (result.success && result.data.pdfUrl) {
-                    window.open(result.data.pdfUrl, '_blank');
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Criar e baixar o arquivo PDF
+                        const blob = new Blob([result.pdfContent], { type: 'application/pdf' });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `relatorio_admin_${userEmail.replace('@', '_').replace('.', '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                        
+                        alert(`📄 Relatório administrativo gerado com sucesso!`);
+                    } else {
+                        alert(result.message || 'Erro ao gerar relatório.');
+                    }
                 } else {
-                    alert('Erro ao gerar relatório: ' + (result.message || 'Erro desconhecido'));
+                    throw new Error('Erro de conexão');
                 }
-                */
             } catch (error) {
                 console.error('❌ Erro ao gerar relatório:', error);
-                alert('Erro de conexão. Tente novamente.');
+                alert('Erro ao gerar relatório. Tente novamente.');
             }
         }
 
@@ -1281,28 +1440,60 @@
             progressContainer.style.display = 'block';
             
             try {
-                // Simular progresso
-                progressFill.style.width = '30%';
+                // Converter arquivos para Base64
+                const filePromises = Array.from(files).map(file => {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve({
+                            name: file.name,
+                            content: reader.result.split(',')[1], // Remove data:type;base64,
+                            type: file.type,
+                            size: file.size
+                        });
+                        reader.readAsDataURL(file);
+                    });
+                });
                 
-                const result = await uploadFilesBase64({
-                    action: 'submitReport',
-                    userEmail: currentUser.email,
-                    reportType: reportType,
-                    reportDate: reportDate,
-                    title: title,
-                    description: description
-                }, files);
+                progressFill.style.width = '30%';
+                const fileData = await Promise.all(filePromises);
+                
+                progressFill.style.width = '60%';
+                
+                // Enviar para Google Apps Script
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'submitReport',
+                        userEmail: currentUser.email,
+                        reportType: reportType,
+                        reportDate: reportDate,
+                        title: title,
+                        description: description,
+                        files: fileData
+                    })
+                });
                 
                 progressFill.style.width = '100%';
                 
-                if (result.success) {
-                    btnText.textContent = 'Relatório enviado!';
-                    alert('Relatório enviado com sucesso!');
-                    document.getElementById('reportForm').reset();
-                    document.getElementById('reportFilesInfo').innerHTML = '';
-                    loadUserData();
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        btnText.textContent = 'Relatório enviado!';
+                        alert('Relatório enviado com sucesso!');
+                        document.getElementById('reportForm').reset();
+                        document.getElementById('reportFilesInfo').innerHTML = '';
+                        loadUserData();
+                        loadOverviewData();
+                    } else {
+                        alert(result.message || 'Erro ao enviar relatório.');
+                    }
                 } else {
-                    alert('Erro ao enviar relatório: ' + result.message);
+                    throw new Error('Erro de conexão');
                 }
             } catch (error) {
                 console.error('❌ Erro ao enviar relatório:', error);
@@ -1344,30 +1535,65 @@
             progressContainer.style.display = 'block';
             
             try {
-                // Simular progresso
-                progressFill.style.width = '30%';
+                // Converter arquivos para Base64 (se houver)
+                let fileData = [];
+                if (files.length > 0) {
+                    const filePromises = Array.from(files).map(file => {
+                        return new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve({
+                                name: file.name,
+                                content: reader.result.split(',')[1],
+                                type: file.type,
+                                size: file.size
+                            });
+                            reader.readAsDataURL(file);
+                        });
+                    });
+                    
+                    progressFill.style.width = '30%';
+                    fileData = await Promise.all(filePromises);
+                }
                 
-                const result = await uploadFilesBase64({
-                    action: 'submitActivity',
-                    userEmail: currentUser.email,
-                    activityType: activityType,
-                    activityDate: activityDate,
-                    title: title,
-                    description: description,
-                    location: location,
-                    participants: participants
-                }, files);
+                progressFill.style.width = '60%';
+                
+                // Enviar para Google Apps Script
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'submitActivity',
+                        userEmail: currentUser.email,
+                        activityType: activityType,
+                        activityDate: activityDate,
+                        title: title,
+                        description: description,
+                        location: location,
+                        participants: participants,
+                        files: fileData
+                    })
+                });
                 
                 progressFill.style.width = '100%';
                 
-                if (result.success) {
-                    btnText.textContent = 'Atividade cadastrada!';
-                    alert('Atividade cadastrada com sucesso!');
-                    document.getElementById('activityForm').reset();
-                    document.getElementById('activityFilesInfo').innerHTML = '';
-                    loadUserData();
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        btnText.textContent = 'Atividade cadastrada!';
+                        alert('Atividade cadastrada com sucesso!');
+                        document.getElementById('activityForm').reset();
+                        document.getElementById('activityFilesInfo').innerHTML = '';
+                        loadUserData();
+                        loadOverviewData();
+                    } else {
+                        alert(result.message || 'Erro ao cadastrar atividade.');
+                    }
                 } else {
-                    alert('Erro ao cadastrar atividade: ' + result.message);
+                    throw new Error('Erro de conexão');
                 }
             } catch (error) {
                 console.error('❌ Erro ao cadastrar atividade:', error);
@@ -1405,26 +1631,58 @@
             progressContainer.style.display = 'block';
             
             try {
-                // Simular progresso
-                progressFill.style.width = '30%';
+                // Converter arquivos para Base64
+                const filePromises = Array.from(files).map(file => {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve({
+                            name: file.name,
+                            content: reader.result.split(',')[1],
+                            type: file.type,
+                            size: file.size
+                        });
+                        reader.readAsDataURL(file);
+                    });
+                });
                 
-                const result = await uploadFilesBase64({
-                    action: 'uploadFiles',
-                    userEmail: currentUser.email,
-                    category: category,
-                    description: description
-                }, files);
+                progressFill.style.width = '30%';
+                const fileData = await Promise.all(filePromises);
+                
+                progressFill.style.width = '60%';
+                
+                // Enviar para Google Apps Script
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'uploadFiles',
+                        userEmail: currentUser.email,
+                        category: category,
+                        description: description,
+                        files: fileData
+                    })
+                });
                 
                 progressFill.style.width = '100%';
                 
-                if (result.success) {
-                    btnText.textContent = 'Arquivos enviados!';
-                    alert(`${files.length} arquivo(s) enviado(s) com sucesso!`);
-                    document.getElementById('filesForm').reset();
-                    document.getElementById('uploadFilesInfo').innerHTML = '';
-                    loadUserData();
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        btnText.textContent = 'Arquivos enviados!';
+                        alert(`${files.length} arquivo(s) enviado(s) com sucesso!`);
+                        document.getElementById('filesForm').reset();
+                        document.getElementById('uploadFilesInfo').innerHTML = '';
+                        loadUserData();
+                        loadOverviewData();
+                    } else {
+                        alert(result.message || 'Erro ao enviar arquivos.');
+                    }
                 } else {
-                    alert('Erro ao enviar arquivos: ' + result.message);
+                    throw new Error('Erro de conexão');
                 }
             } catch (error) {
                 console.error('❌ Erro ao enviar arquivos:', error);
@@ -1441,111 +1699,40 @@
             }
         }
 
-        // ==================== UPLOAD DE ARQUIVOS VIA BASE64 ====================
-        async function uploadFilesBase64(data, files) {
-            console.log('🚀 Iniciando upload Base64...');
-            
-            // Se não há arquivos, enviar apenas dados
-            if (!files || files.length === 0) {
-                return await sendRequest(data);
-            }
-            
-            // Converter arquivos para Base64
-            const filesBase64 = [];
-            
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                
-                // Verificar tamanho
-                if (file.size > CONFIG.MAX_FILE_SIZE) {
-                    throw new Error(`Arquivo ${file.name} é muito grande (${(file.size / 1024 / 1024).toFixed(2)}MB). Máximo: 10MB`);
-                }
-                
-                console.log(`📁 Convertendo ${file.name} para Base64...`);
-                
-                const base64 = await convertFileToBase64(file);
-                
-                filesBase64.push({
-                    name: file.name,
-                    type: file.type,
-                    size: file.size,
-                    base64: base64
-                });
-                
-                console.log(`✅ ${file.name} convertido (${base64.length} caracteres)`);
-            }
-            
-            // Adicionar arquivos aos dados
-            data.filesBase64 = JSON.stringify(filesBase64);
-            
-            console.log(`📤 Enviando ${filesBase64.length} arquivo(s) via Base64...`);
-            
-            return await sendRequest(data);
-        }
-
-        // ==================== CONVERTER ARQUIVO PARA BASE64 ====================
-        function convertFileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                
-                reader.onload = function() {
-                    // Remover prefixo "data:tipo/mime;base64,"
-                    const base64 = reader.result.split(',')[1];
-                    resolve(base64);
-                };
-                
-                reader.onerror = function() {
-                    reject(new Error('Erro ao ler arquivo para conversão Base64'));
-                };
-                
-                reader.readAsDataURL(file);
-            });
-        }
-
-        // ==================== ENVIAR REQUISIÇÃO ====================
-        async function sendRequest(data) {
-            console.log('📤 Enviando requisição:', data.action);
-            
-            const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams(data)
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
-            const result = await response.json();
-            console.log('📥 Resposta recebida:', result);
-            
-            return result;
-        }
-
         // ==================== CARREGAR DADOS DO USUÁRIO ====================
         async function loadUserData() {
             if (!currentUser) return;
             
             try {
-                const result = await sendRequest({
-                    action: 'getUserData',
-                    userEmail: currentUser.email
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'getUserStats',
+                        userEmail: currentUser.email
+                    })
                 });
                 
-                if (result.success) {
-                    const data = result.data;
+                if (response.ok) {
+                    const result = await response.json();
                     
-                    const statsReports = document.getElementById('statsReports');
-                    const statsActivities = document.getElementById('statsActivities');
-                    const statsFiles = document.getElementById('statsFiles');
-                    
-                    if (statsReports) statsReports.textContent = data.reports || 0;
-                    if (statsActivities) statsActivities.textContent = data.activities || 0;
-                    if (statsFiles) statsFiles.textContent = data.files || 0;
-                    
-                    console.log('✅ Dados do usuário carregados:', data);
+                    if (result.success) {
+                        const { reports, activities, files } = result.stats;
+                        
+                        // Atualizar estatísticas se os elementos existirem
+                        const statsReports = document.getElementById('statsReports');
+                        const statsActivities = document.getElementById('statsActivities');
+                        const statsFiles = document.getElementById('statsFiles');
+                        
+                        if (statsReports) statsReports.textContent = reports;
+                        if (statsActivities) statsActivities.textContent = activities;
+                        if (statsFiles) statsFiles.textContent = files;
+                        
+                        console.log('✅ Dados do usuário carregados:', result.stats);
+                    }
                 }
             } catch (error) {
                 console.error('❌ Erro ao carregar dados do usuário:', error);
@@ -1557,23 +1744,33 @@
             if (!currentUser || !currentUser.isAdmin) return;
             
             try {
-                const result = await sendRequest({
-                    action: 'getAdminData'
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'getAdminData',
+                        adminEmail: currentUser.email
+                    })
                 });
                 
-                if (result.success) {
-                    const data = result.data;
+                if (response.ok) {
+                    const result = await response.json();
                     
-                    // Atualizar estatísticas
-                    document.getElementById('adminStatsUsers').textContent = data.totalUsers || 0;
-                    document.getElementById('adminStatsReports').textContent = data.totalReports || 0;
-                    document.getElementById('adminStatsActivities').textContent = data.totalActivities || 0;
-                    document.getElementById('adminStatsFiles').textContent = data.totalFiles || 0;
-                    
-                    // Carregar lista de usuários
-                    const usersList = document.getElementById('adminUsersList');
-                    if (data.users && data.users.length > 0) {
-                        usersList.innerHTML = data.users.map(user => `
+                    if (result.success) {
+                        const { stats, users, reports, activities, files } = result.data;
+                        
+                        // Atualizar estatísticas
+                        document.getElementById('adminStatsUsers').textContent = stats.users;
+                        document.getElementById('adminStatsReports').textContent = stats.reports;
+                        document.getElementById('adminStatsActivities').textContent = stats.activities;
+                        document.getElementById('adminStatsFiles').textContent = stats.files;
+                        
+                        // Carregar lista de usuários
+                        const usersList = document.getElementById('adminUsersList');
+                        usersList.innerHTML = users.map(user => `
                             <div class="user-card">
                                 <div class="user-info-card">
                                     <h5>${user.name}</h5>
@@ -1585,54 +1782,62 @@
                                 </button>
                             </div>
                         `).join('');
-                    } else {
-                        usersList.innerHTML = '<p>Nenhum usuário cadastrado.</p>';
-                    }
-                    
-                    // Carregar relatórios recentes
-                    const reportsList = document.getElementById('adminReportsList');
-                    if (data.reports && data.reports.length > 0) {
-                        reportsList.innerHTML = data.reports.map(report => `
+                        
+                        // Carregar relatórios recentes
+                        const reportsList = document.getElementById('adminReportsList');
+                        reportsList.innerHTML = reports.map(report => `
                             <div class="data-item">
                                 <h6>${report.title}</h6>
-                                <p><strong>Tipo:</strong> ${report.type} | <strong>Data:</strong> ${report.date} | <strong>Usuário:</strong> ${report.userEmail}</p>
+                                <p><strong>Tipo:</strong> ${report.type} | <strong>Data:</strong> ${formatDate(report.date)} | <strong>Usuário:</strong> ${report.userEmail}</p>
+                                <p>${report.description}</p>
                             </div>
                         `).join('');
-                    } else {
-                        reportsList.innerHTML = '<p>Nenhum relatório encontrado.</p>';
-                    }
-                    
-                    // Carregar atividades recentes
-                    const activitiesList = document.getElementById('adminActivitiesList');
-                    if (data.activities && data.activities.length > 0) {
-                        activitiesList.innerHTML = data.activities.map(activity => `
+                        
+                        // Carregar atividades recentes
+                        const activitiesList = document.getElementById('adminActivitiesList');
+                        activitiesList.innerHTML = activities.map(activity => `
                             <div class="data-item">
                                 <h6>${activity.title}</h6>
-                                <p><strong>Tipo:</strong> ${activity.type} | <strong>Data:</strong> ${activity.date} | <strong>Usuário:</strong> ${activity.userEmail}</p>
+                                <p><strong>Tipo:</strong> ${activity.type} | <strong>Data:</strong> ${formatDate(activity.date)} | <strong>Usuário:</strong> ${activity.userEmail}</p>
+                                <p><strong>Local:</strong> ${activity.location}</p>
+                                <p>${activity.description}</p>
                             </div>
                         `).join('');
-                    } else {
-                        activitiesList.innerHTML = '<p>Nenhuma atividade encontrada.</p>';
-                    }
-                    
-                    // Carregar arquivos recentes
-                    const filesList = document.getElementById('adminFilesList');
-                    if (data.files && data.files.length > 0) {
-                        filesList.innerHTML = data.files.map(file => `
+                        
+                        // Carregar arquivos recentes
+                        const filesList = document.getElementById('adminFilesList');
+                        filesList.innerHTML = files.map(file => `
                             <div class="data-item">
                                 <h6>${file.name}</h6>
-                                <p><strong>Categoria:</strong> ${file.category} | <strong>Tamanho:</strong> ${(file.size / 1024 / 1024).toFixed(2)}MB | <strong>Usuário:</strong> ${file.userEmail}</p>
+                                <p><strong>Categoria:</strong> ${file.category} | <strong>Tamanho:</strong> ${formatFileSize(file.size)} | <strong>Usuário:</strong> ${file.userEmail}</p>
+                                <p>${file.description}</p>
                             </div>
                         `).join('');
-                    } else {
-                        filesList.innerHTML = '<p>Nenhum arquivo encontrado.</p>';
+                        
+                        console.log('✅ Dados administrativos carregados');
                     }
-                    
-                    console.log('✅ Dados administrativos carregados:', data);
                 }
             } catch (error) {
                 console.error('❌ Erro ao carregar dados administrativos:', error);
+                // Mostrar mensagem de erro em vez de "Carregando..."
+                document.getElementById('adminUsersList').innerHTML = '<p>Erro ao carregar usuários.</p>';
+                document.getElementById('adminReportsList').innerHTML = '<p>Erro ao carregar relatórios.</p>';
+                document.getElementById('adminActivitiesList').innerHTML = '<p>Erro ao carregar atividades.</p>';
+                document.getElementById('adminFilesList').innerHTML = '<p>Erro ao carregar arquivos.</p>';
             }
+        }
+
+        // ==================== FUNÇÕES UTILITÁRIAS ====================
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('pt-BR');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
     </script>
 </body>
