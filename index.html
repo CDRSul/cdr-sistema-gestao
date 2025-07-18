@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema CDR Sul Tocantins</title>
+    <title>Sistema CDR Sul Tocantins - Gestão de Projetos</title>
     <style>
         * {
             margin: 0;
@@ -26,30 +26,17 @@
             padding: 20px;
         }
 
-        /* ==================== LOGIN STYLES ==================== */
         .login-container {
             background: white;
-            border-radius: 20px;
+            border-radius: 15px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
             max-width: 500px;
             width: 100%;
-            animation: slideUp 0.6s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .login-header {
-            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 40px 30px;
             text-align: center;
@@ -63,25 +50,18 @@
         }
 
         .login-header h1 {
-            font-size: 24px;
+            font-size: 28px;
             margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-weight: 300;
         }
 
         .login-header p {
-            opacity: 0.9;
             font-size: 16px;
+            opacity: 0.9;
         }
 
-        .login-form-container {
+        .login-form {
             padding: 40px 30px;
-        }
-
-        .login-form-container h2 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-            font-size: 28px;
         }
 
         .form-group {
@@ -91,7 +71,7 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 600;
+            font-weight: 500;
             color: #555;
         }
 
@@ -99,720 +79,699 @@
             width: 100%;
             padding: 15px;
             border: 2px solid #e1e5e9;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 16px;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
+            transition: border-color 0.3s ease;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #4a90e2;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+            border-color: #667eea;
         }
 
-        .btn-primary {
+        .btn {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 600;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: transform 0.2s ease;
             position: relative;
             overflow: hidden;
         }
 
-        .btn-primary:hover:not(:disabled) {
+        .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(74, 144, 226, 0.3);
         }
 
-        .btn-primary:disabled {
+        .btn:disabled {
             opacity: 0.7;
             cursor: not-allowed;
             transform: none;
         }
 
-        .btn-primary.btn-loading {
+        .btn-loading {
             color: transparent;
         }
 
-        .btn-primary .loading-spinner {
+        .btn-loading::after {
+            content: '';
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             width: 20px;
             height: 20px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top: 2px solid white;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .register-link {
+        .toggle-form {
             text-align: center;
-            margin-top: 25px;
-            color: #666;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5e9;
         }
 
-        .register-link a {
-            color: #4a90e2;
+        .toggle-form a {
+            color: #667eea;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 500;
         }
 
-        .register-link a:hover {
+        .toggle-form a:hover {
             text-decoration: underline;
         }
 
-        /* ==================== DASHBOARD STYLES ==================== */
+        .hidden {
+            display: none;
+        }
+
+        /* Dashboard Styles */
         .dashboard {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-            width: 100%;
-            max-width: 1200px;
-            min-height: 80vh;
-            animation: slideUp 0.6s ease-out;
+            background: #f8f9fa;
+            min-height: 100vh;
         }
 
         .dashboard-header {
-            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
-            color: white;
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .header-logo {
-            width: 80px;
-            height: auto;
-            filter: brightness(0) invert(1);
-        }
-
-        .user-info h2 {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-
-        .user-info p {
-            opacity: 0.9;
-            font-size: 14px;
-        }
-
-        .admin-badge {
-            background: #ff6b6b;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 10px;
-        }
-
-        .btn-logout {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 2px solid rgba(255,255,255,0.3);
-            padding: 10px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-logout:hover {
-            background: rgba(255,255,255,0.3);
-            border-color: rgba(255,255,255,0.5);
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px 0;
         }
 
         .dashboard-nav {
-            background: #f8f9fa;
-            padding: 0;
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
-            border-bottom: 1px solid #e1e5e9;
-            overflow-x: auto;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
         }
 
-        .nav-btn {
-            background: none;
+        .dashboard-logo {
+            width: 200px;
+            height: auto;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
             border: none;
-            padding: 20px 25px;
+            padding: 8px 16px;
+            border-radius: 5px;
             cursor: pointer;
-            font-weight: 600;
-            color: #666;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-            border-bottom: 3px solid transparent;
+            font-size: 14px;
         }
 
-        .nav-btn:hover {
-            background: #e9ecef;
-            color: #4a90e2;
-        }
-
-        .nav-btn.active {
-            color: #4a90e2;
-            border-bottom-color: #4a90e2;
-            background: white;
+        .logout-btn:hover {
+            background: #c82333;
         }
 
         .dashboard-content {
-            padding: 30px;
-            min-height: 400px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
         }
 
-        /* ==================== CARDS ==================== */
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: #f8f9fa;
+        }
+
+        .tab-content {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .file-upload {
+            border: 2px dashed #e1e5e9;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            transition: border-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-upload:hover {
+            border-color: #667eea;
+        }
+
+        .file-upload.dragover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .file-upload-icon {
+            font-size: 48px;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+
+        .file-upload-text {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .file-selected {
+            background: #f8f9ff;
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e1e5e9;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
 
         .stat-card {
             background: white;
-            border-radius: 15px;
             padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            border: 1px solid #e1e5e9;
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
 
         .stat-number {
             font-size: 36px;
-            font-weight: 700;
-            color: #4a90e2;
+            font-weight: bold;
+            color: #667eea;
             margin-bottom: 10px;
         }
 
         .stat-label {
             color: #666;
-            font-weight: 600;
+            font-size: 16px;
         }
 
-        /* ==================== FORMS ==================== */
-        .form-card {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            border: 1px solid #e1e5e9;
-        }
-
-        .form-card h3 {
-            margin-bottom: 25px;
-            color: #333;
-            font-size: 24px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .file-upload-area {
-            border: 2px dashed #4a90e2;
-            border-radius: 10px;
-            padding: 30px;
-            text-align: center;
-            background: #f8f9ff;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .file-upload-area:hover {
-            border-color: #357abd;
-            background: #f0f4ff;
-        }
-
-        .file-upload-area.dragover {
-            border-color: #357abd;
-            background: #e8f2ff;
-        }
-
-        .file-info {
-            background: #e8f5e8;
-            border: 1px solid #4caf50;
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 15px;
-            display: none;
-        }
-
-        .file-info.show {
-            display: block;
-        }
-
-        /* ==================== PROGRESS ==================== */
-        .progress-container {
-            margin-top: 15px;
-            background: #f0f0f0;
-            border-radius: 10px;
-            overflow: hidden;
-            height: 8px;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #4a90e2, #357abd);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .upload-status {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .upload-status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .upload-status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        /* ==================== LOADING OVERLAY ==================== */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .data-table {
             width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
 
-        .loading-content {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e1e5e9;
         }
 
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #4a90e2;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
         }
 
-        .loading-content h3 {
-            margin-bottom: 10px;
-            color: #333;
+        .data-table tr:hover {
+            background: #f8f9fa;
         }
 
-        .loading-content p {
-            color: #666;
-        }
-
-        /* ==================== TOAST ==================== */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            border-left: 4px solid #4a90e2;
-            max-width: 400px;
-            transform: translateX(450px);
-            transition: transform 0.3s ease;
-            z-index: 10000;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast.success {
-            border-left-color: #4caf50;
-        }
-
-        .toast.error {
-            border-left-color: #f44336;
-        }
-
-        /* ==================== RESPONSIVE ==================== */
+        /* Responsive */
         @media (max-width: 768px) {
-            .main-container {
-                padding: 10px;
+            .form-row {
+                grid-template-columns: 1fr;
             }
 
-            .login-container {
-                margin: 0;
-            }
-
-            .login-header {
-                padding: 30px 20px;
-            }
-
-            .logo {
-                width: 200px;
-            }
-
-            .login-form-container {
-                padding: 30px 20px;
-            }
-
-            .dashboard-header {
+            .tabs {
                 flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .header-left {
-                flex-direction: column;
-                gap: 10px;
             }
 
             .dashboard-nav {
-                flex-wrap: wrap;
-            }
-
-            .nav-btn {
-                flex: 1;
-                min-width: 120px;
-            }
-
-            .dashboard-content {
-                padding: 20px;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                flex-direction: column;
                 gap: 15px;
             }
 
-            .form-row {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .toast {
-                right: 10px;
-                left: 10px;
-                max-width: none;
-                transform: translateY(-100px);
-            }
-
-            .toast.show {
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .logo {
+            .dashboard-logo {
                 width: 150px;
             }
 
-            .login-header h1 {
-                font-size: 20px;
-            }
-
-            .login-header p {
-                font-size: 14px;
-            }
-
-            .login-form-container h2 {
-                font-size: 24px;
-            }
-
-            .stat-card {
-                padding: 20px;
-            }
-
-            .stat-number {
-                font-size: 28px;
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
     <div class="main-container">
-        <!-- Conteúdo será carregado dinamicamente pelo JavaScript -->
-    </div>
+        <!-- Login Form -->
+        <div id="loginContainer" class="login-container">
+            <div class="login-header">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDMwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMTAwIiBmaWxsPSJ0cmFuc3BhcmVudCIvPgo8dGV4dCB4PSIxNTAiIHk9IjM1IiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Q0RSIFNVTCBUT0NBTlRJTlM8L3RleHQ+Cjx0ZXh0IHg9IjE1MCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkNlbnRybyBkZSBEZXNlbnZvbHZpbWVudG8gUmVnaW9uYWw8L3RleHQ+Cjx0ZXh0IHg9IjE1MCIgeT0iODAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMiIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlNpc3RlbWEgZGUgR2VzdMOjbyBkZSBQcm9qZXRvczwvdGV4dD4KPC9zdmc+" alt="CDR Sul Tocantins" class="logo">
+                <h1>Sistema de Gestão</h1>
+                <p>Centro de Desenvolvimento Regional</p>
+            </div>
 
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <h3 id="loadingText">Processando...</h3>
-            <p id="loadingSubtext">Aguarde um momento</p>
+            <!-- Login Form -->
+            <div id="loginForm" class="login-form">
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="loginEmail">E-mail:</label>
+                        <input type="email" id="loginEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Senha:</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn" id="loginBtn">
+                        <span class="btn-text">Fazer Login</span>
+                    </button>
+                </form>
+                <div class="toggle-form">
+                    <p>Não tem conta? <a href="#" onclick="showRegisterForm()">Cadastre-se aqui</a></p>
+                </div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" class="login-form hidden">
+                <form onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="registerName">Nome Completo:</label>
+                        <input type="text" id="registerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">E-mail:</label>
+                        <input type="email" id="registerEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Senha:</label>
+                        <input type="password" id="registerPassword" required>
+                    </div>
+                    <button type="submit" class="btn" id="registerBtn">
+                        <span class="btn-text">Criar Conta</span>
+                    </button>
+                </form>
+                <div class="toggle-form">
+                    <p>Já tem conta? <a href="#" onclick="showLoginForm()">Faça login aqui</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="dashboard hidden">
+            <div class="dashboard-header">
+                <div class="dashboard-nav">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjgwIiB2aWV3Qm94PSIwIDAgMjAwIDgwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjgwIiBmaWxsPSJ0cmFuc3BhcmVudCIvPgo8dGV4dCB4PSIxMDAiIHk9IjI4IiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjNjY3ZWVhIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DRFIgU1VMIFRPQ0FOVElOUzwvdGV4dD4KPHRleHQgeD0iMTAwIiB5PSI0OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmaWxsPSIjNjY3ZWVhIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DZW50cm8gZGUgRGVzZW52b2x2aW1lbnRvIFJlZ2lvbmFsPC90ZXh0Pgo8dGV4dCB4PSIxMDAiIHk9IjY1IiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iOCIgZmlsbD0iIzY2N2VlYSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+U2lzdGVtYSBkZSBHZXN0w6NvIGRlIFByb2pldG9zPC90ZXh0Pgo8L3N2Zz4=" alt="CDR Sul Tocantins" class="dashboard-logo">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">U</div>
+                        <span id="userName">Usuário</span>
+                        <button class="logout-btn" onclick="logout()">Sair</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-content">
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('overview')">Visão Geral</button>
+                    <button class="tab" onclick="showTab('reports')">Relatórios</button>
+                    <button class="tab" onclick="showTab('activities')">Atividades</button>
+                    <button class="tab" onclick="showTab('files')">Arquivos</button>
+                    <button class="tab" id="adminTab" onclick="showTab('admin')" style="display: none;">Admin</button>
+                </div>
+
+                <!-- Overview Tab -->
+                <div id="overviewTab" class="tab-content">
+                    <h2>Visão Geral do Sistema</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalReports">0</div>
+                            <div class="stat-label">Relatórios Enviados</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalActivities">0</div>
+                            <div class="stat-label">Atividades Cadastradas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalFiles">0</div>
+                            <div class="stat-label">Arquivos Enviados</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalUsers">0</div>
+                            <div class="stat-label">Usuários Cadastrados</div>
+                        </div>
+                    </div>
+
+                    <h3>Atividades Recentes</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Usuário</th>
+                                <th>Ação</th>
+                                <th>Descrição</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentActivities">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #666;">Carregando atividades...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Reports Tab -->
+                <div id="reportsTab" class="tab-content hidden">
+                    <h2>Enviar Relatório</h2>
+                    <form onsubmit="submitReport(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="reportTitle">Título do Relatório:</label>
+                                <input type="text" id="reportTitle" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reportCategory">Categoria:</label>
+                                <select id="reportCategory" required>
+                                    <option value="">Selecione uma categoria</option>
+                                    <option value="Pesquisa">Pesquisa</option>
+                                    <option value="Extensão">Extensão</option>
+                                    <option value="Ensino">Ensino</option>
+                                    <option value="Administrativo">Administrativo</option>
+                                    <option value="Outros">Outros</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reportDescription">Descrição:</label>
+                            <textarea id="reportDescription" placeholder="Descreva o conteúdo do relatório..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Arquivo do Relatório:</label>
+                            <div class="file-upload" onclick="document.getElementById('reportFile').click()">
+                                <div class="file-upload-icon">📄</div>
+                                <div class="file-upload-text">
+                                    <strong>Clique para selecionar</strong> ou arraste o arquivo aqui<br>
+                                    <small>Formatos aceitos: PDF, DOC, DOCX (máx. 10MB)</small>
+                                </div>
+                                <input type="file" id="reportFile" accept=".pdf,.doc,.docx" required>
+                            </div>
+                            <div class="progress-bar" id="reportProgress" style="display: none;">
+                                <div class="progress-fill"></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn" id="reportSubmitBtn">
+                            <span class="btn-text">Enviar Relatório</span>
+                        </button>
+                    </form>
+                    <div id="reportMessage"></div>
+                </div>
+
+                <!-- Activities Tab -->
+                <div id="activitiesTab" class="tab-content hidden">
+                    <h2>Cadastrar Atividade</h2>
+                    <form onsubmit="submitActivity(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="activityTitle">Título da Atividade:</label>
+                                <input type="text" id="activityTitle" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="activityType">Tipo:</label>
+                                <select id="activityType" required>
+                                    <option value="">Selecione o tipo</option>
+                                    <option value="Reunião">Reunião</option>
+                                    <option value="Workshop">Workshop</option>
+                                    <option value="Palestra">Palestra</option>
+                                    <option value="Curso">Curso</option>
+                                    <option value="Evento">Evento</option>
+                                    <option value="Outros">Outros</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="activityDate">Data:</label>
+                                <input type="date" id="activityDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="activityTime">Horário:</label>
+                                <input type="time" id="activityTime" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="activityDescription">Descrição:</label>
+                            <textarea id="activityDescription" placeholder="Descreva a atividade..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Arquivo da Atividade (opcional):</label>
+                            <div class="file-upload" onclick="document.getElementById('activityFile').click()">
+                                <div class="file-upload-icon">📎</div>
+                                <div class="file-upload-text">
+                                    <strong>Clique para selecionar</strong> ou arraste o arquivo aqui<br>
+                                    <small>Formatos aceitos: PDF, DOC, DOCX, JPG, PNG (máx. 10MB)</small>
+                                </div>
+                                <input type="file" id="activityFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                            </div>
+                            <div class="progress-bar" id="activityProgress" style="display: none;">
+                                <div class="progress-fill"></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn" id="activitySubmitBtn">
+                            <span class="btn-text">Cadastrar Atividade</span>
+                        </button>
+                    </form>
+                    <div id="activityMessage"></div>
+                </div>
+
+                <!-- Files Tab -->
+                <div id="filesTab" class="tab-content hidden">
+                    <h2>Enviar Arquivos</h2>
+                    <form onsubmit="submitFiles(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fileCategory">Categoria:</label>
+                                <select id="fileCategory" required>
+                                    <option value="">Selecione uma categoria</option>
+                                    <option value="Documentos">Documentos</option>
+                                    <option value="Imagens">Imagens</option>
+                                    <option value="Planilhas">Planilhas</option>
+                                    <option value="Apresentações">Apresentações</option>
+                                    <option value="Outros">Outros</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="fileDescription">Descrição:</label>
+                                <input type="text" id="fileDescription" placeholder="Descreva os arquivos..." required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Selecionar Arquivos:</label>
+                            <div class="file-upload" onclick="document.getElementById('fileUpload').click()">
+                                <div class="file-upload-icon">📁</div>
+                                <div class="file-upload-text">
+                                    <strong>Clique para selecionar</strong> ou arraste os arquivos aqui<br>
+                                    <small>Múltiplos arquivos aceitos (máx. 10MB cada)</small>
+                                </div>
+                                <input type="file" id="fileUpload" multiple required>
+                            </div>
+                            <div class="progress-bar" id="fileProgress" style="display: none;">
+                                <div class="progress-fill"></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn" id="fileSubmitBtn">
+                            <span class="btn-text">Enviar Arquivos</span>
+                        </button>
+                    </form>
+                    <div id="fileMessage"></div>
+                </div>
+
+                <!-- Admin Tab -->
+                <div id="adminTab" class="tab-content hidden">
+                    <h2>Painel Administrativo</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="adminTotalReports">0</div>
+                            <div class="stat-label">Total de Relatórios</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="adminTotalActivities">0</div>
+                            <div class="stat-label">Total de Atividades</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="adminTotalFiles">0</div>
+                            <div class="stat-label">Total de Arquivos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="adminTotalUsers">0</div>
+                            <div class="stat-label">Total de Usuários</div>
+                        </div>
+                    </div>
+
+                    <h3>Todos os Dados</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Usuário</th>
+                                <th>Tipo</th>
+                                <th>Título</th>
+                                <th>Arquivo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminAllData">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #666;">Carregando dados...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         // ==================== CONFIGURAÇÕES ====================
-        const CONFIG = {
-            GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec',
-            VERSION: 'SISTEMA FINAL CORRIGIDO v1.0',
-            DEBUG: true,
-            MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB em bytes
-            MAX_TOTAL_SIZE: 50 * 1024 * 1024, // 50MB total
-            SUPPORTED_FORMATS: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'zip', 'rar', 'xlsx', 'ppt', 'xls']
-        };
-
-        // ==================== ESTADO GLOBAL ====================
+        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec';
         let currentUser = null;
-        let isLoggedIn = false;
 
         // ==================== INICIALIZAÇÃO ====================
         document.addEventListener('DOMContentLoaded', function() {
-            console.log(`[CDR Sul] Sistema CDR Sul iniciando - Versão ${CONFIG.VERSION}`);
+            console.log('🚀 Sistema CDR Sul Tocantins iniciado');
             
-            // Verificar sessão salva
-            checkSavedSession();
-            
-            // Testar conectividade
-            testConnectivity();
-        });
-
-        // ==================== FUNÇÕES DE UI ====================
-        function showLoading(text = 'Processando...', subtext = 'Aguarde um momento') {
-            const overlay = document.getElementById('loadingOverlay');
-            const textEl = document.getElementById('loadingText');
-            const subtextEl = document.getElementById('loadingSubtext');
-            
-            textEl.textContent = text;
-            subtextEl.textContent = subtext;
-            overlay.style.display = 'flex';
-        }
-
-        function hideLoading() {
-            const overlay = document.getElementById('loadingOverlay');
-            overlay.style.display = 'none';
-        }
-
-        function showToast(message, type = 'info', duration = 3000) {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `
-                <div style="font-weight: 600; margin-bottom: 5px;">
-                    ${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'} 
-                    ${type === 'success' ? 'Sucesso' : type === 'error' ? 'Erro' : 'Informação'}
-                </div>
-                <div>${message}</div>
-            `;
-            
-            document.body.appendChild(toast);
-            
-            setTimeout(() => toast.classList.add('show'), 100);
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => document.body.removeChild(toast), 300);
-            }, duration);
-        }
-
-        function setButtonLoading(button, loading = true, text = '') {
-            if (loading) {
-                button.disabled = true;
-                button.classList.add('btn-loading');
-                if (!button.getAttribute('data-original-text')) {
-                    button.setAttribute('data-original-text', button.innerHTML);
-                }
-                button.innerHTML = `
-                    <div class="loading-spinner"></div>
-                    ${text || 'Processando...'}
-                `;
-            } else {
-                button.disabled = false;
-                button.classList.remove('btn-loading');
-                button.innerHTML = button.getAttribute('data-original-text') || text || 'Enviar';
-            }
-        }
-
-        function showUploadProgress(container, progress = 0, status = '') {
-            let progressContainer = container.querySelector('.progress-container');
-            let statusContainer = container.querySelector('.upload-status');
-            
-            if (!progressContainer) {
-                progressContainer = document.createElement('div');
-                progressContainer.className = 'progress-container';
-                progressContainer.innerHTML = '<div class="progress-bar"></div>';
-                container.appendChild(progressContainer);
-            }
-            
-            if (!statusContainer) {
-                statusContainer = document.createElement('div');
-                statusContainer.className = 'upload-status';
-                container.appendChild(statusContainer);
-            }
-            
-            const progressBar = progressContainer.querySelector('.progress-bar');
-            progressBar.style.width = progress + '%';
-            
-            if (status) {
-                statusContainer.textContent = status;
-                statusContainer.style.display = 'block';
-            }
-        }
-
-        // ==================== VERIFICAR SESSÃO ====================
-        function checkSavedSession() {
+            // Verificar se há usuário logado
             const savedUser = localStorage.getItem('cdr_user');
             if (savedUser) {
                 try {
                     currentUser = JSON.parse(savedUser);
-                    console.log('👤 Sessão encontrada:', currentUser.email);
                     showDashboard(currentUser);
-                    return;
                 } catch (error) {
-                    console.error('❌ Erro ao carregar sessão:', error);
+                    console.error('Erro ao carregar usuário salvo:', error);
                     localStorage.removeItem('cdr_user');
                 }
             }
-            
-            showLoginScreen();
+
+            // Configurar upload de arquivos
+            setupFileUploads();
+        });
+
+        // ==================== AUTENTICAÇÃO ====================
+        function showLoginForm() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
         }
 
-        // ==================== TESTAR CONECTIVIDADE ====================
-        async function testConnectivity() {
-            try {
-                console.log('🌐 Testando conectividade...');
-                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL);
-                const result = await response.json();
-                console.log('✅ Conectividade OK:', result.version || 'Versão não informada');
-            } catch (error) {
-                console.error('❌ Erro de conectividade:', error);
-                showToast('Problema de conexão com o servidor. Algumas funcionalidades podem não funcionar.', 'error', 5000);
-            }
-        }
-
-        // ==================== MOSTRAR TELA DE LOGIN ====================
-        function showLoginScreen() {
-            document.querySelector('.main-container').innerHTML = `
-                <div class="login-container">
-                    <div class="login-header">
-                        <img src="https://static.wixstatic.com/media/96b2d1_82005fa5efee493fb11c905fa9b56a83~mv2.png" alt="CDR Sul Tocantins" class="logo">
-                        <h1>Sistema de Gestão de Projetos CDR Sul</h1>
-                        <p>Faça login para acessar o sistema</p>
-                    </div>
-                    
-                    <div class="login-form-container">
-                        <h2>Entrar</h2>
-                        
-                        <form id="loginForm" onsubmit="handleLogin(event)">
-                            <div class="form-group">
-                                <label for="loginEmail">E-mail:</label>
-                                <input type="email" id="loginEmail" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="loginPassword">Senha:</label>
-                                <input type="password" id="loginPassword" required>
-                            </div>
-                            
-                            <button type="submit" class="btn-primary" data-original-text="Entrar">Entrar</button>
-                        </form>
-                        
-                        <p class="register-link">
-                            Não tem conta? <a href="#" onclick="showRegisterScreen()">Cadastre-se aqui</a>
-                        </p>
-                    </div>
-                </div>
-            `;
-        }
-
-        // ==================== MOSTRAR TELA DE CADASTRO ====================
-        function showRegisterScreen() {
-            document.querySelector('.main-container').innerHTML = `
-                <div class="login-container">
-                    <div class="login-header">
-                        <img src="https://static.wixstatic.com/media/96b2d1_82005fa5efee493fb11c905fa9b56a83~mv2.png" alt="CDR Sul Tocantins" class="logo">
-                        <h1>Sistema de Gestão de Projetos CDR Sul</h1>
-                        <p>Cadastro de Novo Usuário</p>
-                    </div>
-                    
-                    <div class="login-form-container">
-                        <h2>Criar Conta</h2>
-                        
-                        <form id="registerForm" onsubmit="handleRegister(event)">
-                            <div class="form-group">
-                                <label for="registerName">Nome Completo:</label>
-                                <input type="text" id="registerName" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="registerEmail">E-mail:</label>
-                                <input type="email" id="registerEmail" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="registerInstitution">Instituição:</label>
-                                <input type="text" id="registerInstitution" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="registerProject">Nome do Projeto:</label>
-                                <input type="text" id="registerProject" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="registerPassword">Senha:</label>
-                                <input type="password" id="registerPassword" required minlength="6">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="registerConfirmPassword">Confirmar Senha:</label>
-                                <input type="password" id="registerConfirmPassword" required minlength="6">
-                            </div>
-                            
-                            <button type="submit" class="btn-primary" data-original-text="Cadastrar">Cadastrar</button>
-                        </form>
-                        
-                        <p class="register-link">
-                            Já tem conta? <a href="#" onclick="showLoginScreen()">Faça login aqui</a>
-                        </p>
-                    </div>
-                </div>
-            `;
+        function showRegisterForm() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
         }
 
         // ==================== PROCESSAR LOGIN ====================
@@ -821,49 +780,51 @@
             
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
-            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const loginBtn = document.getElementById('loginBtn');
             
-            console.log('🔐 Tentando login:', email);
-            
-            setButtonLoading(submitBtn, true, 'Fazendo login...');
-            showLoading('Fazendo login...', 'Verificando suas credenciais');
-            
+            // Mostrar loading
+            loginBtn.disabled = true;
+            loginBtn.classList.add('btn-loading');
+            loginBtn.querySelector('.btn-text').textContent = 'Fazendo login...';
+
             try {
-                const result = await sendRequest({
-                    action: 'login',
-                    email: email,
-                    password: password
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'login',
+                        email: email,
+                        password: password
+                    })
                 });
-                
+
+                const result = await response.json();
                 console.log('📥 Resposta do login:', result);
-                
+
                 if (result.success) {
-                    console.log('✅ Login bem-sucedido');
-                    
-                    // Corrigir: acessar result.user ao invés de result.data.user
+                    console.log('✅ Login bem-sucedido:', result.user);
+                    // CORREÇÃO: Acesso correto aos dados do usuário
                     currentUser = result.user || result.data?.user;
                     
                     if (currentUser) {
                         localStorage.setItem('cdr_user', JSON.stringify(currentUser));
-                        showToast('Login realizado com sucesso!', 'success');
-                        hideLoading();
-                        
-                        setTimeout(() => {
-                            showDashboard(currentUser);
-                        }, 500);
+                        showDashboard(currentUser);
                     } else {
                         throw new Error('Dados do usuário não encontrados na resposta');
                     }
                 } else {
-                    hideLoading();
-                    setButtonLoading(submitBtn, false);
-                    showToast('Erro no login: ' + (result.message || 'Credenciais inválidas'), 'error');
+                    alert('Erro no login: ' + result.message);
                 }
             } catch (error) {
                 console.error('❌ Erro no login:', error);
-                hideLoading();
-                setButtonLoading(submitBtn, false);
-                showToast('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+                alert('Erro de conexão. Verifique sua internet e tente novamente.');
+            } finally {
+                // Restaurar botão
+                loginBtn.disabled = false;
+                loginBtn.classList.remove('btn-loading');
+                loginBtn.querySelector('.btn-text').textContent = 'Fazer Login';
             }
         }
 
@@ -873,383 +834,228 @@
             
             const name = document.getElementById('registerName').value;
             const email = document.getElementById('registerEmail').value;
-            const institution = document.getElementById('registerInstitution').value;
-            const project = document.getElementById('registerProject').value;
             const password = document.getElementById('registerPassword').value;
-            const confirmPassword = document.getElementById('registerConfirmPassword').value;
-            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const registerBtn = document.getElementById('registerBtn');
             
-            if (password !== confirmPassword) {
-                showToast('As senhas não coincidem!', 'error');
-                return;
-            }
-            
-            console.log('📝 Tentando cadastro:', email);
-            
-            setButtonLoading(submitBtn, true, 'Cadastrando...');
-            showLoading('Criando sua conta...', 'Configurando seu perfil no sistema');
-            
+            // Mostrar loading
+            registerBtn.disabled = true;
+            registerBtn.classList.add('btn-loading');
+            registerBtn.querySelector('.btn-text').textContent = 'Criando conta...';
+
             try {
-                const result = await sendRequest({
-                    action: 'register',
-                    name: name,
-                    email: email,
-                    institution: institution,
-                    project: project,
-                    password: password
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'register',
+                        name: name,
+                        email: email,
+                        password: password
+                    })
                 });
-                
+
+                const result = await response.json();
+                console.log('📥 Resposta do cadastro:', result);
+
                 if (result.success) {
-                    hideLoading();
-                    showToast('Cadastro realizado com sucesso! Faça login para continuar.', 'success', 4000);
-                    setTimeout(() => {
-                        showLoginScreen();
-                    }, 1000);
+                    alert('Conta criada com sucesso! Faça login para continuar.');
+                    showLoginForm();
+                    // Limpar campos
+                    document.getElementById('registerName').value = '';
+                    document.getElementById('registerEmail').value = '';
+                    document.getElementById('registerPassword').value = '';
                 } else {
-                    hideLoading();
-                    setButtonLoading(submitBtn, false);
-                    showToast('Erro no cadastro: ' + (result.message || 'Erro desconhecido'), 'error');
+                    alert('Erro no cadastro: ' + result.message);
                 }
             } catch (error) {
                 console.error('❌ Erro no cadastro:', error);
-                hideLoading();
-                setButtonLoading(submitBtn, false);
-                showToast('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+                alert('Erro de conexão. Verifique sua internet e tente novamente.');
+            } finally {
+                // Restaurar botão
+                registerBtn.disabled = false;
+                registerBtn.classList.remove('btn-loading');
+                registerBtn.querySelector('.btn-text').textContent = 'Criar Conta';
             }
         }
 
-        // ==================== MOSTRAR DASHBOARD ====================
+        // ==================== DASHBOARD ====================
         function showDashboard(user) {
-            console.log('📊 Mostrando dashboard:', user.email);
+            console.log('📊 Mostrando dashboard para:', user);
             
-            currentUser = user;
+            document.getElementById('loginContainer').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
             
-            document.querySelector('.main-container').innerHTML = `
-                <div class="dashboard">
-                    <header class="dashboard-header">
-                        <div class="header-left">
-                            <img src="https://static.wixstatic.com/media/96b2d1_82005fa5efee493fb11c905fa9b56a83~mv2.png" alt="CDR Sul" class="header-logo">
-                            <div class="user-info">
-                                <h2>Bem-vindo, ${user.name}</h2>
-                                <p>Projeto: ${user.project || 'Não informado'}</p>
-                                ${user.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
-                            </div>
-                        </div>
-                        <button onclick="logout()" class="btn-logout">Sair</button>
-                    </header>
-                    
-                    <nav class="dashboard-nav">
-                        <button onclick="showTab('overview')" class="nav-btn active" data-tab="overview">Visão Geral</button>
-                        <button onclick="showTab('reports')" class="nav-btn" data-tab="reports">Relatórios</button>
-                        <button onclick="showTab('activities')" class="nav-btn" data-tab="activities">Atividades</button>
-                        <button onclick="showTab('files')" class="nav-btn" data-tab="files">Arquivos</button>
-                        ${user.isAdmin ? '<button onclick="showTab(\'admin\')" class="nav-btn" data-tab="admin">Admin</button>' : ''}
-                    </nav>
-                    
-                    <main class="dashboard-content" id="dashboardContent">
-                        <!-- Conteúdo será carregado aqui -->
-                    </main>
-                </div>
-            `;
+            // Configurar informações do usuário
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
             
-            showTab('overview');
-            loadUserData();
+            // Mostrar aba admin se for administrador
+            if (user.role === 'admin') {
+                document.getElementById('adminTab').style.display = 'block';
+            }
+            
+            // Carregar dados do dashboard
+            loadDashboardData();
         }
 
-        // ==================== MOSTRAR ABA ====================
+        function logout() {
+            localStorage.removeItem('cdr_user');
+            currentUser = null;
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('loginContainer').classList.remove('hidden');
+            showLoginForm();
+        }
+
+        // ==================== TABS ====================
         function showTab(tabName) {
-            console.log('📑 Mostrando aba:', tabName);
+            // Esconder todas as abas
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.add('hidden'));
             
-            // Atualizar navegação
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
-            if (activeBtn) activeBtn.classList.add('active');
+            // Remover classe active de todos os botões
+            const tabButtons = document.querySelectorAll('.tab');
+            tabButtons.forEach(btn => btn.classList.remove('active'));
             
-            // Mostrar conteúdo
-            const content = document.getElementById('dashboardContent');
+            // Mostrar aba selecionada
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
             
-            switch(tabName) {
-                case 'overview':
-                    showOverviewTab(content);
-                    break;
-                case 'reports':
-                    showReportsTab(content);
-                    break;
-                case 'activities':
-                    showActivitiesTab(content);
-                    break;
-                case 'files':
-                    showFilesTab(content);
-                    break;
-                case 'admin':
-                    showAdminTab(content);
-                    break;
+            // Adicionar classe active ao botão
+            event.target.classList.add('active');
+            
+            // Carregar dados específicos da aba
+            if (tabName === 'overview' || tabName === 'admin') {
+                loadDashboardData();
             }
         }
 
-        // ==================== ABA VISÃO GERAL ====================
-        function showOverviewTab(content) {
-            content.innerHTML = `
-                <h2>Visão Geral</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalReports">0</div>
-                        <div class="stat-label">Relatórios Enviados</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalActivities">0</div>
-                        <div class="stat-label">Atividades Cadastradas</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalFiles">0</div>
-                        <div class="stat-label">Arquivos Enviados</div>
-                    </div>
-                </div>
-                
-                <div class="form-card">
-                    <h3>Resumo das Atividades</h3>
-                    <p>Bem-vindo ao Sistema de Gestão de Projetos CDR Sul Tocantins!</p>
-                    <p>Use as abas acima para navegar entre as diferentes funcionalidades do sistema.</p>
-                </div>
-            `;
-        }
+        // ==================== CARREGAR DADOS ====================
+        async function loadDashboardData() {
+            try {
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'getDashboardData',
+                        email: currentUser.email
+                    })
+                });
 
-        // ==================== ABA RELATÓRIOS ====================
-        function showReportsTab(content) {
-            content.innerHTML = `
-                <h2>Enviar Relatório</h2>
-                <div class="form-card">
-                    <h3>Novo Relatório</h3>
-                    <form id="reportForm" onsubmit="handleReportSubmit(event)">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="reportTitle">Título do Relatório:</label>
-                                <input type="text" id="reportTitle" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="reportCategory">Categoria:</label>
-                                <select id="reportCategory" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="Mensal">Relatório Mensal</option>
-                                    <option value="Trimestral">Relatório Trimestral</option>
-                                    <option value="Anual">Relatório Anual</option>
-                                    <option value="Especial">Relatório Especial</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="reportDescription">Descrição:</label>
-                            <textarea id="reportDescription" rows="4" required></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Arquivo do Relatório (PDF, DOC, DOCX):</label>
-                            <div class="file-upload-area" onclick="document.getElementById('reportFile').click()">
-                                <p>📄 Clique aqui para selecionar o arquivo</p>
-                                <p><small>Máximo 10MB - Formatos: PDF, DOC, DOCX</small></p>
-                            </div>
-                            <input type="file" id="reportFile" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleFileSelect(this, 'reportFileInfo')">
-                            <div id="reportFileInfo" class="file-info"></div>
-                        </div>
-                        
-                        <button type="submit" class="btn-primary" data-original-text="Enviar Relatório">Enviar Relatório</button>
-                    </form>
-                </div>
-            `;
-        }
+                const result = await response.json();
+                console.log('📊 Dados do dashboard:', result);
 
-        // ==================== ABA ATIVIDADES ====================
-        function showActivitiesTab(content) {
-            content.innerHTML = `
-                <h2>Cadastrar Atividade</h2>
-                <div class="form-card">
-                    <h3>Nova Atividade</h3>
-                    <form id="activityForm" onsubmit="handleActivitySubmit(event)">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="activityTitle">Título da Atividade:</label>
-                                <input type="text" id="activityTitle" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="activityDate">Data:</label>
-                                <input type="date" id="activityDate" required>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="activityLocation">Local:</label>
-                                <input type="text" id="activityLocation" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="activityType">Tipo:</label>
-                                <select id="activityType" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="Reunião">Reunião</option>
-                                    <option value="Workshop">Workshop</option>
-                                    <option value="Treinamento">Treinamento</option>
-                                    <option value="Evento">Evento</option>
-                                    <option value="Visita Técnica">Visita Técnica</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="activityDescription">Descrição:</label>
-                            <textarea id="activityDescription" rows="4" required></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Anexos (Fotos, Documentos):</label>
-                            <div class="file-upload-area" onclick="document.getElementById('activityFiles').click()">
-                                <p>📎 Clique aqui para selecionar arquivos</p>
-                                <p><small>Máximo 10MB por arquivo - Múltiplos arquivos permitidos</small></p>
-                            </div>
-                            <input type="file" id="activityFiles" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display: none;" onchange="handleFileSelect(this, 'activityFileInfo')">
-                            <div id="activityFileInfo" class="file-info"></div>
-                        </div>
-                        
-                        <button type="submit" class="btn-primary" data-original-text="Cadastrar Atividade">Cadastrar Atividade</button>
-                    </form>
-                </div>
-            `;
-        }
-
-        // ==================== ABA ARQUIVOS ====================
-        function showFilesTab(content) {
-            content.innerHTML = `
-                <h2>Enviar Arquivos</h2>
-                <div class="form-card">
-                    <h3>Upload de Arquivos</h3>
-                    <form id="filesForm" onsubmit="handleFilesSubmit(event)">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="filesCategory">Categoria:</label>
-                                <select id="filesCategory" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="Documentos">Documentos</option>
-                                    <option value="Imagens">Imagens</option>
-                                    <option value="Planilhas">Planilhas</option>
-                                    <option value="Apresentações">Apresentações</option>
-                                    <option value="Outros">Outros</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="filesDescription">Descrição:</label>
-                            <textarea id="filesDescription" rows="3" required placeholder="Descreva os arquivos que está enviando..."></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Selecionar Arquivos:</label>
-                            <div class="file-upload-area" onclick="document.getElementById('uploadFiles').click()">
-                                <p>📁 Clique aqui para selecionar arquivos</p>
-                                <p><small>Máximo 10MB por arquivo - Múltiplos arquivos permitidos</small></p>
-                            </div>
-                            <input type="file" id="uploadFiles" multiple style="display: none;" onchange="handleFileSelect(this, 'uploadFileInfo')">
-                            <div id="uploadFileInfo" class="file-info"></div>
-                        </div>
-                        
-                        <button type="submit" class="btn-primary" data-original-text="Enviar Arquivos">Enviar Arquivos</button>
-                    </form>
-                </div>
-            `;
-        }
-
-        // ==================== ABA ADMIN ====================
-        function showAdminTab(content) {
-            if (!currentUser.isAdmin) {
-                content.innerHTML = '<p>Acesso negado. Apenas administradores podem acessar esta seção.</p>';
-                return;
-            }
-            
-            content.innerHTML = `
-                <h2>Painel Administrativo</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="adminTotalUsers">0</div>
-                        <div class="stat-label">Usuários Cadastrados</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="adminTotalReports">0</div>
-                        <div class="stat-label">Total de Relatórios</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="adminTotalActivities">0</div>
-                        <div class="stat-label">Total de Atividades</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="adminTotalFiles">0</div>
-                        <div class="stat-label">Total de Arquivos</div>
-                    </div>
-                </div>
-                
-                <div class="form-card">
-                    <h3>Usuários Recentes</h3>
-                    <div id="adminUsersList">Carregando...</div>
-                </div>
-                
-                <div class="form-card">
-                    <h3>Relatórios Recentes</h3>
-                    <div id="adminReportsList">Carregando...</div>
-                </div>
-                
-                <div class="form-card">
-                    <h3>Atividades Recentes</h3>
-                    <div id="adminActivitiesList">Carregando...</div>
-                </div>
-            `;
-            
-            loadAdminData();
-        }
-
-        // ==================== MANIPULAR SELEÇÃO DE ARQUIVOS ====================
-        function handleFileSelect(input, infoElementId) {
-            const infoElement = document.getElementById(infoElementId);
-            const files = input.files;
-            
-            if (files.length === 0) {
-                infoElement.style.display = 'none';
-                return;
-            }
-            
-            let totalSize = 0;
-            let fileList = '';
-            let hasError = false;
-            
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                const fileSize = file.size;
-                const fileSizeMB = (fileSize / (1024 * 1024)).toFixed(2);
-                
-                totalSize += fileSize;
-                
-                if (fileSize > CONFIG.MAX_FILE_SIZE) {
-                    fileList += `<div style="color: #d32f2f;">❌ ${file.name} (${fileSizeMB}MB) - Muito grande!</div>`;
-                    hasError = true;
-                } else {
-                    fileList += `<div style="color: #2e7d32;">✅ ${file.name} (${fileSizeMB}MB)</div>`;
+                if (result.success && result.data) {
+                    updateDashboardStats(result.data);
+                    updateRecentActivities(result.data.recentActivities || []);
+                    if (currentUser.role === 'admin') {
+                        updateAdminData(result.data);
+                    }
                 }
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados do dashboard:', error);
             }
+        }
+
+        function updateDashboardStats(data) {
+            document.getElementById('totalReports').textContent = data.totalReports || 0;
+            document.getElementById('totalActivities').textContent = data.totalActivities || 0;
+            document.getElementById('totalFiles').textContent = data.totalFiles || 0;
+            document.getElementById('totalUsers').textContent = data.totalUsers || 0;
             
-            const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+            // Admin stats
+            if (currentUser.role === 'admin') {
+                document.getElementById('adminTotalReports').textContent = data.totalReports || 0;
+                document.getElementById('adminTotalActivities').textContent = data.totalActivities || 0;
+                document.getElementById('adminTotalFiles').textContent = data.totalFiles || 0;
+                document.getElementById('adminTotalUsers').textContent = data.totalUsers || 0;
+            }
+        }
+
+        function updateRecentActivities(activities) {
+            const tbody = document.getElementById('recentActivities');
+            if (activities.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #666;">Nenhuma atividade recente</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = activities.map(activity => `
+                <tr>
+                    <td>${activity.date}</td>
+                    <td>${activity.user}</td>
+                    <td>${activity.action}</td>
+                    <td>${activity.description}</td>
+                </tr>
+            `).join('');
+        }
+
+        function updateAdminData(data) {
+            const tbody = document.getElementById('adminAllData');
+            const allData = data.allData || [];
             
-            if (totalSize > CONFIG.MAX_TOTAL_SIZE) {
-                fileList += `<div style="color: #d32f2f; font-weight: bold; margin-top: 10px;">❌ Tamanho total: ${totalSizeMB}MB (Máximo: 50MB)</div>`;
-                hasError = true;
+            if (allData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #666;">Nenhum dado encontrado</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = allData.map(item => `
+                <tr>
+                    <td>${item.date}</td>
+                    <td>${item.user}</td>
+                    <td>${item.type}</td>
+                    <td>${item.title}</td>
+                    <td>${item.file ? `<a href="${item.file}" target="_blank">Abrir</a>` : '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // ==================== UPLOAD DE ARQUIVOS ====================
+        function setupFileUploads() {
+            // Configurar drag and drop para todos os file uploads
+            const fileUploads = document.querySelectorAll('.file-upload');
+            
+            fileUploads.forEach(upload => {
+                const input = upload.querySelector('input[type="file"]');
+                
+                upload.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    upload.classList.add('dragover');
+                });
+                
+                upload.addEventListener('dragleave', () => {
+                    upload.classList.remove('dragover');
+                });
+                
+                upload.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    upload.classList.remove('dragover');
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        input.files = files;
+                        updateFileUploadDisplay(upload, files);
+                    }
+                });
+                
+                input.addEventListener('change', (e) => {
+                    updateFileUploadDisplay(upload, e.target.files);
+                });
+            });
+        }
+
+        function updateFileUploadDisplay(upload, files) {
+            const textDiv = upload.querySelector('.file-upload-text');
+            
+            if (files.length > 0) {
+                upload.classList.add('file-selected');
+                const fileNames = Array.from(files).map(file => file.name).join(', ');
+                textDiv.innerHTML = `<strong>Arquivo(s) selecionado(s):</strong><br>${fileNames}`;
             } else {
-                fileList += `<div style="color: #2e7d32; font-weight: bold; margin-top: 10px;">✅ Tamanho total: ${totalSizeMB}MB</div>`;
+                upload.classList.remove('file-selected');
+                textDiv.innerHTML = '<strong>Clique para selecionar</strong> ou arraste o arquivo aqui<br><small>Formatos aceitos conforme especificado</small>';
             }
-            
-            infoElement.innerHTML = fileList;
-            infoElement.className = hasError ? 'file-info show error' : 'file-info show success';
-            infoElement.style.display = 'block';
-            
-            return !hasError;
         }
 
         // ==================== CONVERTER ARQUIVO PARA BASE64 ====================
@@ -1258,187 +1064,240 @@
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = () => {
-                    const base64 = reader.result.split(',')[1]; // Remove o prefixo data:...;base64,
+                    const base64 = reader.result.split(',')[1]; // Remove o prefixo data:type;base64,
                     resolve(base64);
                 };
                 reader.onerror = error => reject(error);
             });
         }
 
-        // ==================== PROCESSAR ENVIO DE RELATÓRIO ====================
-        async function handleReportSubmit(event) {
+        // ==================== ENVIAR RELATÓRIO ====================
+        async function submitReport(event) {
             event.preventDefault();
             
             const title = document.getElementById('reportTitle').value;
             const category = document.getElementById('reportCategory').value;
             const description = document.getElementById('reportDescription').value;
             const fileInput = document.getElementById('reportFile');
-            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const submitBtn = document.getElementById('reportSubmitBtn');
+            const messageDiv = document.getElementById('reportMessage');
+            const progressBar = document.getElementById('reportProgress');
             
-            if (!fileInput.files.length) {
-                showToast('Por favor, selecione um arquivo para o relatório.', 'error');
+            if (!fileInput.files[0]) {
+                alert('Por favor, selecione um arquivo.');
                 return;
             }
-            
+
             const file = fileInput.files[0];
             
-            if (file.size > CONFIG.MAX_FILE_SIZE) {
-                showToast('Arquivo muito grande. Máximo permitido: 10MB', 'error');
+            // Validar tamanho (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('Arquivo muito grande. Máximo permitido: 10MB');
                 return;
             }
-            
-            console.log('📄 Enviando relatório:', title);
-            
-            setButtonLoading(submitBtn, true, 'Enviando relatório...');
-            showLoading('Enviando relatório...', 'Convertendo arquivo e enviando para o servidor');
-            
+
+            // Mostrar loading
+            submitBtn.disabled = true;
+            submitBtn.classList.add('btn-loading');
+            submitBtn.querySelector('.btn-text').textContent = 'Enviando relatório...';
+            progressBar.style.display = 'block';
+            messageDiv.innerHTML = '';
+
             try {
+                // Converter arquivo para Base64
                 const fileBase64 = await fileToBase64(file);
                 
-                const result = await sendRequest({
-                    action: 'uploadFile',
-                    email: currentUser.email,
-                    category: 'Relatórios',
-                    description: description,
-                    title: title,
-                    reportCategory: category,
-                    fileName: file.name,
-                    fileType: file.type,
-                    fileSize: file.size,
-                    fileBase64: fileBase64
-                });
-                
-                if (result.success) {
-                    hideLoading();
-                    showToast('Relatório enviado com sucesso!', 'success');
-                    document.getElementById('reportForm').reset();
-                    document.getElementById('reportFileInfo').style.display = 'none';
-                    loadUserData(); // Atualizar estatísticas
-                } else {
-                    hideLoading();
-                    showToast('Erro ao enviar relatório: ' + (result.message || 'Erro desconhecido'), 'error');
-                }
-            } catch (error) {
-                console.error('❌ Erro ao enviar relatório:', error);
-                hideLoading();
-                showToast('Erro de conexão. Tente novamente.', 'error');
-            } finally {
-                setButtonLoading(submitBtn, false);
-            }
-        }
+                // Simular progresso
+                const progressFill = progressBar.querySelector('.progress-fill');
+                progressFill.style.width = '50%';
 
-        // ==================== PROCESSAR ENVIO DE ATIVIDADE ====================
-        async function handleActivitySubmit(event) {
-            event.preventDefault();
-            
-            const title = document.getElementById('activityTitle').value;
-            const date = document.getElementById('activityDate').value;
-            const location = document.getElementById('activityLocation').value;
-            const type = document.getElementById('activityType').value;
-            const description = document.getElementById('activityDescription').value;
-            const fileInput = document.getElementById('activityFiles');
-            const submitBtn = event.target.querySelector('button[type="submit"]');
-            
-            console.log('🎯 Enviando atividade:', title);
-            
-            setButtonLoading(submitBtn, true, 'Cadastrando atividade...');
-            showLoading('Cadastrando atividade...', 'Processando dados e arquivos');
-            
-            try {
-                let fileData = null;
-                
-                if (fileInput.files.length > 0) {
-                    const file = fileInput.files[0]; // Por simplicidade, enviar apenas o primeiro arquivo
-                    
-                    if (file.size > CONFIG.MAX_FILE_SIZE) {
-                        hideLoading();
-                        setButtonLoading(submitBtn, false);
-                        showToast('Arquivo muito grande. Máximo permitido: 10MB', 'error');
-                        return;
-                    }
-                    
-                    const fileBase64 = await fileToBase64(file);
-                    fileData = {
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'uploadFile',
+                        email: currentUser.email,
+                        category: 'Relatórios',
+                        description: `${title} - ${description}`,
                         fileName: file.name,
                         fileType: file.type,
                         fileSize: file.size,
                         fileBase64: fileBase64
-                    };
-                }
-                
-                const requestData = {
-                    action: 'uploadFile',
-                    email: currentUser.email,
-                    category: 'Atividades',
-                    description: description,
-                    title: title,
-                    activityDate: date,
-                    activityLocation: location,
-                    activityType: type
-                };
-                
-                // Adicionar dados do arquivo se existir
-                if (fileData) {
-                    Object.assign(requestData, fileData);
-                }
-                
-                const result = await sendRequest(requestData);
-                
+                    })
+                });
+
+                progressFill.style.width = '100%';
+                const result = await response.json();
+                console.log('📥 Resposta do upload:', result);
+
                 if (result.success) {
-                    hideLoading();
-                    showToast('Atividade cadastrada com sucesso!', 'success');
-                    document.getElementById('activityForm').reset();
-                    document.getElementById('activityFileInfo').style.display = 'none';
-                    loadUserData(); // Atualizar estatísticas
+                    messageDiv.innerHTML = `<div class="success-message">✅ Relatório enviado com sucesso!</div>`;
+                    // Limpar formulário
+                    document.getElementById('reportTitle').value = '';
+                    document.getElementById('reportCategory').value = '';
+                    document.getElementById('reportDescription').value = '';
+                    fileInput.value = '';
+                    updateFileUploadDisplay(fileInput.closest('.file-upload'), []);
                 } else {
-                    hideLoading();
-                    showToast('Erro ao cadastrar atividade: ' + (result.message || 'Erro desconhecido'), 'error');
+                    messageDiv.innerHTML = `<div class="error-message">❌ Erro ao enviar relatório: ${result.message}</div>`;
                 }
             } catch (error) {
-                console.error('❌ Erro ao cadastrar atividade:', error);
-                hideLoading();
-                showToast('Erro de conexão. Tente novamente.', 'error');
+                console.error('❌ Erro no upload:', error);
+                messageDiv.innerHTML = `<div class="error-message">❌ Erro de conexão. Tente novamente.</div>`;
             } finally {
-                setButtonLoading(submitBtn, false);
+                // Restaurar botão
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('btn-loading');
+                submitBtn.querySelector('.btn-text').textContent = 'Enviar Relatório';
+                progressBar.style.display = 'none';
+                progressBar.querySelector('.progress-fill').style.width = '0%';
             }
         }
 
-        // ==================== PROCESSAR ENVIO DE ARQUIVOS ====================
-        async function handleFilesSubmit(event) {
+        // ==================== ENVIAR ATIVIDADE ====================
+        async function submitActivity(event) {
             event.preventDefault();
             
-            const category = document.getElementById('filesCategory').value;
-            const description = document.getElementById('filesDescription').value;
-            const fileInput = document.getElementById('uploadFiles');
-            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const title = document.getElementById('activityTitle').value;
+            const type = document.getElementById('activityType').value;
+            const date = document.getElementById('activityDate').value;
+            const time = document.getElementById('activityTime').value;
+            const description = document.getElementById('activityDescription').value;
+            const fileInput = document.getElementById('activityFile');
+            const submitBtn = document.getElementById('activitySubmitBtn');
+            const messageDiv = document.getElementById('activityMessage');
+            const progressBar = document.getElementById('activityProgress');
+            
+            // Mostrar loading
+            submitBtn.disabled = true;
+            submitBtn.classList.add('btn-loading');
+            submitBtn.querySelector('.btn-text').textContent = 'Cadastrando atividade...';
+            progressBar.style.display = 'block';
+            messageDiv.innerHTML = '';
+
+            try {
+                let fileBase64 = '';
+                let fileName = '';
+                let fileType = '';
+                let fileSize = 0;
+
+                // Se há arquivo, converter para Base64
+                if (fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    
+                    // Validar tamanho (10MB)
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert('Arquivo muito grande. Máximo permitido: 10MB');
+                        return;
+                    }
+
+                    fileBase64 = await fileToBase64(file);
+                    fileName = file.name;
+                    fileType = file.type;
+                    fileSize = file.size;
+                }
+                
+                // Simular progresso
+                const progressFill = progressBar.querySelector('.progress-fill');
+                progressFill.style.width = '50%';
+
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'uploadFile',
+                        email: currentUser.email,
+                        category: 'Atividades',
+                        description: `${title} - ${type} - ${date} ${time} - ${description}`,
+                        fileName: fileName,
+                        fileType: fileType,
+                        fileSize: fileSize,
+                        fileBase64: fileBase64
+                    })
+                });
+
+                progressFill.style.width = '100%';
+                const result = await response.json();
+                console.log('📥 Resposta do upload:', result);
+
+                if (result.success) {
+                    messageDiv.innerHTML = `<div class="success-message">✅ Atividade cadastrada com sucesso!</div>`;
+                    // Limpar formulário
+                    document.getElementById('activityTitle').value = '';
+                    document.getElementById('activityType').value = '';
+                    document.getElementById('activityDate').value = '';
+                    document.getElementById('activityTime').value = '';
+                    document.getElementById('activityDescription').value = '';
+                    fileInput.value = '';
+                    updateFileUploadDisplay(fileInput.closest('.file-upload'), []);
+                } else {
+                    messageDiv.innerHTML = `<div class="error-message">❌ Erro ao cadastrar atividade: ${result.message}</div>`;
+                }
+            } catch (error) {
+                console.error('❌ Erro no upload:', error);
+                messageDiv.innerHTML = `<div class="error-message">❌ Erro de conexão. Tente novamente.</div>`;
+            } finally {
+                // Restaurar botão
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('btn-loading');
+                submitBtn.querySelector('.btn-text').textContent = 'Cadastrar Atividade';
+                progressBar.style.display = 'none';
+                progressBar.querySelector('.progress-fill').style.width = '0%';
+            }
+        }
+
+        // ==================== ENVIAR ARQUIVOS ====================
+        async function submitFiles(event) {
+            event.preventDefault();
+            
+            const category = document.getElementById('fileCategory').value;
+            const description = document.getElementById('fileDescription').value;
+            const fileInput = document.getElementById('fileUpload');
+            const submitBtn = document.getElementById('fileSubmitBtn');
+            const messageDiv = document.getElementById('fileMessage');
+            const progressBar = document.getElementById('fileProgress');
             
             if (!fileInput.files.length) {
-                showToast('Por favor, selecione pelo menos um arquivo.', 'error');
+                alert('Por favor, selecione pelo menos um arquivo.');
                 return;
             }
-            
-            console.log('📁 Enviando arquivos:', fileInput.files.length);
-            
-            setButtonLoading(submitBtn, true, 'Enviando arquivos...');
-            showLoading('Enviando arquivos...', 'Processando múltiplos arquivos');
-            
+
+            // Mostrar loading
+            submitBtn.disabled = true;
+            submitBtn.classList.add('btn-loading');
+            submitBtn.querySelector('.btn-text').textContent = 'Enviando arquivos...';
+            progressBar.style.display = 'block';
+            messageDiv.innerHTML = '';
+
             try {
-                let successCount = 0;
-                let errorCount = 0;
-                
-                for (let i = 0; i < fileInput.files.length; i++) {
-                    const file = fileInput.files[i];
-                    
-                    if (file.size > CONFIG.MAX_FILE_SIZE) {
-                        console.warn('❌ Arquivo muito grande:', file.name);
-                        errorCount++;
+                const files = Array.from(fileInput.files);
+                const progressFill = progressBar.querySelector('.progress-fill');
+                let uploadedCount = 0;
+
+                for (const file of files) {
+                    // Validar tamanho (10MB)
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert(`Arquivo ${file.name} muito grande. Máximo permitido: 10MB`);
                         continue;
                     }
+
+                    // Converter arquivo para Base64
+                    const fileBase64 = await fileToBase64(file);
                     
-                    try {
-                        const fileBase64 = await fileToBase64(file);
-                        
-                        const result = await sendRequest({
+                    // Atualizar progresso
+                    const progress = ((uploadedCount + 0.5) / files.length) * 100;
+                    progressFill.style.width = `${progress}%`;
+
+                    const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
                             action: 'uploadFile',
                             email: currentUser.email,
                             category: category,
@@ -1447,206 +1306,37 @@
                             fileType: file.type,
                             fileSize: file.size,
                             fileBase64: fileBase64
-                        });
-                        
-                        if (result.success) {
-                            successCount++;
-                        } else {
-                            errorCount++;
-                        }
-                    } catch (error) {
-                        console.error('❌ Erro ao processar arquivo:', file.name, error);
-                        errorCount++;
-                    }
+                        })
+                    });
+
+                    const result = await response.json();
+                    console.log(`📥 Resposta do upload ${file.name}:`, result);
+
+                    uploadedCount++;
+                    const finalProgress = (uploadedCount / files.length) * 100;
+                    progressFill.style.width = `${finalProgress}%`;
                 }
+
+                messageDiv.innerHTML = `<div class="success-message">✅ ${uploadedCount} arquivo(s) enviado(s) com sucesso!</div>`;
                 
-                hideLoading();
-                
-                if (successCount > 0) {
-                    showToast(`${successCount} arquivo(s) enviado(s) com sucesso!`, 'success');
-                    document.getElementById('filesForm').reset();
-                    document.getElementById('uploadFileInfo').style.display = 'none';
-                    loadUserData(); // Atualizar estatísticas
-                }
-                
-                if (errorCount > 0) {
-                    showToast(`${errorCount} arquivo(s) falharam no envio.`, 'error');
-                }
-                
+                // Limpar formulário
+                document.getElementById('fileCategory').value = '';
+                document.getElementById('fileDescription').value = '';
+                fileInput.value = '';
+                updateFileUploadDisplay(fileInput.closest('.file-upload'), []);
+
             } catch (error) {
-                console.error('❌ Erro geral no envio de arquivos:', error);
-                hideLoading();
-                showToast('Erro de conexão. Tente novamente.', 'error');
+                console.error('❌ Erro no upload:', error);
+                messageDiv.innerHTML = `<div class="error-message">❌ Erro de conexão. Tente novamente.</div>`;
             } finally {
-                setButtonLoading(submitBtn, false);
+                // Restaurar botão
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('btn-loading');
+                submitBtn.querySelector('.btn-text').textContent = 'Enviar Arquivos';
+                progressBar.style.display = 'none';
+                progressBar.querySelector('.progress-fill').style.width = '0%';
             }
         }
-
-        // ==================== CARREGAR DADOS DO USUÁRIO ====================
-        async function loadUserData() {
-            try {
-                console.log('📊 Carregando dados do usuário...');
-                
-                const result = await sendRequest({
-                    action: 'getUserStats',
-                    email: currentUser.email
-                });
-                
-                if (result.success && result.data) {
-                    const data = result.data;
-                    
-                    // Animar contadores
-                    animateCounter('totalReports', data.totalReports || 0);
-                    animateCounter('totalActivities', data.totalActivities || 0);
-                    animateCounter('totalFiles', data.totalFiles || 0);
-                    
-                    console.log('✅ Dados do usuário carregados:', data);
-                }
-            } catch (error) {
-                console.error('❌ Erro ao carregar dados do usuário:', error);
-            }
-        }
-
-        // ==================== CARREGAR DADOS ADMINISTRATIVOS ====================
-        async function loadAdminData() {
-            if (!currentUser.isAdmin) return;
-            
-            try {
-                console.log('👑 Carregando dados administrativos...');
-                showLoading('Carregando dados administrativos...', 'Coletando estatísticas do sistema');
-                
-                const result = await sendRequest({
-                    action: 'getAdminData',
-                    email: currentUser.email
-                });
-                
-                if (result.success && result.data) {
-                    const data = result.data;
-                    
-                    // Animar contadores administrativos
-                    animateCounter('adminTotalUsers', data.totalUsers || 0);
-                    animateCounter('adminTotalReports', data.totalReports || 0);
-                    animateCounter('adminTotalActivities', data.totalActivities || 0);
-                    animateCounter('adminTotalFiles', data.totalFiles || 0);
-                    
-                    // Usuários
-                    const usersList = document.getElementById('adminUsersList');
-                    if (data.recentUsers && data.recentUsers.length > 0) {
-                        usersList.innerHTML = data.recentUsers.map(user => 
-                            `<div class="admin-item">
-                                <strong>${user.name || 'Nome não informado'}</strong><br>
-                                ${user.email}<br>
-                                <small>${user.institution || 'Instituição não informada'}</small>
-                            </div>`
-                        ).join('');
-                    } else {
-                        usersList.innerHTML = '<p>Nenhum usuário cadastrado</p>';
-                    }
-                    
-                    // Relatórios
-                    const reportsList = document.getElementById('adminReportsList');
-                    if (data.recentReports && data.recentReports.length > 0) {
-                        reportsList.innerHTML = data.recentReports.map(report => 
-                            `<div class="admin-item">
-                                <strong>${report.title || 'Título não informado'}</strong><br>
-                                ${report.userEmail}<br>
-                                <small>${report.date ? new Date(report.date).toLocaleDateString() : 'Data não informada'}</small>
-                            </div>`
-                        ).join('');
-                    } else {
-                        reportsList.innerHTML = '<p>Nenhum relatório encontrado</p>';
-                    }
-                    
-                    // Atividades
-                    const activitiesList = document.getElementById('adminActivitiesList');
-                    if (data.recentActivities && data.recentActivities.length > 0) {
-                        activitiesList.innerHTML = data.recentActivities.map(activity => 
-                            `<div class="admin-item">
-                                <strong>${activity.title || 'Título não informado'}</strong><br>
-                                ${activity.userEmail}<br>
-                                <small>${activity.date ? new Date(activity.date).toLocaleDateString() : 'Data não informada'} - ${activity.location || 'Local não informado'}</small>
-                            </div>`
-                        ).join('');
-                    } else {
-                        activitiesList.innerHTML = '<p>Nenhuma atividade encontrada</p>';
-                    }
-                    
-                    console.log('✅ Dados administrativos carregados:', data);
-                }
-            } catch (error) {
-                console.error('❌ Erro ao carregar dados administrativos:', error);
-                showToast('Erro ao carregar dados administrativos', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // ==================== ANIMAR CONTADOR ====================
-        function animateCounter(elementId, targetValue) {
-            const element = document.getElementById(elementId);
-            if (!element) return;
-            
-            let currentValue = 0;
-            const increment = targetValue / 30; // 30 frames de animação
-            const timer = setInterval(() => {
-                currentValue += increment;
-                if (currentValue >= targetValue) {
-                    currentValue = targetValue;
-                    clearInterval(timer);
-                }
-                element.textContent = Math.floor(currentValue);
-            }, 50);
-        }
-
-        // ==================== ENVIAR REQUISIÇÃO ====================
-        async function sendRequest(data) {
-            console.log('📡 Enviando requisição:', data);
-            
-            try {
-                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams(data)
-                });
-                
-                if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
-                }
-                
-                const text = await response.text();
-                console.log('📥 Resposta bruta:', text);
-                
-                const result = JSON.parse(text);
-                console.log('📥 Resposta processada:', result);
-                return result;
-                
-            } catch (error) {
-                console.error('❌ Erro na requisição:', error);
-                throw error;
-            }
-        }
-
-        // ==================== LOGOUT ====================
-        function logout() {
-            console.log('👋 Fazendo logout');
-            
-            showLoading('Saindo do sistema...', 'Até logo!');
-            
-            setTimeout(() => {
-                currentUser = null;
-                localStorage.removeItem('cdr_user');
-                hideLoading();
-                showToast('Logout realizado com sucesso!', 'success');
-                setTimeout(() => {
-                    showLoginScreen();
-                }, 500);
-            }, 1000);
-        }
-
-        console.log(`✅ Sistema CDR Sul - ${CONFIG.VERSION}`);
     </script>
 </body>
 </html>
