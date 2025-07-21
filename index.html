@@ -484,30 +484,59 @@
             cursor: not-allowed;
         }
 
-        /* ===== ALERTAS ===== */
-        .alert {
-            padding: 12px 16px;
-            border-radius: 6px;
-            margin-bottom: 15px;
+        /* ===== ALERTAS FIXOS ===== */
+        .alert-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
             font-weight: 600;
+            z-index: 10000;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease-out;
         }
 
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+        .alert-notification.alert-success {
+            background: #28a745;
         }
 
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .alert-notification.alert-error {
+            background: #dc3545;
         }
 
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
+        .alert-notification.alert-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .alert-notification.alert-info {
+            background: #17a2b8;
+        }
+
+        .alert-close {
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 18px;
+            float: right;
+            cursor: pointer;
+            margin-left: 15px;
+            padding: 0;
+            line-height: 1;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         /* ===== RESPONSIVIDADE ===== */
@@ -537,6 +566,13 @@
 
             .admin-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .alert-notification {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
             }
         }
 
@@ -1001,7 +1037,7 @@
                         <div class="form-group">
                             <label>Arquivos do Relatório (PDF, DOC, DOCX - máximo 10MB cada):</label>
                             <div class="file-input-container" id="reportFileContainer" onclick="document.getElementById('reportFiles').click()">
-                                <input type="file" id="reportFiles" class="file-input-hidden" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.txt,.zip,.rar,.xlsx,.ppt,.xls" onchange="handleFileSelection('reportFiles', 'reportFileContainer')">
+                                <input type="file" id="reportFiles" class="file-input-hidden" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.txt,.zip,.rar,.xlsx,.ppt,.xls" onchange="handleFileSelection('reportFiles', 'reportFileContainer')" required>
                                 <div class="file-input-label">📎 Clique aqui para selecionar arquivos ou arraste e solte</div>
                                 <div class="file-input-text">Formatos aceitos: PDF, DOC, DOCX, JPG, PNG, GIF, TXT, ZIP, RAR, XLSX, PPT, XLS</div>
                                 <div class="file-list" id="reportFilesList"></div>
@@ -1236,7 +1272,7 @@
             if (totalSize > 50 * 1024 * 1024) { // 50MB total
                 hasError = true;
                 const errorDiv = document.createElement('div');
-                errorDiv.className = 'alert alert-error';
+                errorDiv.style.cssText = 'color: #dc3545; font-weight: 600; margin-top: 10px;';
                 errorDiv.textContent = `Tamanho total muito grande: ${totalSizeMB}MB (máximo 50MB)`;
                 filesList.appendChild(errorDiv);
             }
@@ -1672,33 +1708,20 @@
             // Criar novo alerta
             const alert = document.createElement('div');
             alert.className = `alert-notification alert-${type}`;
-            alert.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 15px 20px;
-                border-radius: 8px;
-                color: white;
-                font-weight: 600;
-                z-index: 10000;
-                max-width: 400px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-                background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
-            `;
             
             alert.innerHTML = `
                 <span>${message}</span>
-                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; font-size: 18px; float: right; cursor: pointer; margin-left: 10px;">&times;</button>
+                <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
             `;
             
             document.body.appendChild(alert);
             
-            // Remover automaticamente após 5 segundos
+            // Remover automaticamente após 8 segundos
             setTimeout(() => {
                 if (alert.parentElement) {
                     alert.remove();
                 }
-            }, 5000);
+            }, 8000);
         }
 
         function logout() {
@@ -1710,7 +1733,7 @@
             }, 1000);
         }
 
-        console.log('✅ Sistema CDR Sul - Versão 2.0');
+        console.log('✅ Sistema CDR Sul - Versão Final Corrigida');
     </script>
 </body>
 </html>
