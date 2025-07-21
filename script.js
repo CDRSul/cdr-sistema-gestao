@@ -1,142 +1,95 @@
+// ==================== CONFIGURAÇÕES ====================
 const CONFIG = {
     GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec',
-    VERSION: '3.4 - MELHORADO COM FEEDBACK VISUAL E PDF',
-    DEBUG: true,
-    MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB em bytes
-    MAX_TOTAL_SIZE: 50 * 1024 * 1024, // 50MB total
+    MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
+    MAX_TOTAL_SIZE: 50 * 1024 * 1024, // 50MB
     SUPPORTED_FORMATS: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'zip', 'rar', 'xlsx', 'ppt', 'xls']
 };
 
-// ==================== ESTADO GLOBAL ====================
+// ==================== VARIÁVEIS GLOBAIS ====================
 let currentUser = null;
-let isLoggedIn = false;
 
 // ==================== INICIALIZAÇÃO ====================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log(`[CDR Sul] Sistema CDR Sul iniciando - Versão ${CONFIG.VERSION}`);
+    console.log('[CDR Sul] Sistema iniciado');
     
-    // Verificar sessão salva
-    checkSavedSession();
+    // Verificar se há sessão salva
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+        try {
+            currentUser = JSON.parse(savedUser);
+            showDashboard();
+        } catch (e) {
+            console.error('[CDR Sul] Erro ao carregar sessão:', e);
+            localStorage.removeItem('currentUser');
+        }
+    }
     
-    // Configurar event listeners
+    // Configurar eventos
     setupEventListeners();
-    
-    // Testar conectividade
-    testConnectivity();
+    setupFileValidation();
 });
 
 function setupEventListeners() {
-    try {
-        // Formulário de login
-        const loginForm = document.getElementById('loginForm');
-        if (loginForm) {
-            loginForm.addEventListener('submit', handleLogin);
-        }
-        
-        // Formulário de cadastro
-        const registerForm = document.getElementById('registerForm');
-        if (registerForm) {
-            registerForm.addEventListener('submit', handleRegister);
-        }
-        
-        // Formulário de relatório
-        const reportForm = document.getElementById('reportForm');
-        if (reportForm) {
-            reportForm.addEventListener('submit', handleSubmitReport);
-        }
-        
-        // Formulário de atividade
-        const activityForm = document.getElementById('activityForm');
-        if (activityForm) {
-            activityForm.addEventListener('submit', handleSubmitActivity);
-        }
-        
-        // Formulário de arquivos
-        const filesForm = document.getElementById('filesForm');
-        if (filesForm) {
-            filesForm.addEventListener('submit', handleUploadFiles);
-        }
-        
-        // Botão de logout
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', handleLogout);
-        }
-        
-        // Links de navegação
-        const navLinks = document.querySelectorAll('.nav-link');
-        navLinks.forEach(link => {
-            link.addEventListener('click', handleNavigation);
-        });
-        
-        // Link de cadastro
-        const registerLink = document.getElementById('registerLink');
-        if (registerLink) {
-            registerLink.addEventListener('click', showRegisterForm);
-        }
-        
-        // Link de voltar ao login
-        const backToLoginLink = document.getElementById('backToLoginLink');
-        if (backToLoginLink) {
-            backToLoginLink.addEventListener('click', showLoginForm);
-        }
-        
-        // Botão de gerar PDF
-        const generatePdfBtn = document.getElementById('generatePdfBtn');
-        if (generatePdfBtn) {
-            generatePdfBtn.addEventListener('click', generateUserPDF);
-        }
-        
-        // Validação de arquivos em tempo real
-        setupFileValidation();
-        
-        console.log('[CDR Sul] Event listeners configurados');
-    } catch (error) {
-        console.error('[CDR Sul] Erro ao configurar event listeners:', error);
+    // Login
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
     }
+    
+    // Cadastro
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+        registerForm.addEventListener('submit', handleRegister);
+    }
+    
+    // Formulários do dashboard
+    const reportForm = document.getElementById('reportForm');
+    if (reportForm) {
+        reportForm.addEventListener('submit', handleSubmitReport);
+    }
+    
+    const activityForm = document.getElementById('activityForm');
+    if (activityForm) {
+        activityForm.addEventListener('submit', handleSubmitActivity);
+    }
+    
+    const fileForm = document.getElementById('fileForm');
+    if (fileForm) {
+        fileForm.addEventListener('submit', handleUploadFiles);
+    }
+    
+    // Botões de navegação
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('.tab-btn')) {
+            showTab(e.target.dataset.tab);
+        }
+        
+        if (e.target.matches('.logout-btn')) {
+            handleLogout();
+        }
+        
+        if (e.target.matches('.generate-pdf-btn')) {
+            handleGeneratePDF();
+        }
+        
+        if (e.target.matches('.show-register')) {
+            showRegisterForm();
+        }
+        
+        if (e.target.matches('.show-login')) {
+            showLoginForm();
+        }
+    });
 }
 
-// ==================== VALIDAÇÃO DE ARQUIVOS ====================
 function setupFileValidation() {
     const fileInputs = document.querySelectorAll('input[type="file"]');
-    
     fileInputs.forEach(input => {
         input.addEventListener('change', function(e) {
             validateFiles(e.target.files, e.target);
-            updateFileInfo(e.target);
         });
     });
-}
-
-function updateFileInfo(inputElement) {
-    const files = inputElement.files;
-    const infoId = inputElement.id + 'Info';
-    const infoDiv = document.getElementById(infoId);
-    
-    if (!infoDiv) return;
-    
-    if (files.length === 0) {
-        infoDiv.classList.add('hidden');
-        return;
-    }
-    
-    let totalSize = 0;
-    let fileList = '';
-    
-    Array.from(files).forEach(file => {
-        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-        totalSize += file.size;
-        fileList += `<div>📎 ${file.name} (${sizeMB}MB)</div>`;
-    });
-    
-    const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
-    
-    infoDiv.innerHTML = `
-        <strong>Arquivos selecionados:</strong><br>
-        ${fileList}
-        <div style="margin-top: 8px;"><strong>Total: ${files.length} arquivo(s) - ${totalSizeMB}MB</strong></div>
-    `;
-    infoDiv.classList.remove('hidden');
 }
 
 function validateFiles(files, inputElement) {
@@ -145,10 +98,16 @@ function validateFiles(files, inputElement) {
     let totalSize = 0;
     const errors = [];
     const warnings = [];
+    const fileList = [];
     
     Array.from(files).forEach((file, index) => {
         const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
         totalSize += file.size;
+        
+        fileList.push({
+            name: file.name,
+            size: fileSizeMB + 'MB'
+        });
         
         // Verificar tamanho individual
         if (file.size > CONFIG.MAX_FILE_SIZE) {
@@ -168,78 +127,64 @@ function validateFiles(files, inputElement) {
         errors.push(`Tamanho total (${totalSizeMB}MB) excede o limite de 50MB`);
     }
     
+    // Exibir feedback
+    const feedbackDiv = inputElement.parentNode.querySelector('.file-feedback') || 
+                       createFileFeedback(inputElement);
+    
     if (errors.length > 0) {
-        showMessage('Erro: ' + errors.join(', '), 'error');
+        feedbackDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <strong>❌ Erros encontrados:</strong>
+                <ul>${errors.map(error => `<li>${error}</li>`).join('')}</ul>
+                <small>Comprima os arquivos ou divida em partes menores.</small>
+            </div>
+        `;
         inputElement.setCustomValidity('Arquivos muito grandes');
         return false;
     }
     
     if (warnings.length > 0) {
-        showMessage('Aviso: ' + warnings.join(', '), 'info');
+        feedbackDiv.innerHTML = `
+            <div class="alert alert-warning">
+                <strong>⚠️ Avisos:</strong>
+                <ul>${warnings.map(warning => `<li>${warning}</li>`).join('')}</ul>
+            </div>
+        `;
+    } else {
+        feedbackDiv.innerHTML = `
+            <div class="alert alert-success">
+                <strong>✅ Arquivos válidos:</strong>
+                <ul>${fileList.map(file => `<li>${file.name} (${file.size})</li>`).join('')}</ul>
+                <small>Total: ${totalSizeMB}MB</small>
+            </div>
+        `;
     }
     
     inputElement.setCustomValidity('');
     return true;
 }
 
-// ==================== FEEDBACK VISUAL ====================
-function setButtonLoading(buttonId, isLoading, loadingText = 'Carregando...') {
-    const button = document.getElementById(buttonId);
-    if (!button) return;
-    
-    if (isLoading) {
-        button.disabled = true;
-        button.classList.add('btn-loading');
-        button.dataset.originalText = button.textContent;
-        button.innerHTML = `<span class="spinner"></span>${loadingText}`;
-    } else {
-        button.disabled = false;
-        button.classList.remove('btn-loading');
-        button.innerHTML = button.dataset.originalText || button.textContent.replace(/^.*?([A-Za-z].*)$/, '$1');
-    }
-}
-
-function showProgress(progressId, show = true, percentage = 0) {
-    const progressContainer = document.getElementById(progressId);
-    if (!progressContainer) return;
-    
-    if (show) {
-        progressContainer.style.display = 'block';
-        const progressFill = progressContainer.querySelector('.progress-fill');
-        if (progressFill) {
-            progressFill.style.width = percentage + '%';
-        }
-    } else {
-        progressContainer.style.display = 'none';
-    }
-}
-
-function showMessage(message, type = 'info') {
-    // Remove mensagens anteriores
-    const existingMessages = document.querySelectorAll('.message');
-    existingMessages.forEach(msg => msg.remove());
-    
-    // Criar nova mensagem
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${type}`;
-    messageDiv.textContent = message;
-    
-    // Inserir no topo do conteúdo ativo
-    const activeSection = document.querySelector('.content-section.active');
-    if (activeSection) {
-        activeSection.insertBefore(messageDiv, activeSection.firstChild);
-    }
-    
-    // Auto-remover após 5 segundos
-    setTimeout(() => {
-        messageDiv.remove();
-    }, 5000);
+function createFileFeedback(inputElement) {
+    const feedbackDiv = document.createElement('div');
+    feedbackDiv.className = 'file-feedback mt-2';
+    inputElement.parentNode.appendChild(feedbackDiv);
+    return feedbackDiv;
 }
 
 // ==================== COMUNICAÇÃO COM GOOGLE APPS SCRIPT ====================
 async function makeRequest(action, data = {}, files = null) {
     try {
         console.log(`[CDR Sul] Enviando ação: ${action}`);
+        console.log(`[CDR Sul] Dados:`, Object.keys(data));
+        console.log(`[CDR Sul] Arquivos:`, files ? files.length : 0);
+        
+        // Validar arquivos antes de enviar
+        if (files && files.length > 0) {
+            const validation = validateFilesForUpload(Array.from(files));
+            if (!validation.success) {
+                throw new Error(validation.error);
+            }
+        }
         
         const formData = new FormData();
         
@@ -251,25 +196,48 @@ async function makeRequest(action, data = {}, files = null) {
             }
         });
         
-        // Adicionar arquivos se houver
+        // Adicionar arquivos com nomes específicos
         if (files && files.length > 0) {
             Array.from(files).forEach((file, index) => {
-                formData.append(`file_${index}`, file);
+                // Usar nomes específicos baseados na ação
+                let fileName = `file_${index}`;
+                if (action === 'submitReport') {
+                    fileName = `reportFile_${index}`;
+                } else if (action === 'submitActivity') {
+                    fileName = `activityFile_${index}`;
+                } else if (action === 'uploadFiles') {
+                    fileName = `uploadFile_${index}`;
+                }
+                
+                formData.append(fileName, file);
+                console.log(`[CDR Sul] Arquivo adicionado: ${fileName} = ${file.name} (${file.size} bytes)`);
             });
         }
         
+        console.log(`[CDR Sul] Enviando requisição para: ${CONFIG.GOOGLE_APPS_SCRIPT_URL}`);
+        
         const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
             method: 'POST',
-            body: formData
+            body: formData,
+            mode: 'cors'
         });
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
-        const result = await response.json();
-        console.log(`[CDR Sul] Resposta recebida:`, result);
+        const responseText = await response.text();
+        console.log(`[CDR Sul] Resposta recebida: ${responseText.substring(0, 200)}...`);
         
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error('[CDR Sul] Erro ao fazer parse da resposta:', parseError);
+            throw new Error(`Resposta inválida do servidor: ${responseText.substring(0, 100)}`);
+        }
+        
+        console.log(`[CDR Sul] Resposta processada:`, result);
         return result;
         
     } catch (error) {
@@ -278,47 +246,82 @@ async function makeRequest(action, data = {}, files = null) {
     }
 }
 
-// ==================== AUTENTICAÇÃO ====================
+function validateFilesForUpload(files) {
+    if (!files || files.length === 0) {
+        return { success: true };
+    }
+    
+    let totalSize = 0;
+    const errors = [];
+    
+    files.forEach(file => {
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        totalSize += file.size;
+        
+        if (file.size > CONFIG.MAX_FILE_SIZE) {
+            // Verificar se é imagem (pode ser comprimida)
+            const extension = file.name.split('.').pop().toLowerCase();
+            if (!['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+                errors.push(`${file.name} (${fileSizeMB}MB) excede 10MB e não pode ser comprimido`);
+            }
+        }
+    });
+    
+    const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+    if (totalSize > CONFIG.MAX_TOTAL_SIZE) {
+        errors.push(`Tamanho total (${totalSizeMB}MB) excede 50MB`);
+    }
+    
+    if (errors.length > 0) {
+        return {
+            success: false,
+            error: errors.join('; ')
+        };
+    }
+    
+    return { success: true };
+}
+
+// ==================== FUNÇÕES DE AUTENTICAÇÃO ====================
 async function handleLogin(e) {
     e.preventDefault();
     
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
     
     if (!email || !password) {
-        showMessage('Por favor, preencha todos os campos', 'error');
+        showAlert('Por favor, preencha todos os campos', 'error');
         return;
     }
     
-    setButtonLoading('loginBtn', true, 'Fazendo login...');
+    // Feedback visual
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Fazendo login...';
+    submitBtn.disabled = true;
     
     try {
         const result = await makeRequest('login', { email, password });
         
         if (result.success) {
-            currentUser = result.data.user;
-            isLoggedIn = true;
+            currentUser = result.data.user || result.user;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
             
-            // Salvar sessão
-            localStorage.setItem('cdr_user', JSON.stringify(currentUser));
-            localStorage.setItem('cdr_session', 'active');
-            
-            showMessage('Login realizado com sucesso!', 'success');
+            submitBtn.textContent = 'Login realizado!';
+            showAlert('Login realizado com sucesso!', 'success');
             
             setTimeout(() => {
                 showDashboard();
-                loadUserData();
             }, 1000);
-            
         } else {
-            showMessage(result.error || 'Erro no login', 'error');
+            throw new Error(result.error || 'Erro no login');
         }
-        
     } catch (error) {
         console.error('[CDR Sul] Erro no login:', error);
-        showMessage('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
-    } finally {
-        setButtonLoading('loginBtn', false);
+        showAlert(`Erro no login: ${error.message}`, 'error');
+        
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     }
 }
 
@@ -327,76 +330,94 @@ async function handleRegister(e) {
     
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
+    const submitBtn = e.target.querySelector('button[type="submit"]');
     
+    // Validações
     if (!data.name || !data.email || !data.institution || !data.project || !data.password) {
-        showMessage('Por favor, preencha todos os campos', 'error');
+        showAlert('Por favor, preencha todos os campos', 'error');
         return;
     }
     
-    setButtonLoading('registerBtn', true, 'Criando conta...');
+    if (data.password !== data.confirmPassword) {
+        showAlert('As senhas não coincidem', 'error');
+        return;
+    }
+    
+    // Feedback visual
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Criando conta...';
+    submitBtn.disabled = true;
     
     try {
         const result = await makeRequest('register', data);
         
         if (result.success) {
-            showMessage('Conta criada com sucesso! Faça login para continuar.', 'success');
+            submitBtn.textContent = 'Conta criada!';
+            showAlert('Usuário cadastrado com sucesso! Faça login para continuar.', 'success');
+            
             setTimeout(() => {
                 showLoginForm();
             }, 2000);
         } else {
-            showMessage(result.error || 'Erro no cadastro', 'error');
+            throw new Error(result.error || 'Erro no cadastro');
         }
-        
     } catch (error) {
         console.error('[CDR Sul] Erro no cadastro:', error);
-        showMessage('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
-    } finally {
-        setButtonLoading('registerBtn', false);
+        showAlert(`Erro no cadastro: ${error.message}`, 'error');
+        
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     }
 }
 
-// ==================== ENVIO DE DADOS ====================
+function handleLogout() {
+    currentUser = null;
+    localStorage.removeItem('currentUser');
+    showLoginForm();
+    showAlert('Logout realizado com sucesso', 'success');
+}
+
+// ==================== FUNÇÕES DO DASHBOARD ====================
 async function handleSubmitReport(e) {
     e.preventDefault();
     
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    const files = document.getElementById('reportFiles').files;
-    
-    if (!data.type || !data.date || !data.title || !data.description) {
-        showMessage('Por favor, preencha todos os campos obrigatórios', 'error');
-        return;
-    }
-    
     data.userEmail = currentUser.email;
     
-    setButtonLoading('submitReportBtn', true, 'Enviando relatório...');
-    showProgress('reportProgress', true, 0);
+    const files = e.target.querySelector('input[type="file"]').files;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    
+    // Feedback visual
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Enviando relatório...';
+    submitBtn.disabled = true;
     
     try {
-        // Simular progresso
-        for (let i = 0; i <= 100; i += 20) {
-            showProgress('reportProgress', true, i);
-            await new Promise(resolve => setTimeout(resolve, 200));
-        }
-        
         const result = await makeRequest('submitReport', data, files);
         
         if (result.success) {
-            showMessage('Relatório enviado com sucesso!', 'success');
+            submitBtn.textContent = 'Relatório enviado!';
+            showAlert('Relatório enviado com sucesso!', 'success');
             e.target.reset();
-            updateFileInfo(document.getElementById('reportFiles'));
-            loadUserData(); // Atualizar estatísticas
+            
+            // Limpar feedback de arquivos
+            const feedback = e.target.querySelector('.file-feedback');
+            if (feedback) feedback.innerHTML = '';
+            
+            setTimeout(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
         } else {
-            showMessage(result.error || 'Erro ao enviar relatório', 'error');
+            throw new Error(result.error || 'Erro ao enviar relatório');
         }
-        
     } catch (error) {
         console.error('[CDR Sul] Erro ao enviar relatório:', error);
-        showMessage('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
-    } finally {
-        setButtonLoading('submitReportBtn', false);
-        showProgress('reportProgress', false);
+        showAlert(`Erro ao enviar relatório: ${error.message}`, 'error');
+        
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     }
 }
 
@@ -405,42 +426,41 @@ async function handleSubmitActivity(e) {
     
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    const files = document.getElementById('activityFiles').files;
-    
-    if (!data.type || !data.date || !data.title || !data.description) {
-        showMessage('Por favor, preencha todos os campos obrigatórios', 'error');
-        return;
-    }
-    
     data.userEmail = currentUser.email;
     
-    setButtonLoading('submitActivityBtn', true, 'Cadastrando atividade...');
-    showProgress('activityProgress', true, 0);
+    const files = e.target.querySelector('input[type="file"]').files;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    
+    // Feedback visual
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Cadastrando atividade...';
+    submitBtn.disabled = true;
     
     try {
-        // Simular progresso
-        for (let i = 0; i <= 100; i += 25) {
-            showProgress('activityProgress', true, i);
-            await new Promise(resolve => setTimeout(resolve, 150));
-        }
-        
         const result = await makeRequest('submitActivity', data, files);
         
         if (result.success) {
-            showMessage('Atividade cadastrada com sucesso!', 'success');
+            submitBtn.textContent = 'Atividade cadastrada!';
+            showAlert('Atividade cadastrada com sucesso!', 'success');
             e.target.reset();
-            updateFileInfo(document.getElementById('activityFiles'));
-            loadUserData(); // Atualizar estatísticas
+            
+            // Limpar feedback de arquivos
+            const feedback = e.target.querySelector('.file-feedback');
+            if (feedback) feedback.innerHTML = '';
+            
+            setTimeout(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
         } else {
-            showMessage(result.error || 'Erro ao cadastrar atividade', 'error');
+            throw new Error(result.error || 'Erro ao cadastrar atividade');
         }
-        
     } catch (error) {
         console.error('[CDR Sul] Erro ao cadastrar atividade:', error);
-        showMessage('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
-    } finally {
-        setButtonLoading('submitActivityBtn', false);
-        showProgress('activityProgress', false);
+        showAlert(`Erro ao cadastrar atividade: ${error.message}`, 'error');
+        
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     }
 }
 
@@ -449,507 +469,384 @@ async function handleUploadFiles(e) {
     
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    const files = document.getElementById('uploadFiles').files;
+    data.userEmail = currentUser.email;
     
-    if (!data.category || files.length === 0) {
-        showMessage('Por favor, selecione a categoria e pelo menos um arquivo', 'error');
+    const files = e.target.querySelector('input[type="file"]').files;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    
+    if (!files || files.length === 0) {
+        showAlert('Por favor, selecione pelo menos um arquivo', 'error');
         return;
     }
     
-    data.userEmail = currentUser.email;
-    
-    setButtonLoading('submitFilesBtn', true, 'Enviando arquivos...');
-    showProgress('filesProgress', true, 0);
+    // Feedback visual
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Enviando arquivos...';
+    submitBtn.disabled = true;
     
     try {
-        // Simular progresso
-        for (let i = 0; i <= 100; i += 10) {
-            showProgress('filesProgress', true, i);
-            await new Promise(resolve => setTimeout(resolve, 300));
-        }
-        
         const result = await makeRequest('uploadFiles', data, files);
         
         if (result.success) {
-            showMessage('Arquivos enviados com sucesso!', 'success');
+            submitBtn.textContent = 'Arquivos enviados!';
+            showAlert(`${result.data?.count || files.length} arquivo(s) enviados com sucesso!`, 'success');
             e.target.reset();
-            updateFileInfo(document.getElementById('uploadFiles'));
-            loadUserData(); // Atualizar estatísticas
+            
+            // Limpar feedback de arquivos
+            const feedback = e.target.querySelector('.file-feedback');
+            if (feedback) feedback.innerHTML = '';
+            
+            setTimeout(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
         } else {
-            showMessage(result.error || 'Erro ao enviar arquivos', 'error');
+            throw new Error(result.error || 'Erro ao enviar arquivos');
         }
-        
     } catch (error) {
         console.error('[CDR Sul] Erro ao enviar arquivos:', error);
-        showMessage('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
-    } finally {
-        setButtonLoading('submitFilesBtn', false);
-        showProgress('filesProgress', false);
+        showAlert(`Erro ao enviar arquivos: ${error.message}`, 'error');
+        
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     }
 }
 
-// ==================== GERAÇÃO DE PDF ====================
-async function generateUserPDF() {
-    if (!currentUser) {
-        showMessage('Usuário não encontrado', 'error');
-        return;
-    }
+async function handleGeneratePDF() {
+    const btn = document.querySelector('.generate-pdf-btn');
+    if (!btn) return;
     
-    setButtonLoading('generatePdfBtn', true, 'Gerando PDF...');
+    const originalText = btn.textContent;
+    btn.textContent = 'Gerando PDF...';
+    btn.disabled = true;
     
     try {
-        const result = await makeRequest('generatePDF', {
-            userEmail: currentUser.email,
-            requestedBy: currentUser.email,
-            isAdmin: currentUser.isAdmin || false
-        });
+        const result = await makeRequest('generatePDF', { userEmail: currentUser.email });
         
-        if (result.success && result.data.pdfUrl) {
-            showMessage('Relatório PDF gerado com sucesso!', 'success');
+        if (result.success && result.data?.pdfUrl) {
+            btn.textContent = 'PDF gerado!';
+            showAlert('Relatório PDF gerado com sucesso!', 'success');
+            
             // Abrir PDF em nova aba
             window.open(result.data.pdfUrl, '_blank');
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }, 2000);
         } else {
-            showMessage(result.error || 'Erro ao gerar relatório PDF', 'error');
+            throw new Error(result.error || 'Erro ao gerar PDF');
         }
-        
     } catch (error) {
         console.error('[CDR Sul] Erro ao gerar PDF:', error);
-        showMessage('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
-    } finally {
-        setButtonLoading('generatePdfBtn', false);
+        showAlert(`Erro ao gerar PDF: ${error.message}`, 'error');
+        
+        btn.textContent = originalText;
+        btn.disabled = false;
     }
 }
 
-async function generateAdminPDF(userEmail) {
-    if (!currentUser || !currentUser.isAdmin) {
-        showMessage('Acesso negado', 'error');
-        return;
-    }
+// ==================== FUNÇÕES DE INTERFACE ====================
+function showLoginForm() {
+    document.getElementById('loginSection').style.display = 'block';
+    document.getElementById('registerSection').style.display = 'none';
+    document.getElementById('dashboardSection').style.display = 'none';
+}
+
+function showRegisterForm() {
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('registerSection').style.display = 'block';
+    document.getElementById('dashboardSection').style.display = 'none';
+}
+
+function showDashboard() {
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('registerSection').style.display = 'none';
+    document.getElementById('dashboardSection').style.display = 'block';
     
-    try {
-        const result = await makeRequest('generatePDF', {
-            userEmail: userEmail,
-            requestedBy: currentUser.email,
-            isAdmin: true
-        });
-        
-        if (result.success && result.data.pdfUrl) {
-            showMessage('Relatório PDF gerado com sucesso!', 'success');
-            // Abrir PDF em nova aba
-            window.open(result.data.pdfUrl, '_blank');
-        } else {
-            showMessage(result.error || 'Erro ao gerar relatório PDF', 'error');
-        }
-        
-    } catch (error) {
-        console.error('[CDR Sul] Erro ao gerar PDF admin:', error);
-        showMessage('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+    // Atualizar informações do usuário
+    updateUserInfo();
+    
+    // Mostrar primeira aba
+    showTab('overview');
+    
+    // Carregar dados se for admin
+    if (currentUser?.isAdmin) {
+        loadAdminData();
     }
 }
 
-// ==================== CARREGAMENTO DE DADOS ====================
-async function loadUserData() {
+function updateUserInfo() {
     if (!currentUser) return;
     
+    const userNameElements = document.querySelectorAll('.user-name');
+    const userEmailElements = document.querySelectorAll('.user-email');
+    const userInstitutionElements = document.querySelectorAll('.user-institution');
+    
+    userNameElements.forEach(el => el.textContent = currentUser.name);
+    userEmailElements.forEach(el => el.textContent = currentUser.email);
+    userInstitutionElements.forEach(el => el.textContent = currentUser.institution);
+    
+    // Mostrar/ocultar aba admin
+    const adminTab = document.querySelector('[data-tab="admin"]');
+    if (adminTab) {
+        adminTab.style.display = currentUser.isAdmin ? 'block' : 'none';
+    }
+}
+
+function showTab(tabName) {
+    // Ocultar todas as abas
+    const tabs = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => tab.style.display = 'none');
+    
+    // Remover classe ativa de todos os botões
+    const buttons = document.querySelectorAll('.tab-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    
+    // Mostrar aba selecionada
+    const selectedTab = document.getElementById(`${tabName}Tab`);
+    if (selectedTab) {
+        selectedTab.style.display = 'block';
+    }
+    
+    // Ativar botão correspondente
+    const selectedBtn = document.querySelector(`[data-tab="${tabName}"]`);
+    if (selectedBtn) {
+        selectedBtn.classList.add('active');
+    }
+    
+    // Carregar dados específicos da aba
+    if (tabName === 'overview') {
+        loadOverviewData();
+    } else if (tabName === 'admin' && currentUser?.isAdmin) {
+        loadAdminData();
+    }
+}
+
+async function loadOverviewData() {
     try {
-        // Carregar relatórios do usuário
-        const reportsResult = await makeRequest('getReports', { userEmail: currentUser.email });
-        if (reportsResult.success) {
-            updateReportsCount(reportsResult.data.length);
-            displayReports(reportsResult.data);
-            displayRecentReports(reportsResult.data.slice(-3));
-        }
+        // Carregar estatísticas do usuário
+        const [reports, activities, files] = await Promise.all([
+            makeRequest('getReports', { userEmail: currentUser.email }),
+            makeRequest('getActivities', { userEmail: currentUser.email }),
+            makeRequest('getFiles', { userEmail: currentUser.email })
+        ]);
         
-        // Carregar atividades do usuário
-        const activitiesResult = await makeRequest('getActivities', { userEmail: currentUser.email });
-        if (activitiesResult.success) {
-            updateActivitiesCount(activitiesResult.data.length);
-            displayActivities(activitiesResult.data);
-            displayRecentActivities(activitiesResult.data.slice(-3));
-        }
+        // Atualizar contadores
+        updateCounter('reportsCount', reports.data?.length || 0);
+        updateCounter('activitiesCount', activities.data?.length || 0);
+        updateCounter('filesCount', files.data?.length || 0);
         
-        // Carregar arquivos do usuário
-        const filesResult = await makeRequest('getFiles', { userEmail: currentUser.email });
-        if (filesResult.success) {
-            updateFilesCount(filesResult.data.length);
-            displayFiles(filesResult.data);
-            displayRecentFiles(filesResult.data.slice(-3));
-        }
-        
-        // Se for admin, carregar dados administrativos
-        if (currentUser.isAdmin) {
-            loadAdminData();
-        }
+        // Atualizar listas
+        updateRecentList('recentReports', reports.data?.slice(0, 5) || []);
+        updateRecentList('recentActivities', activities.data?.slice(0, 5) || []);
         
     } catch (error) {
-        console.error('[CDR Sul] Erro ao carregar dados do usuário:', error);
+        console.error('[CDR Sul] Erro ao carregar dados da visão geral:', error);
     }
 }
 
 async function loadAdminData() {
+    if (!currentUser?.isAdmin) return;
+    
     try {
-        // Carregar todos os usuários
-        const usersResult = await makeRequest('getUsers');
-        if (usersResult.success) {
-            updateTotalUsers(usersResult.data.length);
-            displayAllUsers(usersResult.data);
-        }
+        // Carregar dados administrativos
+        const [users, allReports, allActivities, allFiles] = await Promise.all([
+            makeRequest('getUsers'),
+            makeRequest('getReports'),
+            makeRequest('getActivities'),
+            makeRequest('getFiles')
+        ]);
         
-        // Carregar todos os relatórios
-        const allReportsResult = await makeRequest('getReports');
-        if (allReportsResult.success) {
-            updateTotalReports(allReportsResult.data.length);
-            displayAdminReports(allReportsResult.data.slice(-10));
-        }
+        // Atualizar estatísticas administrativas
+        updateCounter('totalUsers', users.data?.length || 0);
+        updateCounter('totalReports', allReports.data?.length || 0);
+        updateCounter('totalActivities', allActivities.data?.length || 0);
+        updateCounter('totalFiles', allFiles.data?.length || 0);
         
-        // Carregar todas as atividades
-        const allActivitiesResult = await makeRequest('getActivities');
-        if (allActivitiesResult.success) {
-            updateTotalActivities(allActivitiesResult.data.length);
-            displayAdminActivities(allActivitiesResult.data.slice(-10));
-        }
-        
-        // Carregar todos os arquivos
-        const allFilesResult = await makeRequest('getFiles');
-        if (allFilesResult.success) {
-            updateTotalFiles(allFilesResult.data.length);
-            displayAdminFiles(allFilesResult.data.slice(-10));
-        }
+        // Atualizar lista de usuários
+        updateUsersList(users.data || []);
         
     } catch (error) {
         console.error('[CDR Sul] Erro ao carregar dados administrativos:', error);
     }
 }
 
-// ==================== ATUALIZAÇÃO DE INTERFACE ====================
-function updateReportsCount(count) {
-    const element = document.getElementById('reportsCount');
-    if (element) element.textContent = count;
+function updateCounter(elementId, count) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = count;
+    }
 }
 
-function updateActivitiesCount(count) {
-    const element = document.getElementById('activitiesCount');
-    if (element) element.textContent = count;
-}
-
-function updateFilesCount(count) {
-    const element = document.getElementById('filesCount');
-    if (element) element.textContent = count;
-}
-
-function updateTotalUsers(count) {
-    const element = document.getElementById('totalUsers');
-    if (element) element.textContent = count;
-}
-
-function updateTotalReports(count) {
-    const element = document.getElementById('totalReports');
-    if (element) element.textContent = count;
-}
-
-function updateTotalActivities(count) {
-    const element = document.getElementById('totalActivities');
-    if (element) element.textContent = count;
-}
-
-function updateTotalFiles(count) {
-    const element = document.getElementById('totalFiles');
-    if (element) element.textContent = count;
-}
-
-function displayRecentActivities(activities) {
-    const container = document.getElementById('recentActivities');
-    if (!container) return;
+function updateRecentList(elementId, items) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
     
-    if (activities.length === 0) {
-        container.innerHTML = '<p>Nenhuma atividade cadastrada ainda.</p>';
+    if (items.length === 0) {
+        element.innerHTML = '<p>Nenhum item encontrado</p>';
         return;
     }
     
-    container.innerHTML = activities.map(activity => `
-        <div class="data-item">
-            <h4>${activity.title}</h4>
-            <p><strong>Tipo:</strong> ${activity.type} | <strong>Data:</strong> ${formatDate(activity.date)}</p>
-            <p><strong>Local:</strong> ${activity.location || 'Não informado'}</p>
-            <p>${activity.description}</p>
+    const html = items.map(item => `
+        <div class="recent-item">
+            <h4>${item.title}</h4>
+            <p>${item.description || ''}</p>
+            <small>${new Date(item.date || item.createdAt).toLocaleDateString('pt-BR')}</small>
         </div>
     `).join('');
+    
+    element.innerHTML = html;
 }
 
-function displayRecentFiles(files) {
-    const container = document.getElementById('recentFiles');
-    if (!container) return;
-    
-    if (files.length === 0) {
-        container.innerHTML = '<p>Nenhum arquivo enviado ainda.</p>';
-        return;
-    }
-    
-    container.innerHTML = files.map(file => `
-        <div class="data-item">
-            <h4>${file.name}</h4>
-            <p><strong>Categoria:</strong> ${file.category} | <strong>Tamanho:</strong> ${formatFileSize(file.size)}</p>
-            <p><strong>Data:</strong> ${formatDate(file.uploadDate)}</p>
-            <p>${file.description || 'Sem descrição'}</p>
-            ${file.driveUrl ? `<p><a href="${file.driveUrl}" target="_blank">📎 Abrir arquivo</a></p>` : ''}
-        </div>
-    `).join('');
-}
-
-function displayAllUsers(users) {
-    const container = document.getElementById('usersList');
-    if (!container) return;
+function updateUsersList(users) {
+    const element = document.getElementById('usersList');
+    if (!element) return;
     
     if (users.length === 0) {
-        container.innerHTML = '<p>Nenhum usuário cadastrado.</p>';
+        element.innerHTML = '<p>Nenhum usuário encontrado</p>';
         return;
     }
     
-    container.innerHTML = users.map(user => `
+    const html = users.map(user => `
         <div class="user-card">
-            <div class="user-info-admin">
-                <h5>${user.name}</h5>
-                <p><strong>E-mail:</strong> ${user.email}</p>
-                <p><strong>Instituição:</strong> ${user.institution}</p>
-                <p><strong>Projeto:</strong> ${user.project}</p>
-            </div>
-            <button class="btn-user-pdf" onclick="generateAdminPDF('${user.email}')">
-                📄 Relatório PDF
+            <h4>${user.name}</h4>
+            <p>${user.email}</p>
+            <p>${user.institution}</p>
+            <p><strong>Projeto:</strong> ${user.project}</p>
+            <button class="btn btn-secondary" onclick="generateUserPDF('${user.email}')">
+                Relatório PDF
             </button>
         </div>
     `).join('');
+    
+    element.innerHTML = html;
 }
 
-// ==================== UTILITÁRIOS ====================
-function formatDate(dateString) {
-    if (!dateString) return 'Data não informada';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
-}
-
-function formatFileSize(bytes) {
-    if (!bytes || bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-// ==================== NAVEGAÇÃO ====================
-function showLoginForm() {
-    document.getElementById('loginFormContainer').classList.remove('hidden');
-    document.getElementById('registerFormContainer').classList.add('hidden');
-}
-
-function showRegisterForm() {
-    document.getElementById('loginFormContainer').classList.add('hidden');
-    document.getElementById('registerFormContainer').classList.remove('hidden');
-}
-
-function showDashboard() {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('dashboard').classList.add('active');
-    
-    // Atualizar informações do usuário
-    if (currentUser) {
-        document.getElementById('userName').textContent = `Olá, ${currentUser.name}!`;
-        document.getElementById('userInfo').textContent = `${currentUser.email} - ${currentUser.institution}`;
-        
-        if (currentUser.isAdmin) {
-            document.getElementById('adminBadge').classList.remove('hidden');
-            document.getElementById('adminNavLink').classList.remove('hidden');
-        }
-    }
-}
-
-function handleNavigation(e) {
-    e.preventDefault();
-    
-    const section = e.target.dataset.section;
-    if (!section) return;
-    
-    // Atualizar navegação ativa
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('active');
-    });
-    e.target.classList.add('active');
-    
-    // Mostrar seção correspondente
-    document.querySelectorAll('.content-section').forEach(section => {
-        section.classList.remove('active');
-    });
-    
-    const targetSection = document.getElementById(section + 'Section');
-    if (targetSection) {
-        targetSection.classList.add('active');
-    }
-}
-
-function handleLogout() {
-    currentUser = null;
-    isLoggedIn = false;
-    
-    localStorage.removeItem('cdr_user');
-    localStorage.removeItem('cdr_session');
-    
-    document.getElementById('dashboard').classList.remove('active');
-    document.getElementById('loginScreen').style.display = 'flex';
-    
-    // Limpar formulários
-    document.querySelectorAll('form').forEach(form => form.reset());
-    
-    showMessage('Logout realizado com sucesso!', 'success');
-}
-
-function checkSavedSession() {
-    const savedUser = localStorage.getItem('cdr_user');
-    const savedSession = localStorage.getItem('cdr_session');
-    
-    if (savedUser && savedSession === 'active') {
-        try {
-            currentUser = JSON.parse(savedUser);
-            isLoggedIn = true;
-            showDashboard();
-            loadUserData();
-        } catch (error) {
-            console.error('[CDR Sul] Erro ao restaurar sessão:', error);
-            localStorage.removeItem('cdr_user');
-            localStorage.removeItem('cdr_session');
-        }
-    }
-}
-
-async function testConnectivity() {
+async function generateUserPDF(userEmail) {
     try {
-        const result = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL);
-        console.log('[CDR Sul] Conectividade testada com sucesso');
+        const result = await makeRequest('generatePDF', { userEmail });
+        
+        if (result.success && result.data?.pdfUrl) {
+            showAlert('Relatório PDF gerado com sucesso!', 'success');
+            window.open(result.data.pdfUrl, '_blank');
+        } else {
+            throw new Error(result.error || 'Erro ao gerar PDF');
+        }
     } catch (error) {
-        console.warn('[CDR Sul] Problema de conectividade:', error);
+        console.error('[CDR Sul] Erro ao gerar PDF do usuário:', error);
+        showAlert(`Erro ao gerar PDF: ${error.message}`, 'error');
     }
 }
 
-// ==================== FUNÇÕES AUXILIARES DE EXIBIÇÃO ====================
-function displayReports(reports) {
-    const container = document.getElementById('reportsList');
-    if (!container) return;
+function showAlert(message, type = 'info') {
+    // Remover alertas existentes
+    const existingAlerts = document.querySelectorAll('.alert-notification');
+    existingAlerts.forEach(alert => alert.remove());
     
-    if (reports.length === 0) {
-        container.innerHTML = '<p>Nenhum relatório enviado ainda.</p>';
-        return;
-    }
+    // Criar novo alerta
+    const alert = document.createElement('div');
+    alert.className = `alert-notification alert-${type}`;
+    alert.innerHTML = `
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()">&times;</button>
+    `;
     
-    container.innerHTML = reports.map(report => `
-        <div class="data-item">
-            <h4>${report.title}</h4>
-            <p><strong>Tipo:</strong> ${report.type} | <strong>Data:</strong> ${formatDate(report.date)}</p>
-            <p>${report.description}</p>
-            ${report.fileUrls && report.fileUrls.length > 0 ? 
-                `<p><strong>Arquivos:</strong> ${report.fileUrls.map((url, index) => 
-                    `<a href="${url}" target="_blank">📎 ${report.files[index] || 'Arquivo'}</a>`
-                ).join(', ')}</p>` : ''}
-        </div>
-    `).join('');
+    // Adicionar ao topo da página
+    document.body.insertBefore(alert, document.body.firstChild);
+    
+    // Remover automaticamente após 5 segundos
+    setTimeout(() => {
+        if (alert.parentElement) {
+            alert.remove();
+        }
+    }, 5000);
 }
 
-function displayActivities(activities) {
-    const container = document.getElementById('activitiesList');
-    if (!container) return;
-    
-    if (activities.length === 0) {
-        container.innerHTML = '<p>Nenhuma atividade cadastrada ainda.</p>';
-        return;
-    }
-    
-    container.innerHTML = activities.map(activity => `
-        <div class="data-item">
-            <h4>${activity.title}</h4>
-            <p><strong>Tipo:</strong> ${activity.type} | <strong>Data:</strong> ${formatDate(activity.date)}</p>
-            <p><strong>Local:</strong> ${activity.location || 'Não informado'}</p>
-            <p><strong>Participantes:</strong> ${activity.participants || 'Não informado'}</p>
-            <p>${activity.description}</p>
-            ${activity.fileUrls && activity.fileUrls.length > 0 ? 
-                `<p><strong>Arquivos:</strong> ${activity.fileUrls.map((url, index) => 
-                    `<a href="${url}" target="_blank">📎 ${activity.files[index] || 'Arquivo'}</a>`
-                ).join(', ')}</p>` : ''}
-        </div>
-    `).join('');
+// ==================== ESTILOS DINÂMICOS ====================
+const styles = `
+.alert-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    z-index: 10000;
+    max-width: 400px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-function displayFiles(files) {
-    const container = document.getElementById('filesList');
-    if (!container) return;
-    
-    if (files.length === 0) {
-        container.innerHTML = '<p>Nenhum arquivo enviado ainda.</p>';
-        return;
-    }
-    
-    container.innerHTML = files.map(file => `
-        <div class="data-item">
-            <h4>${file.name}</h4>
-            <p><strong>Categoria:</strong> ${file.category} | <strong>Tamanho:</strong> ${formatFileSize(file.size)}</p>
-            <p><strong>Data:</strong> ${formatDate(file.uploadDate)}</p>
-            <p>${file.description || 'Sem descrição'}</p>
-            ${file.driveUrl ? `<p><a href="${file.driveUrl}" target="_blank">📎 Abrir arquivo</a></p>` : ''}
-        </div>
-    `).join('');
+.alert-success { background-color: #28a745; }
+.alert-error { background-color: #dc3545; }
+.alert-warning { background-color: #ffc107; color: #000; }
+.alert-info { background-color: #17a2b8; }
+
+.alert-notification button {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 20px;
+    float: right;
+    cursor: pointer;
+    margin-left: 10px;
 }
 
-function displayAdminReports(reports) {
-    const container = document.getElementById('adminReportsList');
-    if (!container) return;
-    
-    if (reports.length === 0) {
-        container.innerHTML = '<p>Nenhum relatório encontrado.</p>';
-        return;
-    }
-    
-    container.innerHTML = reports.map(report => `
-        <div class="data-item">
-            <h4>${report.title}</h4>
-            <p><strong>Usuário:</strong> ${report.userEmail}</p>
-            <p><strong>Tipo:</strong> ${report.type} | <strong>Data:</strong> ${formatDate(report.date)}</p>
-            <p>${report.description}</p>
-        </div>
-    `).join('');
+.file-feedback {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
 }
 
-function displayAdminActivities(activities) {
-    const container = document.getElementById('adminActivitiesList');
-    if (!container) return;
-    
-    if (activities.length === 0) {
-        container.innerHTML = '<p>Nenhuma atividade encontrada.</p>';
-        return;
-    }
-    
-    container.innerHTML = activities.map(activity => `
-        <div class="data-item">
-            <h4>${activity.title}</h4>
-            <p><strong>Usuário:</strong> ${activity.userEmail}</p>
-            <p><strong>Tipo:</strong> ${activity.type} | <strong>Data:</strong> ${formatDate(activity.date)}</p>
-            <p><strong>Local:</strong> ${activity.location || 'Não informado'}</p>
-            <p>${activity.description}</p>
-        </div>
-    `).join('');
+.alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.alert-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+.alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+.recent-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 10px;
 }
 
-function displayAdminFiles(files) {
-    const container = document.getElementById('adminFilesList');
-    if (!container) return;
-    
-    if (files.length === 0) {
-        container.innerHTML = '<p>Nenhum arquivo encontrado.</p>';
-        return;
-    }
-    
-    container.innerHTML = files.map(file => `
-        <div class="data-item">
-            <h4>${file.name}</h4>
-            <p><strong>Usuário:</strong> ${file.userEmail}</p>
-            <p><strong>Categoria:</strong> ${file.category} | <strong>Tamanho:</strong> ${formatFileSize(file.size)}</p>
-            <p><strong>Data:</strong> ${formatDate(file.uploadDate)}</p>
-            <p>${file.description || 'Sem descrição'}</p>
-        </div>
-    `).join('');
+.recent-item h4 {
+    margin: 0 0 5px 0;
+    color: #333;
 }
+
+.recent-item p {
+    margin: 0 0 5px 0;
+    color: #666;
+}
+
+.recent-item small {
+    color: #999;
+}
+
+.user-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+}
+
+.user-card h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.user-card p {
+    margin: 5px 0;
+    color: #666;
+}
+
+.user-card button {
+    margin-top: 10px;
+}
+`;
+
+// Adicionar estilos ao documento
+const styleSheet = document.createElement('style');
+styleSheet.textContent = styles;
+document.head.appendChild(styleSheet);
