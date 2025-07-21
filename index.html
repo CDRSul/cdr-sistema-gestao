@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -843,7 +844,7 @@
         // ==================== CONFIGURAÇÕES ====================
         const CONFIG = {
             GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec',
-            VERSION: '4.0 - FINAL FUNCIONANDO COM MELHORIAS',
+            VERSION: '4.2 - UPLOAD ARQUIVOS CORRIGIDO',
             DEBUG: true,
             MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB em bytes
             MAX_TOTAL_SIZE: 50 * 1024 * 1024, // 50MB total
@@ -953,6 +954,72 @@
             }
         }
 
+        // ==================== COMUNICAÇÃO COM GOOGLE APPS SCRIPT ====================
+        async function makeRequest(action, data = {}, files = null) {
+            try {
+                console.log(`[CDR Sul] Enviando ação: ${action}`);
+                console.log(`[CDR Sul] Dados:`, Object.keys(data));
+                console.log(`[CDR Sul] Arquivos:`, files ? files.length : 0);
+                
+                const formData = new FormData();
+                
+                // Adicionar dados
+                formData.append('action', action);
+                Object.keys(data).forEach(key => {
+                    if (data[key] !== null && data[key] !== undefined) {
+                        formData.append(key, data[key]);
+                    }
+                });
+                
+                // Adicionar arquivos com nomes específicos baseados na ação
+                if (files && files.length > 0) {
+                    Array.from(files).forEach((file, index) => {
+                        let fileName = `file_${index}`;
+                        if (action === 'submitReport') {
+                            fileName = `reportFile_${index}`;
+                        } else if (action === 'submitActivity') {
+                            fileName = `activityFile_${index}`;
+                        } else if (action === 'uploadFiles') {
+                            fileName = `uploadFile_${index}`;
+                        }
+                        
+                        formData.append(fileName, file);
+                        console.log(`[CDR Sul] Arquivo adicionado: ${fileName} = ${file.name} (${file.size} bytes)`);
+                    });
+                }
+                
+                console.log(`[CDR Sul] Enviando requisição para: ${CONFIG.GOOGLE_APPS_SCRIPT_URL}`);
+                
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'cors'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const responseText = await response.text();
+                console.log(`[CDR Sul] Resposta recebida: ${responseText.substring(0, 200)}...`);
+                
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('[CDR Sul] Erro ao fazer parse da resposta:', parseError);
+                    throw new Error(`Resposta inválida do servidor: ${responseText.substring(0, 100)}`);
+                }
+                
+                console.log(`[CDR Sul] Resposta processada:`, result);
+                return result;
+                
+            } catch (error) {
+                console.error(`[CDR Sul] Erro na requisição:`, error);
+                throw error;
+            }
+        }
+
         // ==================== MOSTRAR TELA DE LOGIN ====================
         function showLoginScreen() {
             document.querySelector('.main-container').innerHTML = `
@@ -988,7 +1055,7 @@
                     </div>
                     
                     <div class="footer">
-                        <p>Desenvolvido pela equipe do CDR Sul Tocantins - Versão 4.0</p>
+                        <p>Desenvolvido pela equipe do CDR Sul Tocantins - Versão 4.2</p>
                     </div>
                 </div>
             `;
@@ -1073,8 +1140,7 @@
             btnText.innerHTML = '<div class="spinner"></div> Fazendo login...';
             
             try {
-                const result = await sendRequest({
-                    action: 'login',
+                const result = await makeRequest('login', {
                     email: email,
                     password: password
                 });
@@ -1127,8 +1193,7 @@
             btnText.innerHTML = '<div class="spinner"></div> Criando conta...';
             
             try {
-                const result = await sendRequest({
-                    action: 'register',
+                const result = await makeRequest('register', {
                     name: name,
                     email: email,
                     institution: institution,
@@ -1598,30 +1663,13 @@
             btnText.innerHTML = '<div class="spinner"></div> Enviando relatório...';
             
             try {
-                // Preparar dados do formulário com arquivos
-                let formData = new FormData();
-                formData.append('action', 'submitReport');
-                formData.append('userEmail', currentUser.email);
-                formData.append('reportType', reportType);
-                formData.append('reportDate', reportDate);
-                formData.append('title', title);
-                formData.append('description', description);
-                
-                for (let i = 0; i < files.length; i++) {
-                    formData.append('files', files[i]);
-                }
-                
-                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    body: formData
-                });
-                
-                if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
-                }
-                
-                const result = await response.json();
+                const result = await makeRequest('submitReport', {
+                    userEmail: currentUser.email,
+                    reportType: reportType,
+                    reportDate: reportDate,
+                    title: title,
+                    description: description
+                }, files);
                 
                 if (result.success) {
                     showAlert('Relatório enviado com sucesso!', 'success');
@@ -1662,32 +1710,15 @@
             btnText.innerHTML = '<div class="spinner"></div> Cadastrando atividade...';
             
             try {
-                // Preparar dados do formulário com arquivos
-                let formData = new FormData();
-                formData.append('action', 'submitActivity');
-                formData.append('userEmail', currentUser.email);
-                formData.append('activityType', activityType);
-                formData.append('activityDate', activityDate);
-                formData.append('title', title);
-                formData.append('description', description);
-                formData.append('location', location);
-                formData.append('participants', participants);
-                
-                for (let i = 0; i < files.length; i++) {
-                    formData.append('files', files[i]);
-                }
-                
-                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    body: formData
-                });
-                
-                if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
-                }
-                
-                const result = await response.json();
+                const result = await makeRequest('submitActivity', {
+                    userEmail: currentUser.email,
+                    activityType: activityType,
+                    activityDate: activityDate,
+                    title: title,
+                    description: description,
+                    location: location,
+                    participants: participants
+                }, files);
                 
                 if (result.success) {
                     showAlert('Atividade cadastrada com sucesso!', 'success');
@@ -1730,28 +1761,11 @@
             btnText.innerHTML = '<div class="spinner"></div> Enviando arquivos...';
             
             try {
-                // Preparar dados do formulário com arquivos
-                let formData = new FormData();
-                formData.append('action', 'uploadFiles');
-                formData.append('userEmail', currentUser.email);
-                formData.append('category', category);
-                formData.append('description', description);
-                
-                for (let i = 0; i < files.length; i++) {
-                    formData.append('files', files[i]);
-                }
-                
-                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    body: formData
-                });
-                
-                if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
-                }
-                
-                const result = await response.json();
+                const result = await makeRequest('uploadFiles', {
+                    userEmail: currentUser.email,
+                    category: category,
+                    description: description
+                }, files);
                 
                 if (result.success) {
                     showAlert('Arquivo(s) enviado(s) com sucesso!', 'success');
@@ -1763,7 +1777,7 @@
                 }
             } catch (error) {
                 console.error('[CDR Sul] ❌ Erro ao enviar arquivos:', error);
-                showAlert('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+                showAlert('Erro ao enviar arquivos: ' + error.message, 'error');
             } finally {
                 // Restaurar botão
                 btn.disabled = false;
@@ -1778,8 +1792,7 @@
             console.log('[CDR Sul] Gerando PDF para:', currentUser.email);
             
             try {
-                const result = await sendRequest({
-                    action: 'generatePDF',
+                const result = await makeRequest('generatePDF', {
                     userEmail: currentUser.email
                 });
                 
@@ -1802,8 +1815,7 @@
             console.log('[CDR Sul] Gerando PDF admin para:', userEmail);
             
             try {
-                const result = await sendRequest({
-                    action: 'generatePDF',
+                const result = await makeRequest('generatePDF', {
                     userEmail: userEmail,
                     adminRequest: true
                 });
@@ -1825,8 +1837,7 @@
             if (!currentUser) return;
             
             try {
-                const result = await sendRequest({
-                    action: 'getUserData',
+                const result = await makeRequest('getUserData', {
                     userEmail: currentUser.email
                 });
                 
@@ -1853,9 +1864,7 @@
             if (!currentUser || !currentUser.isAdmin) return;
             
             try {
-                const result = await sendRequest({
-                    action: 'getAdminData'
-                });
+                const result = await makeRequest('getAdminData');
                 
                 if (result.success) {
                     const data = result.data;
@@ -1935,35 +1944,6 @@
                 }
             } catch (error) {
                 console.error('[CDR Sul] ❌ Erro ao carregar dados administrativos:', error);
-            }
-        }
-
-        // ==================== ENVIAR REQUISIÇÃO ====================
-        async function sendRequest(data) {
-            console.log('[CDR Sul] Enviando requisição:', data);
-            
-            try {
-                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'text/plain;charset=utf-8'
-                    },
-                    body: JSON.stringify(data),
-                    redirect: 'follow'
-                });
-                
-                if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
-                }
-                
-                const result = await response.json();
-                console.log('[CDR Sul] Resposta recebida:', result);
-                return result;
-                
-            } catch (error) {
-                console.error('[CDR Sul] ❌ Erro na requisição:', error);
-                throw error;
             }
         }
 
