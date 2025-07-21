@@ -1,7 +1,6 @@
-// ==================== CONFIGURAÇÕES ====================
 const CONFIG = {
     GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec',
-    VERSION: 'SISTEMA COMPLETO BASE64 v1.0',
+    VERSION: '3.4 - MELHORADO COM FEEDBACK VISUAL E PDF',
     DEBUG: true,
     MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB em bytes
     MAX_TOTAL_SIZE: 50 * 1024 * 1024, // 50MB total
@@ -19,860 +18,938 @@ document.addEventListener('DOMContentLoaded', function() {
     // Verificar sessão salva
     checkSavedSession();
     
+    // Configurar event listeners
+    setupEventListeners();
+    
     // Testar conectividade
     testConnectivity();
 });
 
-// ==================== VERIFICAR SESSÃO SALVA ====================
-function checkSavedSession() {
+function setupEventListeners() {
     try {
-        const savedUser = localStorage.getItem('cdr_user');
-        if (savedUser) {
-            currentUser = JSON.parse(savedUser);
-            console.log('👤 Usuário recuperado:', currentUser.email);
-            showDashboard(currentUser);
-            return;
+        // Formulário de login
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', handleLogin);
         }
-    } catch (e) {
-        localStorage.removeItem('cdr_user');
-    }
-    
-    showLoginScreen();
-}
-
-// ==================== TESTAR CONECTIVIDADE ====================
-async function testConnectivity() {
-    console.log('🔍 Testando conectividade...');
-    
-    try {
-        const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
-            method: 'GET',
-            mode: 'cors'
+        
+        // Formulário de cadastro
+        const registerForm = document.getElementById('registerForm');
+        if (registerForm) {
+            registerForm.addEventListener('submit', handleRegister);
+        }
+        
+        // Formulário de relatório
+        const reportForm = document.getElementById('reportForm');
+        if (reportForm) {
+            reportForm.addEventListener('submit', handleSubmitReport);
+        }
+        
+        // Formulário de atividade
+        const activityForm = document.getElementById('activityForm');
+        if (activityForm) {
+            activityForm.addEventListener('submit', handleSubmitActivity);
+        }
+        
+        // Formulário de arquivos
+        const filesForm = document.getElementById('filesForm');
+        if (filesForm) {
+            filesForm.addEventListener('submit', handleUploadFiles);
+        }
+        
+        // Botão de logout
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', handleLogout);
+        }
+        
+        // Links de navegação
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', handleNavigation);
         });
         
-        if (response.ok) {
-            const data = await response.json();
-            console.log('✅ Conectividade OK:', data.version);
-        } else {
-            console.log('⚠️ Resposta não OK:', response.status);
+        // Link de cadastro
+        const registerLink = document.getElementById('registerLink');
+        if (registerLink) {
+            registerLink.addEventListener('click', showRegisterForm);
         }
-    } catch (error) {
-        console.log('❌ Erro de conectividade:', error);
-    }
-}
-
-// ==================== MOSTRAR TELA DE LOGIN ====================
-function showLoginScreen() {
-    document.querySelector('.main-container').innerHTML = `
-        <div class="login-container">
-            <div class="login-header">
-                <img src="https://static.wixstatic.com/media/96b2d1_82005fa5efee493fb11c905fa9b56a83~mv2.png" alt="CDR Sul Tocantins" class="logo">
-                <h1>Sistema de Gestão de Projetos CDR Sul</h1>
-                <p>Tudo sobre o seu projeto, reunido em um só lugar</p>
-            </div>
-            
-            <div class="login-form-container">
-                <h2>Acesso ao Sistema</h2>
-                
-                <form id="loginForm" onsubmit="handleLogin(event)">
-                    <div class="form-group">
-                        <label for="loginEmail">E-mail:</label>
-                        <input type="email" id="loginEmail" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="loginPassword">Senha:</label>
-                        <input type="password" id="loginPassword" required>
-                    </div>
-                    
-                    <button type="submit" class="btn-primary">Entrar</button>
-                </form>
-                
-                <p class="register-link">
-                    Não tem conta? <a href="#" onclick="showRegisterScreen()">Cadastre-se aqui</a>
-                </p>
-            </div>
-            
-            <div class="footer">
-                <p>Desenvolvido pela equipe do CDR Sul Tocantins - Versão 2.0</p>
-            </div>
-        </div>
-    `;
-}
-
-// ==================== MOSTRAR TELA DE CADASTRO ====================
-function showRegisterScreen() {
-    document.querySelector('.main-container').innerHTML = `
-        <div class="login-container">
-            <div class="login-header">
-                <img src="https://static.wixstatic.com/media/96b2d1_82005fa5efee493fb11c905fa9b56a83~mv2.png" alt="CDR Sul Tocantins" class="logo">
-                <h1>Sistema de Gestão de Projetos CDR Sul</h1>
-                <p>Cadastro de Novo Usuário</p>
-            </div>
-            
-            <div class="login-form-container">
-                <h2>Criar Conta</h2>
-                
-                <form id="registerForm" onsubmit="handleRegister(event)">
-                    <div class="form-group">
-                        <label for="registerName">Nome Completo:</label>
-                        <input type="text" id="registerName" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="registerEmail">E-mail:</label>
-                        <input type="email" id="registerEmail" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="registerInstitution">Instituição:</label>
-                        <input type="text" id="registerInstitution" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="registerProject">Nome do Projeto:</label>
-                        <input type="text" id="registerProject" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="registerPassword">Senha:</label>
-                        <input type="password" id="registerPassword" required minlength="6">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="registerConfirmPassword">Confirmar Senha:</label>
-                        <input type="password" id="registerConfirmPassword" required minlength="6">
-                    </div>
-                    
-                    <button type="submit" class="btn-primary">Cadastrar</button>
-                </form>
-                
-                <p class="register-link">
-                    Já tem conta? <a href="#" onclick="showLoginScreen()">Faça login aqui</a>
-                </p>
-            </div>
-        </div>
-    `;
-}
-
-// ==================== PROCESSAR LOGIN ====================
-async function handleLogin(event) {
-    event.preventDefault();
-    
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    
-    console.log('🔐 Tentando login:', email);
-    
-    try {
-        const result = await sendRequest({
-            action: 'login',
-            email: email,
-            password: password
-        });
         
-        if (result.success) {
-            console.log('✅ Login bem-sucedido:', result.user);
-            currentUser = result.user;
-            localStorage.setItem('cdr_user', JSON.stringify(currentUser));
-            showDashboard(currentUser);
-        } else {
-            alert('Erro no login: ' + result.message);
+        // Link de voltar ao login
+        const backToLoginLink = document.getElementById('backToLoginLink');
+        if (backToLoginLink) {
+            backToLoginLink.addEventListener('click', showLoginForm);
         }
-    } catch (error) {
-        console.error('❌ Erro no login:', error);
-        alert('Erro de conexão. Verifique sua internet e tente novamente.');
-    }
-}
-
-// ==================== PROCESSAR CADASTRO ====================
-async function handleRegister(event) {
-    event.preventDefault();
-    
-    const name = document.getElementById('registerName').value;
-    const email = document.getElementById('registerEmail').value;
-    const institution = document.getElementById('registerInstitution').value;
-    const project = document.getElementById('registerProject').value;
-    const password = document.getElementById('registerPassword').value;
-    const confirmPassword = document.getElementById('registerConfirmPassword').value;
-    
-    if (password !== confirmPassword) {
-        alert('As senhas não coincidem!');
-        return;
-    }
-    
-    console.log('📝 Tentando cadastro:', email);
-    
-    try {
-        const result = await sendRequest({
-            action: 'register',
-            name: name,
-            email: email,
-            institution: institution,
-            project: project,
-            password: password
-        });
         
-        if (result.success) {
-            alert('Cadastro realizado com sucesso! Faça login para continuar.');
-            showLoginScreen();
-        } else {
-            alert('Erro no cadastro: ' + result.message);
+        // Botão de gerar PDF
+        const generatePdfBtn = document.getElementById('generatePdfBtn');
+        if (generatePdfBtn) {
+            generatePdfBtn.addEventListener('click', generateUserPDF);
         }
+        
+        // Validação de arquivos em tempo real
+        setupFileValidation();
+        
+        console.log('[CDR Sul] Event listeners configurados');
     } catch (error) {
-        console.error('❌ Erro no cadastro:', error);
-        alert('Erro de conexão. Verifique sua internet e tente novamente.');
+        console.error('[CDR Sul] Erro ao configurar event listeners:', error);
     }
 }
 
-// ==================== MOSTRAR DASHBOARD ====================
-function showDashboard(user) {
-    console.log('📊 Mostrando dashboard:', user.email);
+// ==================== VALIDAÇÃO DE ARQUIVOS ====================
+function setupFileValidation() {
+    const fileInputs = document.querySelectorAll('input[type="file"]');
     
-    currentUser = user;
-    
-    document.querySelector('.main-container').innerHTML = `
-        <div class="dashboard">
-            <header class="dashboard-header">
-                <div class="header-left">
-                    <img src="https://static.wixstatic.com/media/96b2d1_82005fa5efee493fb11c905fa9b56a83~mv2.png" alt="CDR Sul" class="header-logo">
-                    <div class="user-info">
-                        <h2>Bem-vindo, ${user.name}</h2>
-                        <p>Projeto: ${user.project}</p>
-                        ${user.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
-                    </div>
-                </div>
-                <button onclick="logout()" class="btn-logout">Sair</button>
-            </header>
-            
-            <nav class="dashboard-nav">
-                <button onclick="showTab('overview')" class="nav-btn active" data-tab="overview">Visão Geral</button>
-                <button onclick="showTab('reports')" class="nav-btn" data-tab="reports">Relatórios</button>
-                <button onclick="showTab('activities')" class="nav-btn" data-tab="activities">Atividades</button>
-                <button onclick="showTab('files')" class="nav-btn" data-tab="files">Arquivos</button>
-                ${user.isAdmin ? '<button onclick="showTab(\'admin\')" class="nav-btn" data-tab="admin">Admin</button>' : ''}
-            </nav>
-            
-            <main class="dashboard-content" id="dashboardContent">
-                <!-- Conteúdo será carregado aqui -->
-            </main>
-        </div>
-    `;
-    
-    showTab('overview');
-    loadUserData();
-}
-
-// ==================== MOSTRAR ABA ====================
-function showTab(tabName) {
-    console.log('📑 Mostrando aba:', tabName);
-    
-    // Atualizar navegação
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('active');
+    fileInputs.forEach(input => {
+        input.addEventListener('change', function(e) {
+            validateFiles(e.target.files, e.target);
+            updateFileInfo(e.target);
+        });
     });
-    const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
-    if (activeBtn) activeBtn.classList.add('active');
+}
+
+function updateFileInfo(inputElement) {
+    const files = inputElement.files;
+    const infoId = inputElement.id + 'Info';
+    const infoDiv = document.getElementById(infoId);
     
-    // Mostrar conteúdo
-    switch (tabName) {
-        case 'overview':
-            showOverviewTab();
-            break;
-        case 'reports':
-            showReportsTab();
-            break;
-        case 'activities':
-            showActivitiesTab();
-            break;
-        case 'files':
-            showFilesTab();
-            break;
-        case 'admin':
-            if (currentUser && currentUser.isAdmin) {
-                showAdminTab();
-            }
-            break;
-    }
-}
-
-// ==================== ABA VISÃO GERAL ====================
-function showOverviewTab() {
-    document.getElementById('dashboardContent').innerHTML = `
-        <div class="overview-tab">
-            <h3>Visão Geral do Projeto</h3>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h4>Relatórios Enviados</h4>
-                    <div class="stat-number" id="statsReports">-</div>
-                </div>
-                <div class="stat-card">
-                    <h4>Atividades Cadastradas</h4>
-                    <div class="stat-number" id="statsActivities">-</div>
-                </div>
-                <div class="stat-card">
-                    <h4>Arquivos Enviados</h4>
-                    <div class="stat-number" id="statsFiles">-</div>
-                </div>
-            </div>
-            
-            <div class="project-info">
-                <h4>Informações do Projeto</h4>
-                <p><strong>Coordenador:</strong> ${currentUser.name}</p>
-                <p><strong>Instituição:</strong> ${currentUser.institution}</p>
-                <p><strong>Projeto:</strong> ${currentUser.project}</p>
-                <p><strong>E-mail:</strong> ${currentUser.email}</p>
-            </div>
-        </div>
-    `;
-}
-
-// ==================== ABA RELATÓRIOS ====================
-function showReportsTab() {
-    document.getElementById('dashboardContent').innerHTML = `
-        <div class="reports-tab">
-            <h3>Enviar Relatório</h3>
-            
-            <form id="reportForm" onsubmit="handleSubmitReport(event)">
-                <div class="form-group">
-                    <label for="reportType">Tipo de Relatório:</label>
-                    <select id="reportType" required>
-                        <option value="Relatório Parcial">Relatório Parcial</option>
-                        <option value="Relatório Final">Relatório Final</option>
-                        <option value="Relatório de Atividade">Relatório de Atividade</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="reportDate">Data do Relatório:</label>
-                    <input type="date" id="reportDate" value="${new Date().toISOString().split('T')[0]}" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="reportTitle">Título:</label>
-                    <input type="text" id="reportTitle" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="reportDescription">Descrição:</label>
-                    <textarea id="reportDescription" rows="4" required></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="reportFiles">Arquivos (PDF, DOC, DOCX - máximo 10MB cada):</label>
-                    <input type="file" id="reportFiles" multiple accept=".pdf,.doc,.docx" onchange="validateFiles(this)">
-                    <div id="reportFilesInfo"></div>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary">Enviar Relatório</button>
-                </div>
-            </form>
-        </div>
-    `;
-}
-
-// ==================== ABA ATIVIDADES ====================
-function showActivitiesTab() {
-    document.getElementById('dashboardContent').innerHTML = `
-        <div class="activities-tab">
-            <h3>Cadastrar Atividade</h3>
-            
-            <form id="activityForm" onsubmit="handleSubmitActivity(event)">
-                <div class="form-group">
-                    <label for="activityType">Tipo de Atividade:</label>
-                    <select id="activityType" required>
-                        <option value="Reunião">Reunião</option>
-                        <option value="Workshop">Workshop</option>
-                        <option value="Palestra">Palestra</option>
-                        <option value="Curso">Curso</option>
-                        <option value="Evento">Evento</option>
-                        <option value="Pesquisa de Campo">Pesquisa de Campo</option>
-                        <option value="Outra">Outra</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="activityDate">Data da Atividade:</label>
-                    <input type="date" id="activityDate" value="${new Date().toISOString().split('T')[0]}" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="activityTitle">Título da Atividade:</label>
-                    <input type="text" id="activityTitle" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="activityDescription">Descrição:</label>
-                    <textarea id="activityDescription" rows="4" required></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="activityLocation">Local:</label>
-                    <input type="text" id="activityLocation">
-                </div>
-                
-                <div class="form-group">
-                    <label for="activityParticipants">Participantes:</label>
-                    <textarea id="activityParticipants" rows="2" placeholder="Liste os participantes da atividade"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="activityFiles">Arquivos (Fotos, Documentos - máximo 10MB cada):</label>
-                    <input type="file" id="activityFiles" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="validateFiles(this)">
-                    <div id="activityFilesInfo"></div>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary">Cadastrar Atividade</button>
-                </div>
-            </form>
-        </div>
-    `;
-}
-
-// ==================== ABA ARQUIVOS ====================
-function showFilesTab() {
-    document.getElementById('dashboardContent').innerHTML = `
-        <div class="files-tab">
-            <h3>Enviar Arquivos</h3>
-            
-            <form id="filesForm" onsubmit="handleUploadFiles(event)">
-                <div class="form-group">
-                    <label for="fileCategory">Categoria:</label>
-                    <select id="fileCategory" required>
-                        <option value="Documentos">Documentos</option>
-                        <option value="Fotos">Fotos</option>
-                        <option value="Planilhas">Planilhas</option>
-                        <option value="Apresentações">Apresentações</option>
-                        <option value="Outros">Outros</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="fileDescription">Descrição:</label>
-                    <textarea id="fileDescription" rows="3" placeholder="Descreva os arquivos que está enviando"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="uploadFiles">Selecionar Arquivos (máximo 10MB cada):</label>
-                    <input type="file" id="uploadFiles" multiple required onchange="validateFiles(this)">
-                    <div id="uploadFilesInfo"></div>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary">Enviar Arquivos</button>
-                </div>
-            </form>
-        </div>
-    `;
-}
-
-// ==================== ABA ADMIN ====================
-function showAdminTab() {
-    if (!currentUser || !currentUser.isAdmin) return;
+    if (!infoDiv) return;
     
-    document.getElementById('dashboardContent').innerHTML = `
-        <div class="admin-tab">
-            <h3>Painel Administrativo</h3>
-            
-            <div class="admin-stats">
-                <div class="stat-card">
-                    <h4>Total de Usuários</h4>
-                    <div class="stat-number" id="adminStatsUsers">-</div>
-                </div>
-                <div class="stat-card">
-                    <h4>Total de Relatórios</h4>
-                    <div class="stat-number" id="adminStatsReports">-</div>
-                </div>
-                <div class="stat-card">
-                    <h4>Total de Atividades</h4>
-                    <div class="stat-number" id="adminStatsActivities">-</div>
-                </div>
-            </div>
-            
-            <div class="admin-sections">
-                <div class="admin-section">
-                    <h4>Usuários Cadastrados</h4>
-                    <div id="adminUsersList">Carregando...</div>
-                </div>
-                
-                <div class="admin-section">
-                    <h4>Relatórios Recentes</h4>
-                    <div id="adminReportsList">Carregando...</div>
-                </div>
-                
-                <div class="admin-section">
-                    <h4>Atividades Recentes</h4>
-                    <div id="adminActivitiesList">Carregando...</div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    loadAdminData();
-}
-
-// ==================== VALIDAR ARQUIVOS ====================
-function validateFiles(input) {
-    const files = input.files;
-    const infoDiv = document.getElementById(input.id + 'Info');
-    
-    if (!files || files.length === 0) {
-        infoDiv.innerHTML = '';
+    if (files.length === 0) {
+        infoDiv.classList.add('hidden');
         return;
     }
     
     let totalSize = 0;
-    let validFiles = [];
-    let errors = [];
+    let fileList = '';
     
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+    Array.from(files).forEach(file => {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        totalSize += file.size;
+        fileList += `<div>📎 ${file.name} (${sizeMB}MB)</div>`;
+    });
+    
+    const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+    
+    infoDiv.innerHTML = `
+        <strong>Arquivos selecionados:</strong><br>
+        ${fileList}
+        <div style="margin-top: 8px;"><strong>Total: ${files.length} arquivo(s) - ${totalSizeMB}MB</strong></div>
+    `;
+    infoDiv.classList.remove('hidden');
+}
+
+function validateFiles(files, inputElement) {
+    if (!files || files.length === 0) return true;
+    
+    let totalSize = 0;
+    const errors = [];
+    const warnings = [];
+    
+    Array.from(files).forEach((file, index) => {
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        totalSize += file.size;
         
         // Verificar tamanho individual
         if (file.size > CONFIG.MAX_FILE_SIZE) {
-            errors.push(`${file.name}: ${fileSizeMB}MB (máximo: 10MB)`);
-            continue;
+            errors.push(`${file.name} (${fileSizeMB}MB) excede o limite de 10MB`);
         }
         
-        totalSize += file.size;
-        validFiles.push({
-            name: file.name,
-            size: fileSizeMB,
-            type: file.type
-        });
-    }
+        // Verificar formato
+        const extension = file.name.split('.').pop().toLowerCase();
+        if (!CONFIG.SUPPORTED_FORMATS.includes(extension)) {
+            warnings.push(`${file.name} - formato ${extension} pode não ser suportado`);
+        }
+    });
     
     // Verificar tamanho total
+    const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
     if (totalSize > CONFIG.MAX_TOTAL_SIZE) {
-        const totalSizeMB = (totalSize / 1024 / 1024).toFixed(2);
-        errors.push(`Tamanho total: ${totalSizeMB}MB (máximo: 50MB)`);
-    }
-    
-    // Mostrar informações
-    let html = '';
-    
-    if (validFiles.length > 0) {
-        html += '<div style="background: #e8f5e8; padding: 10px; border-radius: 5px; margin: 10px 0;">';
-        html += '<h4>✅ Arquivos Válidos:</h4>';
-        validFiles.forEach(file => {
-            html += `<p>📁 ${file.name} (${file.size}MB)</p>`;
-        });
-        html += '</div>';
+        errors.push(`Tamanho total (${totalSizeMB}MB) excede o limite de 50MB`);
     }
     
     if (errors.length > 0) {
-        html += '<div style="background: #ffe8e8; padding: 10px; border-radius: 5px; margin: 10px 0;">';
-        html += '<h4>❌ Problemas Encontrados:</h4>';
-        errors.forEach(error => {
-            html += `<p>⚠️ ${error}</p>`;
-        });
-        html += '</div>';
+        showMessage('Erro: ' + errors.join(', '), 'error');
+        inputElement.setCustomValidity('Arquivos muito grandes');
+        return false;
     }
     
-    infoDiv.innerHTML = html;
+    if (warnings.length > 0) {
+        showMessage('Aviso: ' + warnings.join(', '), 'info');
+    }
+    
+    inputElement.setCustomValidity('');
+    return true;
 }
 
-// ==================== PROCESSAR ENVIO DE RELATÓRIO ====================
-async function handleSubmitReport(event) {
-    event.preventDefault();
+// ==================== FEEDBACK VISUAL ====================
+function setButtonLoading(buttonId, isLoading, loadingText = 'Carregando...') {
+    const button = document.getElementById(buttonId);
+    if (!button) return;
     
-    const reportType = document.getElementById('reportType').value;
-    const reportDate = document.getElementById('reportDate').value;
-    const title = document.getElementById('reportTitle').value;
-    const description = document.getElementById('reportDescription').value;
-    const files = document.getElementById('reportFiles').files;
+    if (isLoading) {
+        button.disabled = true;
+        button.classList.add('btn-loading');
+        button.dataset.originalText = button.textContent;
+        button.innerHTML = `<span class="spinner"></span>${loadingText}`;
+    } else {
+        button.disabled = false;
+        button.classList.remove('btn-loading');
+        button.innerHTML = button.dataset.originalText || button.textContent.replace(/^.*?([A-Za-z].*)$/, '$1');
+    }
+}
+
+function showProgress(progressId, show = true, percentage = 0) {
+    const progressContainer = document.getElementById(progressId);
+    if (!progressContainer) return;
     
-    console.log('📄 Enviando relatório:', title);
-    
-    try {
-        const result = await uploadFilesBase64({
-            action: 'submitReport',
-            userEmail: currentUser.email,
-            reportType: reportType,
-            reportDate: reportDate,
-            title: title,
-            description: description
-        }, files);
-        
-        if (result.success) {
-            alert('Relatório enviado com sucesso!');
-            document.getElementById('reportForm').reset();
-            document.getElementById('reportFilesInfo').innerHTML = '';
-            loadUserData();
-        } else {
-            alert('Erro ao enviar relatório: ' + result.message);
+    if (show) {
+        progressContainer.style.display = 'block';
+        const progressFill = progressContainer.querySelector('.progress-fill');
+        if (progressFill) {
+            progressFill.style.width = percentage + '%';
         }
-    } catch (error) {
-        console.error('❌ Erro ao enviar relatório:', error);
-        alert('Erro de conexão. Verifique sua internet e tente novamente.');
+    } else {
+        progressContainer.style.display = 'none';
     }
 }
 
-// ==================== PROCESSAR CADASTRO DE ATIVIDADE ====================
-async function handleSubmitActivity(event) {
-    event.preventDefault();
+function showMessage(message, type = 'info') {
+    // Remove mensagens anteriores
+    const existingMessages = document.querySelectorAll('.message');
+    existingMessages.forEach(msg => msg.remove());
     
-    const activityType = document.getElementById('activityType').value;
-    const activityDate = document.getElementById('activityDate').value;
-    const title = document.getElementById('activityTitle').value;
-    const description = document.getElementById('activityDescription').value;
-    const location = document.getElementById('activityLocation').value;
-    const participants = document.getElementById('activityParticipants').value;
-    const files = document.getElementById('activityFiles').files;
+    // Criar nova mensagem
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+    messageDiv.textContent = message;
     
-    console.log('🎯 Cadastrando atividade:', title);
+    // Inserir no topo do conteúdo ativo
+    const activeSection = document.querySelector('.content-section.active');
+    if (activeSection) {
+        activeSection.insertBefore(messageDiv, activeSection.firstChild);
+    }
     
+    // Auto-remover após 5 segundos
+    setTimeout(() => {
+        messageDiv.remove();
+    }, 5000);
+}
+
+// ==================== COMUNICAÇÃO COM GOOGLE APPS SCRIPT ====================
+async function makeRequest(action, data = {}, files = null) {
     try {
-        const result = await uploadFilesBase64({
-            action: 'submitActivity',
-            userEmail: currentUser.email,
-            activityType: activityType,
-            activityDate: activityDate,
-            title: title,
-            description: description,
-            location: location,
-            participants: participants
-        }, files);
+        console.log(`[CDR Sul] Enviando ação: ${action}`);
         
-        if (result.success) {
-            alert('Atividade cadastrada com sucesso!');
-            document.getElementById('activityForm').reset();
-            document.getElementById('activityFilesInfo').innerHTML = '';
-            loadUserData();
-        } else {
-            alert('Erro ao cadastrar atividade: ' + result.message);
-        }
-    } catch (error) {
-        console.error('❌ Erro ao cadastrar atividade:', error);
-        alert('Erro de conexão. Verifique sua internet e tente novamente.');
-    }
-}
-
-// ==================== PROCESSAR UPLOAD DE ARQUIVOS ====================
-async function handleUploadFiles(event) {
-    event.preventDefault();
-    
-    const category = document.getElementById('fileCategory').value;
-    const description = document.getElementById('fileDescription').value;
-    const files = document.getElementById('uploadFiles').files;
-    
-    console.log('📁 Enviando arquivos, categoria:', category);
-    
-    try {
-        const result = await uploadFilesBase64({
-            action: 'uploadFiles',
-            userEmail: currentUser.email,
-            category: category,
-            description: description
-        }, files);
+        const formData = new FormData();
         
-        if (result.success) {
-            alert(`${files.length} arquivo(s) enviado(s) com sucesso!`);
-            document.getElementById('filesForm').reset();
-            document.getElementById('uploadFilesInfo').innerHTML = '';
-            loadUserData();
-        } else {
-            alert('Erro ao enviar arquivos: ' + result.message);
-        }
-    } catch (error) {
-        console.error('❌ Erro ao enviar arquivos:', error);
-        alert('Erro de conexão. Verifique sua internet e tente novamente.');
-    }
-}
-
-// ==================== UPLOAD DE ARQUIVOS VIA BASE64 ====================
-async function uploadFilesBase64(data, files) {
-    console.log('🚀 Iniciando upload Base64...');
-    
-    // Se não há arquivos, enviar apenas dados
-    if (!files || files.length === 0) {
-        return await sendRequest(data);
-    }
-    
-    // Converter arquivos para Base64
-    const filesBase64 = [];
-    
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        
-        // Verificar tamanho
-        if (file.size > CONFIG.MAX_FILE_SIZE) {
-            throw new Error(`Arquivo ${file.name} é muito grande (${(file.size / 1024 / 1024).toFixed(2)}MB). Máximo: 10MB`);
-        }
-        
-        console.log(`📁 Convertendo ${file.name} para Base64...`);
-        
-        const base64 = await convertFileToBase64(file);
-        
-        filesBase64.push({
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            base64: base64
-        });
-        
-        console.log(`✅ ${file.name} convertido (${base64.length} caracteres)`);
-    }
-    
-    // Adicionar arquivos aos dados
-    data.filesBase64 = JSON.stringify(filesBase64);
-    
-    console.log(`📤 Enviando ${filesBase64.length} arquivo(s) via Base64...`);
-    
-    return await sendRequest(data);
-}
-
-// ==================== CONVERTER ARQUIVO PARA BASE64 ====================
-function convertFileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        
-        reader.onload = function() {
-            // Remover prefixo "data:tipo/mime;base64,"
-            const base64 = reader.result.split(',')[1];
-            resolve(base64);
-        };
-        
-        reader.onerror = function() {
-            reject(new Error('Erro ao ler arquivo para conversão Base64'));
-        };
-        
-        reader.readAsDataURL(file);
-    });
-}
-
-// ==================== CARREGAR DADOS DO USUÁRIO ====================
-async function loadUserData() {
-    if (!currentUser) return;
-    
-    try {
-        const result = await sendRequest({
-            action: 'getUserData',
-            userEmail: currentUser.email
-        });
-        
-        if (result.success) {
-            const data = result.data;
-            
-            const statsReports = document.getElementById('statsReports');
-            const statsActivities = document.getElementById('statsActivities');
-            const statsFiles = document.getElementById('statsFiles');
-            
-            if (statsReports) statsReports.textContent = data.reports || 0;
-            if (statsActivities) statsActivities.textContent = data.activities || 0;
-            if (statsFiles) statsFiles.textContent = data.files || 0;
-            
-            console.log('✅ Dados do usuário carregados:', data);
-        }
-    } catch (error) {
-        console.error('❌ Erro ao carregar dados do usuário:', error);
-    }
-}
-
-// ==================== CARREGAR DADOS ADMINISTRATIVOS ====================
-async function loadAdminData() {
-    if (!currentUser || !currentUser.isAdmin) return;
-    
-    try {
-        const result = await sendRequest({
-            action: 'getAdminData'
-        });
-        
-        if (result.success) {
-            const data = result.data;
-            
-            document.getElementById('adminStatsUsers').textContent = data.totalUsers || 0;
-            document.getElementById('adminStatsReports').textContent = data.totalReports || 0;
-            document.getElementById('adminStatsActivities').textContent = data.totalActivities || 0;
-            
-            // Usuários
-            const usersList = document.getElementById('adminUsersList');
-            if (data.users && data.users.length > 0) {
-                usersList.innerHTML = data.users.map(user => 
-                    `<div class="admin-item">
-                        <strong>${user.name || 'Nome não informado'}</strong><br>
-                        ${user.email}<br>
-                        <small>${user.institution || 'Instituição não informada'} - ${user.project || 'Projeto não informado'}</small>
-                    </div>`
-                ).join('');
-            } else {
-                usersList.innerHTML = '<p>Nenhum usuário cadastrado</p>';
+        // Adicionar dados
+        formData.append('action', action);
+        Object.keys(data).forEach(key => {
+            if (data[key] !== null && data[key] !== undefined) {
+                formData.append(key, data[key]);
             }
-            
-            // Relatórios
-            const reportsList = document.getElementById('adminReportsList');
-            if (data.recentReports && data.recentReports.length > 0) {
-                reportsList.innerHTML = data.recentReports.map(report => 
-                    `<div class="admin-item">
-                        <strong>${report.title || 'Título não informado'}</strong><br>
-                        ${report.userEmail}<br>
-                        <small>${report.date ? new Date(report.date).toLocaleDateString() : 'Data não informada'}</small>
-                    </div>`
-                ).join('');
-            } else {
-                reportsList.innerHTML = '<p>Nenhum relatório encontrado</p>';
-            }
-            
-            // Atividades
-            const activitiesList = document.getElementById('adminActivitiesList');
-            if (data.recentActivities && data.recentActivities.length > 0) {
-                activitiesList.innerHTML = data.recentActivities.map(activity => 
-                    `<div class="admin-item">
-                        <strong>${activity.title || 'Título não informado'}</strong><br>
-                        ${activity.userEmail}<br>
-                        <small>${activity.date ? new Date(activity.date).toLocaleDateString() : 'Data não informada'} - ${activity.location || 'Local não informado'}</small>
-                    </div>`
-                ).join('');
-            } else {
-                activitiesList.innerHTML = '<p>Nenhuma atividade encontrada</p>';
-            }
-            
-            console.log('✅ Dados administrativos carregados:', data);
+        });
+        
+        // Adicionar arquivos se houver
+        if (files && files.length > 0) {
+            Array.from(files).forEach((file, index) => {
+                formData.append(`file_${index}`, file);
+            });
         }
-    } catch (error) {
-        console.error('❌ Erro ao carregar dados administrativos:', error);
-    }
-}
-
-// ==================== ENVIAR REQUISIÇÃO ====================
-async function sendRequest(data) {
-    console.log('📡 Enviando requisição:', data);
-    
-    try {
+        
         const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
             method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: new URLSearchParams(data)
+            body: formData
         });
         
         if (!response.ok) {
-            throw new Error('HTTP error! status: ' + response.status);
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
-        const text = await response.text();
-        const result = JSON.parse(text);
-        console.log('📥 Resposta recebida:', result);
+        const result = await response.json();
+        console.log(`[CDR Sul] Resposta recebida:`, result);
+        
         return result;
         
     } catch (error) {
-        console.error('❌ Erro na requisição:', error);
+        console.error(`[CDR Sul] Erro na requisição:`, error);
         throw error;
     }
 }
 
-// ==================== LOGOUT ====================
-function logout() {
-    console.log('👋 Fazendo logout');
-    currentUser = null;
-    localStorage.removeItem('cdr_user');
-    showLoginScreen();
+// ==================== AUTENTICAÇÃO ====================
+async function handleLogin(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!email || !password) {
+        showMessage('Por favor, preencha todos os campos', 'error');
+        return;
+    }
+    
+    setButtonLoading('loginBtn', true, 'Fazendo login...');
+    
+    try {
+        const result = await makeRequest('login', { email, password });
+        
+        if (result.success) {
+            currentUser = result.data.user;
+            isLoggedIn = true;
+            
+            // Salvar sessão
+            localStorage.setItem('cdr_user', JSON.stringify(currentUser));
+            localStorage.setItem('cdr_session', 'active');
+            
+            showMessage('Login realizado com sucesso!', 'success');
+            
+            setTimeout(() => {
+                showDashboard();
+                loadUserData();
+            }, 1000);
+            
+        } else {
+            showMessage(result.error || 'Erro no login', 'error');
+        }
+        
+    } catch (error) {
+        console.error('[CDR Sul] Erro no login:', error);
+        showMessage('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+    } finally {
+        setButtonLoading('loginBtn', false);
+    }
 }
 
-console.log(`✅ Sistema CDR Sul - ${CONFIG.VERSION}`);
+async function handleRegister(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    if (!data.name || !data.email || !data.institution || !data.project || !data.password) {
+        showMessage('Por favor, preencha todos os campos', 'error');
+        return;
+    }
+    
+    setButtonLoading('registerBtn', true, 'Criando conta...');
+    
+    try {
+        const result = await makeRequest('register', data);
+        
+        if (result.success) {
+            showMessage('Conta criada com sucesso! Faça login para continuar.', 'success');
+            setTimeout(() => {
+                showLoginForm();
+            }, 2000);
+        } else {
+            showMessage(result.error || 'Erro no cadastro', 'error');
+        }
+        
+    } catch (error) {
+        console.error('[CDR Sul] Erro no cadastro:', error);
+        showMessage('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+    } finally {
+        setButtonLoading('registerBtn', false);
+    }
+}
+
+// ==================== ENVIO DE DADOS ====================
+async function handleSubmitReport(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    const files = document.getElementById('reportFiles').files;
+    
+    if (!data.type || !data.date || !data.title || !data.description) {
+        showMessage('Por favor, preencha todos os campos obrigatórios', 'error');
+        return;
+    }
+    
+    data.userEmail = currentUser.email;
+    
+    setButtonLoading('submitReportBtn', true, 'Enviando relatório...');
+    showProgress('reportProgress', true, 0);
+    
+    try {
+        // Simular progresso
+        for (let i = 0; i <= 100; i += 20) {
+            showProgress('reportProgress', true, i);
+            await new Promise(resolve => setTimeout(resolve, 200));
+        }
+        
+        const result = await makeRequest('submitReport', data, files);
+        
+        if (result.success) {
+            showMessage('Relatório enviado com sucesso!', 'success');
+            e.target.reset();
+            updateFileInfo(document.getElementById('reportFiles'));
+            loadUserData(); // Atualizar estatísticas
+        } else {
+            showMessage(result.error || 'Erro ao enviar relatório', 'error');
+        }
+        
+    } catch (error) {
+        console.error('[CDR Sul] Erro ao enviar relatório:', error);
+        showMessage('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+    } finally {
+        setButtonLoading('submitReportBtn', false);
+        showProgress('reportProgress', false);
+    }
+}
+
+async function handleSubmitActivity(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    const files = document.getElementById('activityFiles').files;
+    
+    if (!data.type || !data.date || !data.title || !data.description) {
+        showMessage('Por favor, preencha todos os campos obrigatórios', 'error');
+        return;
+    }
+    
+    data.userEmail = currentUser.email;
+    
+    setButtonLoading('submitActivityBtn', true, 'Cadastrando atividade...');
+    showProgress('activityProgress', true, 0);
+    
+    try {
+        // Simular progresso
+        for (let i = 0; i <= 100; i += 25) {
+            showProgress('activityProgress', true, i);
+            await new Promise(resolve => setTimeout(resolve, 150));
+        }
+        
+        const result = await makeRequest('submitActivity', data, files);
+        
+        if (result.success) {
+            showMessage('Atividade cadastrada com sucesso!', 'success');
+            e.target.reset();
+            updateFileInfo(document.getElementById('activityFiles'));
+            loadUserData(); // Atualizar estatísticas
+        } else {
+            showMessage(result.error || 'Erro ao cadastrar atividade', 'error');
+        }
+        
+    } catch (error) {
+        console.error('[CDR Sul] Erro ao cadastrar atividade:', error);
+        showMessage('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+    } finally {
+        setButtonLoading('submitActivityBtn', false);
+        showProgress('activityProgress', false);
+    }
+}
+
+async function handleUploadFiles(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    const files = document.getElementById('uploadFiles').files;
+    
+    if (!data.category || files.length === 0) {
+        showMessage('Por favor, selecione a categoria e pelo menos um arquivo', 'error');
+        return;
+    }
+    
+    data.userEmail = currentUser.email;
+    
+    setButtonLoading('submitFilesBtn', true, 'Enviando arquivos...');
+    showProgress('filesProgress', true, 0);
+    
+    try {
+        // Simular progresso
+        for (let i = 0; i <= 100; i += 10) {
+            showProgress('filesProgress', true, i);
+            await new Promise(resolve => setTimeout(resolve, 300));
+        }
+        
+        const result = await makeRequest('uploadFiles', data, files);
+        
+        if (result.success) {
+            showMessage('Arquivos enviados com sucesso!', 'success');
+            e.target.reset();
+            updateFileInfo(document.getElementById('uploadFiles'));
+            loadUserData(); // Atualizar estatísticas
+        } else {
+            showMessage(result.error || 'Erro ao enviar arquivos', 'error');
+        }
+        
+    } catch (error) {
+        console.error('[CDR Sul] Erro ao enviar arquivos:', error);
+        showMessage('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+    } finally {
+        setButtonLoading('submitFilesBtn', false);
+        showProgress('filesProgress', false);
+    }
+}
+
+// ==================== GERAÇÃO DE PDF ====================
+async function generateUserPDF() {
+    if (!currentUser) {
+        showMessage('Usuário não encontrado', 'error');
+        return;
+    }
+    
+    setButtonLoading('generatePdfBtn', true, 'Gerando PDF...');
+    
+    try {
+        const result = await makeRequest('generatePDF', {
+            userEmail: currentUser.email,
+            requestedBy: currentUser.email,
+            isAdmin: currentUser.isAdmin || false
+        });
+        
+        if (result.success && result.data.pdfUrl) {
+            showMessage('Relatório PDF gerado com sucesso!', 'success');
+            // Abrir PDF em nova aba
+            window.open(result.data.pdfUrl, '_blank');
+        } else {
+            showMessage(result.error || 'Erro ao gerar relatório PDF', 'error');
+        }
+        
+    } catch (error) {
+        console.error('[CDR Sul] Erro ao gerar PDF:', error);
+        showMessage('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+    } finally {
+        setButtonLoading('generatePdfBtn', false);
+    }
+}
+
+async function generateAdminPDF(userEmail) {
+    if (!currentUser || !currentUser.isAdmin) {
+        showMessage('Acesso negado', 'error');
+        return;
+    }
+    
+    try {
+        const result = await makeRequest('generatePDF', {
+            userEmail: userEmail,
+            requestedBy: currentUser.email,
+            isAdmin: true
+        });
+        
+        if (result.success && result.data.pdfUrl) {
+            showMessage('Relatório PDF gerado com sucesso!', 'success');
+            // Abrir PDF em nova aba
+            window.open(result.data.pdfUrl, '_blank');
+        } else {
+            showMessage(result.error || 'Erro ao gerar relatório PDF', 'error');
+        }
+        
+    } catch (error) {
+        console.error('[CDR Sul] Erro ao gerar PDF admin:', error);
+        showMessage('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+    }
+}
+
+// ==================== CARREGAMENTO DE DADOS ====================
+async function loadUserData() {
+    if (!currentUser) return;
+    
+    try {
+        // Carregar relatórios do usuário
+        const reportsResult = await makeRequest('getReports', { userEmail: currentUser.email });
+        if (reportsResult.success) {
+            updateReportsCount(reportsResult.data.length);
+            displayReports(reportsResult.data);
+            displayRecentReports(reportsResult.data.slice(-3));
+        }
+        
+        // Carregar atividades do usuário
+        const activitiesResult = await makeRequest('getActivities', { userEmail: currentUser.email });
+        if (activitiesResult.success) {
+            updateActivitiesCount(activitiesResult.data.length);
+            displayActivities(activitiesResult.data);
+            displayRecentActivities(activitiesResult.data.slice(-3));
+        }
+        
+        // Carregar arquivos do usuário
+        const filesResult = await makeRequest('getFiles', { userEmail: currentUser.email });
+        if (filesResult.success) {
+            updateFilesCount(filesResult.data.length);
+            displayFiles(filesResult.data);
+            displayRecentFiles(filesResult.data.slice(-3));
+        }
+        
+        // Se for admin, carregar dados administrativos
+        if (currentUser.isAdmin) {
+            loadAdminData();
+        }
+        
+    } catch (error) {
+        console.error('[CDR Sul] Erro ao carregar dados do usuário:', error);
+    }
+}
+
+async function loadAdminData() {
+    try {
+        // Carregar todos os usuários
+        const usersResult = await makeRequest('getUsers');
+        if (usersResult.success) {
+            updateTotalUsers(usersResult.data.length);
+            displayAllUsers(usersResult.data);
+        }
+        
+        // Carregar todos os relatórios
+        const allReportsResult = await makeRequest('getReports');
+        if (allReportsResult.success) {
+            updateTotalReports(allReportsResult.data.length);
+            displayAdminReports(allReportsResult.data.slice(-10));
+        }
+        
+        // Carregar todas as atividades
+        const allActivitiesResult = await makeRequest('getActivities');
+        if (allActivitiesResult.success) {
+            updateTotalActivities(allActivitiesResult.data.length);
+            displayAdminActivities(allActivitiesResult.data.slice(-10));
+        }
+        
+        // Carregar todos os arquivos
+        const allFilesResult = await makeRequest('getFiles');
+        if (allFilesResult.success) {
+            updateTotalFiles(allFilesResult.data.length);
+            displayAdminFiles(allFilesResult.data.slice(-10));
+        }
+        
+    } catch (error) {
+        console.error('[CDR Sul] Erro ao carregar dados administrativos:', error);
+    }
+}
+
+// ==================== ATUALIZAÇÃO DE INTERFACE ====================
+function updateReportsCount(count) {
+    const element = document.getElementById('reportsCount');
+    if (element) element.textContent = count;
+}
+
+function updateActivitiesCount(count) {
+    const element = document.getElementById('activitiesCount');
+    if (element) element.textContent = count;
+}
+
+function updateFilesCount(count) {
+    const element = document.getElementById('filesCount');
+    if (element) element.textContent = count;
+}
+
+function updateTotalUsers(count) {
+    const element = document.getElementById('totalUsers');
+    if (element) element.textContent = count;
+}
+
+function updateTotalReports(count) {
+    const element = document.getElementById('totalReports');
+    if (element) element.textContent = count;
+}
+
+function updateTotalActivities(count) {
+    const element = document.getElementById('totalActivities');
+    if (element) element.textContent = count;
+}
+
+function updateTotalFiles(count) {
+    const element = document.getElementById('totalFiles');
+    if (element) element.textContent = count;
+}
+
+function displayRecentActivities(activities) {
+    const container = document.getElementById('recentActivities');
+    if (!container) return;
+    
+    if (activities.length === 0) {
+        container.innerHTML = '<p>Nenhuma atividade cadastrada ainda.</p>';
+        return;
+    }
+    
+    container.innerHTML = activities.map(activity => `
+        <div class="data-item">
+            <h4>${activity.title}</h4>
+            <p><strong>Tipo:</strong> ${activity.type} | <strong>Data:</strong> ${formatDate(activity.date)}</p>
+            <p><strong>Local:</strong> ${activity.location || 'Não informado'}</p>
+            <p>${activity.description}</p>
+        </div>
+    `).join('');
+}
+
+function displayRecentFiles(files) {
+    const container = document.getElementById('recentFiles');
+    if (!container) return;
+    
+    if (files.length === 0) {
+        container.innerHTML = '<p>Nenhum arquivo enviado ainda.</p>';
+        return;
+    }
+    
+    container.innerHTML = files.map(file => `
+        <div class="data-item">
+            <h4>${file.name}</h4>
+            <p><strong>Categoria:</strong> ${file.category} | <strong>Tamanho:</strong> ${formatFileSize(file.size)}</p>
+            <p><strong>Data:</strong> ${formatDate(file.uploadDate)}</p>
+            <p>${file.description || 'Sem descrição'}</p>
+            ${file.driveUrl ? `<p><a href="${file.driveUrl}" target="_blank">📎 Abrir arquivo</a></p>` : ''}
+        </div>
+    `).join('');
+}
+
+function displayAllUsers(users) {
+    const container = document.getElementById('usersList');
+    if (!container) return;
+    
+    if (users.length === 0) {
+        container.innerHTML = '<p>Nenhum usuário cadastrado.</p>';
+        return;
+    }
+    
+    container.innerHTML = users.map(user => `
+        <div class="user-card">
+            <div class="user-info-admin">
+                <h5>${user.name}</h5>
+                <p><strong>E-mail:</strong> ${user.email}</p>
+                <p><strong>Instituição:</strong> ${user.institution}</p>
+                <p><strong>Projeto:</strong> ${user.project}</p>
+            </div>
+            <button class="btn-user-pdf" onclick="generateAdminPDF('${user.email}')">
+                📄 Relatório PDF
+            </button>
+        </div>
+    `).join('');
+}
+
+// ==================== UTILITÁRIOS ====================
+function formatDate(dateString) {
+    if (!dateString) return 'Data não informada';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+}
+
+function formatFileSize(bytes) {
+    if (!bytes || bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// ==================== NAVEGAÇÃO ====================
+function showLoginForm() {
+    document.getElementById('loginFormContainer').classList.remove('hidden');
+    document.getElementById('registerFormContainer').classList.add('hidden');
+}
+
+function showRegisterForm() {
+    document.getElementById('loginFormContainer').classList.add('hidden');
+    document.getElementById('registerFormContainer').classList.remove('hidden');
+}
+
+function showDashboard() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').classList.add('active');
+    
+    // Atualizar informações do usuário
+    if (currentUser) {
+        document.getElementById('userName').textContent = `Olá, ${currentUser.name}!`;
+        document.getElementById('userInfo').textContent = `${currentUser.email} - ${currentUser.institution}`;
+        
+        if (currentUser.isAdmin) {
+            document.getElementById('adminBadge').classList.remove('hidden');
+            document.getElementById('adminNavLink').classList.remove('hidden');
+        }
+    }
+}
+
+function handleNavigation(e) {
+    e.preventDefault();
+    
+    const section = e.target.dataset.section;
+    if (!section) return;
+    
+    // Atualizar navegação ativa
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    e.target.classList.add('active');
+    
+    // Mostrar seção correspondente
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    const targetSection = document.getElementById(section + 'Section');
+    if (targetSection) {
+        targetSection.classList.add('active');
+    }
+}
+
+function handleLogout() {
+    currentUser = null;
+    isLoggedIn = false;
+    
+    localStorage.removeItem('cdr_user');
+    localStorage.removeItem('cdr_session');
+    
+    document.getElementById('dashboard').classList.remove('active');
+    document.getElementById('loginScreen').style.display = 'flex';
+    
+    // Limpar formulários
+    document.querySelectorAll('form').forEach(form => form.reset());
+    
+    showMessage('Logout realizado com sucesso!', 'success');
+}
+
+function checkSavedSession() {
+    const savedUser = localStorage.getItem('cdr_user');
+    const savedSession = localStorage.getItem('cdr_session');
+    
+    if (savedUser && savedSession === 'active') {
+        try {
+            currentUser = JSON.parse(savedUser);
+            isLoggedIn = true;
+            showDashboard();
+            loadUserData();
+        } catch (error) {
+            console.error('[CDR Sul] Erro ao restaurar sessão:', error);
+            localStorage.removeItem('cdr_user');
+            localStorage.removeItem('cdr_session');
+        }
+    }
+}
+
+async function testConnectivity() {
+    try {
+        const result = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL);
+        console.log('[CDR Sul] Conectividade testada com sucesso');
+    } catch (error) {
+        console.warn('[CDR Sul] Problema de conectividade:', error);
+    }
+}
+
+// ==================== FUNÇÕES AUXILIARES DE EXIBIÇÃO ====================
+function displayReports(reports) {
+    const container = document.getElementById('reportsList');
+    if (!container) return;
+    
+    if (reports.length === 0) {
+        container.innerHTML = '<p>Nenhum relatório enviado ainda.</p>';
+        return;
+    }
+    
+    container.innerHTML = reports.map(report => `
+        <div class="data-item">
+            <h4>${report.title}</h4>
+            <p><strong>Tipo:</strong> ${report.type} | <strong>Data:</strong> ${formatDate(report.date)}</p>
+            <p>${report.description}</p>
+            ${report.fileUrls && report.fileUrls.length > 0 ? 
+                `<p><strong>Arquivos:</strong> ${report.fileUrls.map((url, index) => 
+                    `<a href="${url}" target="_blank">📎 ${report.files[index] || 'Arquivo'}</a>`
+                ).join(', ')}</p>` : ''}
+        </div>
+    `).join('');
+}
+
+function displayActivities(activities) {
+    const container = document.getElementById('activitiesList');
+    if (!container) return;
+    
+    if (activities.length === 0) {
+        container.innerHTML = '<p>Nenhuma atividade cadastrada ainda.</p>';
+        return;
+    }
+    
+    container.innerHTML = activities.map(activity => `
+        <div class="data-item">
+            <h4>${activity.title}</h4>
+            <p><strong>Tipo:</strong> ${activity.type} | <strong>Data:</strong> ${formatDate(activity.date)}</p>
+            <p><strong>Local:</strong> ${activity.location || 'Não informado'}</p>
+            <p><strong>Participantes:</strong> ${activity.participants || 'Não informado'}</p>
+            <p>${activity.description}</p>
+            ${activity.fileUrls && activity.fileUrls.length > 0 ? 
+                `<p><strong>Arquivos:</strong> ${activity.fileUrls.map((url, index) => 
+                    `<a href="${url}" target="_blank">📎 ${activity.files[index] || 'Arquivo'}</a>`
+                ).join(', ')}</p>` : ''}
+        </div>
+    `).join('');
+}
+
+function displayFiles(files) {
+    const container = document.getElementById('filesList');
+    if (!container) return;
+    
+    if (files.length === 0) {
+        container.innerHTML = '<p>Nenhum arquivo enviado ainda.</p>';
+        return;
+    }
+    
+    container.innerHTML = files.map(file => `
+        <div class="data-item">
+            <h4>${file.name}</h4>
+            <p><strong>Categoria:</strong> ${file.category} | <strong>Tamanho:</strong> ${formatFileSize(file.size)}</p>
+            <p><strong>Data:</strong> ${formatDate(file.uploadDate)}</p>
+            <p>${file.description || 'Sem descrição'}</p>
+            ${file.driveUrl ? `<p><a href="${file.driveUrl}" target="_blank">📎 Abrir arquivo</a></p>` : ''}
+        </div>
+    `).join('');
+}
+
+function displayAdminReports(reports) {
+    const container = document.getElementById('adminReportsList');
+    if (!container) return;
+    
+    if (reports.length === 0) {
+        container.innerHTML = '<p>Nenhum relatório encontrado.</p>';
+        return;
+    }
+    
+    container.innerHTML = reports.map(report => `
+        <div class="data-item">
+            <h4>${report.title}</h4>
+            <p><strong>Usuário:</strong> ${report.userEmail}</p>
+            <p><strong>Tipo:</strong> ${report.type} | <strong>Data:</strong> ${formatDate(report.date)}</p>
+            <p>${report.description}</p>
+        </div>
+    `).join('');
+}
+
+function displayAdminActivities(activities) {
+    const container = document.getElementById('adminActivitiesList');
+    if (!container) return;
+    
+    if (activities.length === 0) {
+        container.innerHTML = '<p>Nenhuma atividade encontrada.</p>';
+        return;
+    }
+    
+    container.innerHTML = activities.map(activity => `
+        <div class="data-item">
+            <h4>${activity.title}</h4>
+            <p><strong>Usuário:</strong> ${activity.userEmail}</p>
+            <p><strong>Tipo:</strong> ${activity.type} | <strong>Data:</strong> ${formatDate(activity.date)}</p>
+            <p><strong>Local:</strong> ${activity.location || 'Não informado'}</p>
+            <p>${activity.description}</p>
+        </div>
+    `).join('');
+}
+
+function displayAdminFiles(files) {
+    const container = document.getElementById('adminFilesList');
+    if (!container) return;
+    
+    if (files.length === 0) {
+        container.innerHTML = '<p>Nenhum arquivo encontrado.</p>';
+        return;
+    }
+    
+    container.innerHTML = files.map(file => `
+        <div class="data-item">
+            <h4>${file.name}</h4>
+            <p><strong>Usuário:</strong> ${file.userEmail}</p>
+            <p><strong>Categoria:</strong> ${file.category} | <strong>Tamanho:</strong> ${formatFileSize(file.size)}</p>
+            <p><strong>Data:</strong> ${formatDate(file.uploadDate)}</p>
+            <p>${file.description || 'Sem descrição'}</p>
+        </div>
+    `).join('');
+}
