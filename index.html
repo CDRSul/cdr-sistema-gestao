@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -516,49 +515,6 @@
             color: #2b6cb0;
         }
 
-        .file-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .file-item:last-child {
-            border-bottom: none;
-        }
-
-        .file-info {
-            flex: 1;
-        }
-
-        .file-name {
-            font-weight: 600;
-            color: #2d3748;
-        }
-
-        .file-size {
-            font-size: 0.8rem;
-            color: #718096;
-        }
-
-        .file-status {
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-
-        .file-status.valid {
-            background: #c6f6d5;
-            color: #276749;
-        }
-
-        .file-status.invalid {
-            background: #fed7d7;
-            color: #c53030;
-        }
-
         /* ===== PAINEL ADMIN ===== */
         .admin-tab {
             background: white;
@@ -844,11 +800,11 @@
         // ==================== CONFIGURAÇÕES ====================
         const CONFIG = {
             GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxW8iySGkZpzbreHqG78LGCL4NiHGBS9PdczQRAncNFUifD5a55v8iMhv7PfB6HVggD/exec',
-            VERSION: '2.0 - CDR Sul',
+            VERSION: 'SISTEMA FINAL BASE64 v1.0',
             DEBUG: true,
             MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB em bytes
             MAX_TOTAL_SIZE: 50 * 1024 * 1024, // 50MB total
-            SUPPORTED_FORMATS: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'zip', 'rar', 'xlsx', 'ppt', 'doc', 'xlx']
+            SUPPORTED_FORMATS: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'zip', 'rar', 'xlsx', 'ppt', 'xls']
         };
 
         // ==================== ESTADO GLOBAL ====================
@@ -864,11 +820,6 @@
             
             // Testar conectividade
             testConnectivity();
-            
-            // Mostrar tela inicial
-            if (!currentUser) {
-                showLoginScreen();
-            }
         });
 
         // ==================== SISTEMA DE ALERTAS CENTRALIZADOS ====================
@@ -924,20 +875,22 @@
                 const savedUser = localStorage.getItem('cdr_user');
                 if (savedUser) {
                     currentUser = JSON.parse(savedUser);
-                    isLoggedIn = true;
-                    console.log('[CDR Sul] Usuário recuperado da sessão:', currentUser.email);
+                    console.log('👤 Usuário recuperado:', currentUser.email);
                     showDashboard(currentUser);
+                    return;
                 }
-            } catch (error) {
-                console.error('[CDR Sul] Erro ao recuperar sessão:', error);
+            } catch (e) {
                 localStorage.removeItem('cdr_user');
             }
+            
+            showLoginScreen();
         }
 
         // ==================== TESTAR CONECTIVIDADE ====================
         async function testConnectivity() {
+            console.log('🔍 Testando conectividade...');
+            
             try {
-                console.log('[CDR Sul] Testando conectividade...');
                 const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
                     method: 'GET',
                     mode: 'cors'
@@ -945,78 +898,12 @@
                 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('[CDR Sul] ✅ Conectividade OK:', data.version);
+                    console.log('✅ Conectividade OK:', data.version);
                 } else {
-                    console.log('[CDR Sul] ⚠️ Resposta não OK:', response.status);
+                    console.log('⚠️ Resposta não OK:', response.status);
                 }
             } catch (error) {
-                console.log('[CDR Sul] ❌ Erro de conectividade:', error);
-            }
-        }
-
-        // ==================== COMUNICAÇÃO COM GOOGLE APPS SCRIPT ====================
-        async function makeRequest(action, data = {}, files = null) {
-            try {
-                console.log(`[CDR Sul] Enviando ação: ${action}`);
-                console.log(`[CDR Sul] Dados:`, Object.keys(data));
-                console.log(`[CDR Sul] Arquivos:`, files ? files.length : 0);
-                
-                const formData = new FormData();
-                
-                // Adicionar dados
-                formData.append('action', action);
-                Object.keys(data).forEach(key => {
-                    if (data[key] !== null && data[key] !== undefined) {
-                        formData.append(key, data[key]);
-                    }
-                });
-                
-                // Adicionar arquivos com nomes específicos baseados na ação
-                if (files && files.length > 0) {
-                    Array.from(files).forEach((file, index) => {
-                        let fileName = `file_${index}`;
-                        if (action === 'submitReport') {
-                            fileName = `reportFile_${index}`;
-                        } else if (action === 'submitActivity') {
-                            fileName = `activityFile_${index}`;
-                        } else if (action === 'uploadFiles') {
-                            fileName = `uploadFile_${index}`;
-                        }
-                        
-                        formData.append(fileName, file);
-                        console.log(`[CDR Sul] Arquivo adicionado: ${fileName} = ${file.name} (${file.size} bytes)`);
-                    });
-                }
-                
-                console.log(`[CDR Sul] Enviando requisição para: ${CONFIG.GOOGLE_APPS_SCRIPT_URL}`);
-                
-                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    body: formData,
-                    mode: 'cors'
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const responseText = await response.text();
-                console.log(`[CDR Sul] Resposta recebida: ${responseText.substring(0, 200)}...`);
-                
-                let result;
-                try {
-                    result = JSON.parse(responseText);
-                } catch (parseError) {
-                    console.error('[CDR Sul] Erro ao fazer parse da resposta:', parseError);
-                    throw new Error(`Resposta inválida do servidor: ${responseText.substring(0, 100)}`);
-                }
-                
-                console.log(`[CDR Sul] Resposta processada:`, result);
-                return result;
-                
-            } catch (error) {
-                console.error(`[CDR Sul] Erro na requisição:`, error);
-                throw error;
+                console.log('❌ Erro de conectividade:', error);
             }
         }
 
@@ -1055,7 +942,7 @@
                     </div>
                     
                     <div class="footer">
-                        <p>Desenvolvido pela equipe do CDR Sul Tocantins - Versão 4.2</p>
+                        <p>Desenvolvido pela equipe do CDR Sul Tocantins - Versão 2.0</p>
                     </div>
                 </div>
             `;
@@ -1133,21 +1020,22 @@
             const btn = document.getElementById('loginBtn');
             const btnText = btn.querySelector('.btn-text');
             
-            console.log('[CDR Sul] Tentando login:', email);
+            console.log('🔐 Tentando login:', email);
             
             // Mostrar loading
             btn.disabled = true;
             btnText.innerHTML = '<div class="spinner"></div> Fazendo login...';
             
             try {
-                const result = await makeRequest('login', {
+                const result = await sendRequest({
+                    action: 'login',
                     email: email,
                     password: password
                 });
                 
                 if (result.success) {
-                    console.log('[CDR Sul] ✅ Login bem-sucedido:', result.user);
-                    currentUser = result.user;
+                    console.log('✅ Login bem-sucedido:', result.user);
+                    currentUser = result.user || result.data?.user;
                     isLoggedIn = true;
                     localStorage.setItem('cdr_user', JSON.stringify(currentUser));
                     
@@ -1159,7 +1047,7 @@
                     showAlert('Erro no login: ' + result.message, 'error');
                 }
             } catch (error) {
-                console.error('[CDR Sul] ❌ Erro no login:', error);
+                console.error('❌ Erro no login:', error);
                 showAlert('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
             } finally {
                 // Restaurar botão
@@ -1186,14 +1074,15 @@
                 return;
             }
             
-            console.log('[CDR Sul] Tentando cadastro:', email);
+            console.log('📝 Tentando cadastro:', email);
             
             // Mostrar loading
             btn.disabled = true;
             btnText.innerHTML = '<div class="spinner"></div> Criando conta...';
             
             try {
-                const result = await makeRequest('register', {
+                const result = await sendRequest({
+                    action: 'register',
                     name: name,
                     email: email,
                     institution: institution,
@@ -1210,7 +1099,7 @@
                     showAlert('Erro no cadastro: ' + result.message, 'error');
                 }
             } catch (error) {
-                console.error('[CDR Sul] ❌ Erro no cadastro:', error);
+                console.error('❌ Erro no cadastro:', error);
                 showAlert('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
             } finally {
                 // Restaurar botão
@@ -1221,7 +1110,7 @@
 
         // ==================== MOSTRAR DASHBOARD ====================
         function showDashboard(user) {
-            console.log('[CDR Sul] Mostrando dashboard:', user.email);
+            console.log('🏠 Mostrando dashboard:', user.email);
             
             currentUser = user;
             isLoggedIn = true;
@@ -1260,7 +1149,7 @@
 
         // ==================== MOSTRAR ABA ====================
         function showTab(tabName) {
-            console.log('[CDR Sul] Mostrando aba:', tabName);
+            console.log('📑 Mostrando aba:', tabName);
             
             // Atualizar navegação
             document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -1363,7 +1252,7 @@
                         <div class="form-group">
                             <label for="reportFiles">Arquivos (PDF, DOC, DOCX) - Obrigatório:</label>
                             <input type="file" id="reportFiles" multiple accept=".pdf,.doc,.docx" required>
-                            <div id="reportFilesValidation" class="file-validation" style="display: none;"></div>
+                            <div id="reportFilesInfo" class="file-validation" style="display: none;"></div>
                         </div>
                         
                         <div class="form-actions">
@@ -1377,7 +1266,7 @@
             
             // Configurar validação de arquivos
             document.getElementById('reportFiles').addEventListener('change', function() {
-                validateFiles(this.files, 'reportFilesValidation');
+                validateFiles(this);
             });
             
             // Configurar event listener do formulário
@@ -1432,7 +1321,7 @@
                         <div class="form-group">
                             <label for="activityFiles">Arquivos (Fotos, Documentos) - Opcional:</label>
                             <input type="file" id="activityFiles" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-                            <div id="activityFilesValidation" class="file-validation" style="display: none;"></div>
+                            <div id="activityFilesInfo" class="file-validation" style="display: none;"></div>
                         </div>
                         
                         <div class="form-actions">
@@ -1446,7 +1335,7 @@
             
             // Configurar validação de arquivos
             document.getElementById('activityFiles').addEventListener('change', function() {
-                validateFiles(this.files, 'activityFilesValidation');
+                validateFiles(this);
             });
             
             // Configurar event listener do formulário
@@ -1479,7 +1368,7 @@
                         <div class="form-group">
                             <label for="uploadFiles">Selecionar Arquivos - Obrigatório:</label>
                             <input type="file" id="uploadFiles" multiple required>
-                            <div id="uploadFilesValidation" class="file-validation" style="display: none;"></div>
+                            <div id="uploadFilesInfo" class="file-validation" style="display: none;"></div>
                         </div>
                         
                         <div class="form-actions">
@@ -1493,7 +1382,7 @@
             
             // Configurar validação de arquivos
             document.getElementById('uploadFiles').addEventListener('change', function() {
-                validateFiles(this.files, 'uploadFilesValidation');
+                validateFiles(this);
             });
             
             // Configurar event listener do formulário
@@ -1554,88 +1443,67 @@
             loadAdminData();
         }
 
-        // ==================== VALIDAÇÃO DE ARQUIVOS ====================
-        function validateFiles(files, validationElementId) {
-            const validationEl = document.getElementById(validationElementId);
+        // ==================== VALIDAR ARQUIVOS ====================
+        function validateFiles(input) {
+            const files = input.files;
+            const infoDiv = document.getElementById(input.id + 'Info');
             
             if (!files || files.length === 0) {
-                validationEl.style.display = 'none';
+                infoDiv.style.display = 'none';
                 return;
             }
             
             let totalSize = 0;
-            let validFiles = 0;
-            let invalidFiles = 0;
-            let fileList = '';
+            let validFiles = [];
+            let errors = [];
             
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                const fileSize = file.size;
-                const fileName = file.name;
-                const fileExtension = fileName.split('.').pop().toLowerCase();
+                const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
                 
-                totalSize += fileSize;
-                
-                const isValidFormat = CONFIG.SUPPORTED_FORMATS.includes(fileExtension);
-                const isValidSize = fileSize <= CONFIG.MAX_FILE_SIZE;
-                
-                if (isValidFormat && isValidSize) {
-                    validFiles++;
-                    fileList += `
-                        <div class="file-item">
-                            <div class="file-info">
-                                <div class="file-name">${fileName}</div>
-                                <div class="file-size">${formatFileSize(fileSize)}</div>
-                            </div>
-                            <div class="file-status valid">Válido</div>
-                        </div>
-                    `;
-                } else {
-                    invalidFiles++;
-                    let reason = '';
-                    if (!isValidFormat) reason = 'Formato não suportado';
-                    else if (!isValidSize) reason = 'Arquivo muito grande';
-                    
-                    fileList += `
-                        <div class="file-item">
-                            <div class="file-info">
-                                <div class="file-name">${fileName}</div>
-                                <div class="file-size">${formatFileSize(fileSize)}</div>
-                            </div>
-                            <div class="file-status invalid">${reason}</div>
-                        </div>
-                    `;
+                // Verificar tamanho individual
+                if (file.size > CONFIG.MAX_FILE_SIZE) {
+                    errors.push(`${file.name}: ${fileSizeMB}MB (máximo: 10MB)`);
+                    continue;
                 }
+                
+                totalSize += file.size;
+                validFiles.push({
+                    name: file.name,
+                    size: fileSizeMB,
+                    type: file.type
+                });
             }
             
+            // Verificar tamanho total
+            if (totalSize > CONFIG.MAX_TOTAL_SIZE) {
+                const totalSizeMB = (totalSize / 1024 / 1024).toFixed(2);
+                errors.push(`Tamanho total: ${totalSizeMB}MB (máximo: 50MB)`);
+            }
+            
+            // Mostrar informações
+            let html = '';
             let validationClass = 'info';
-            let validationMessage = `${files.length} arquivo(s) selecionado(s)`;
             
-            if (invalidFiles > 0) {
-                validationClass = 'error';
-                validationMessage = `${invalidFiles} arquivo(s) inválido(s) encontrado(s)`;
-            } else if (totalSize > CONFIG.MAX_TOTAL_SIZE) {
-                validationClass = 'error';
-                validationMessage = `Tamanho total excede ${formatFileSize(CONFIG.MAX_TOTAL_SIZE)}`;
-            } else if (validFiles > 0) {
+            if (validFiles.length > 0) {
+                html += '<div style="margin-bottom: 10px;"><strong>✅ Arquivos Válidos:</strong></div>';
+                validFiles.forEach(file => {
+                    html += `<div>📁 ${file.name} (${file.size}MB)</div>`;
+                });
                 validationClass = 'success';
-                validationMessage = `${validFiles} arquivo(s) válido(s) - Total: ${formatFileSize(totalSize)}`;
             }
             
-            validationEl.className = `file-validation ${validationClass}`;
-            validationEl.innerHTML = `
-                <div style="margin-bottom: 10px; font-weight: 600;">${validationMessage}</div>
-                ${fileList}
-            `;
-            validationEl.style.display = 'block';
-        }
-
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            if (errors.length > 0) {
+                html += '<div style="margin-top: 10px;"><strong>❌ Problemas Encontrados:</strong></div>';
+                errors.forEach(error => {
+                    html += `<div>⚠️ ${error}</div>`;
+                });
+                validationClass = 'error';
+            }
+            
+            infoDiv.className = `file-validation ${validationClass}`;
+            infoDiv.innerHTML = html;
+            infoDiv.style.display = 'block';
         }
 
         // ==================== PROCESSAR ENVIO DE RELATÓRIO ====================
@@ -1656,14 +1524,15 @@
                 return;
             }
             
-            console.log('[CDR Sul] Enviando relatório:', title);
+            console.log('📄 Enviando relatório:', title);
             
             // Mostrar loading
             btn.disabled = true;
             btnText.innerHTML = '<div class="spinner"></div> Enviando relatório...';
             
             try {
-                const result = await makeRequest('submitReport', {
+                const result = await uploadFilesBase64({
+                    action: 'submitReport',
                     userEmail: currentUser.email,
                     reportType: reportType,
                     reportDate: reportDate,
@@ -1674,13 +1543,13 @@
                 if (result.success) {
                     showAlert('Relatório enviado com sucesso!', 'success');
                     document.getElementById('reportForm').reset();
-                    document.getElementById('reportFilesValidation').style.display = 'none';
+                    document.getElementById('reportFilesInfo').style.display = 'none';
                     loadUserData();
                 } else {
                     showAlert('Erro ao enviar relatório: ' + result.message, 'error');
                 }
             } catch (error) {
-                console.error('[CDR Sul] ❌ Erro ao enviar relatório:', error);
+                console.error('❌ Erro ao enviar relatório:', error);
                 showAlert('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
             } finally {
                 // Restaurar botão
@@ -1703,14 +1572,15 @@
             const btn = document.getElementById('activityBtn');
             const btnText = btn.querySelector('.btn-text');
             
-            console.log('[CDR Sul] Cadastrando atividade:', title);
+            console.log('🎯 Cadastrando atividade:', title);
             
             // Mostrar loading
             btn.disabled = true;
             btnText.innerHTML = '<div class="spinner"></div> Cadastrando atividade...';
             
             try {
-                const result = await makeRequest('submitActivity', {
+                const result = await uploadFilesBase64({
+                    action: 'submitActivity',
                     userEmail: currentUser.email,
                     activityType: activityType,
                     activityDate: activityDate,
@@ -1723,13 +1593,13 @@
                 if (result.success) {
                     showAlert('Atividade cadastrada com sucesso!', 'success');
                     document.getElementById('activityForm').reset();
-                    document.getElementById('activityFilesValidation').style.display = 'none';
+                    document.getElementById('activityFilesInfo').style.display = 'none';
                     loadUserData();
                 } else {
                     showAlert('Erro ao cadastrar atividade: ' + result.message, 'error');
                 }
             } catch (error) {
-                console.error('[CDR Sul] ❌ Erro ao cadastrar atividade:', error);
+                console.error('❌ Erro ao cadastrar atividade:', error);
                 showAlert('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
             } finally {
                 // Restaurar botão
@@ -1754,29 +1624,30 @@
                 return;
             }
             
-            console.log('[CDR Sul] Enviando arquivos, categoria:', category);
+            console.log('📁 Enviando arquivos, categoria:', category);
             
             // Mostrar loading
             btn.disabled = true;
             btnText.innerHTML = '<div class="spinner"></div> Enviando arquivos...';
             
             try {
-                const result = await makeRequest('uploadFiles', {
+                const result = await uploadFilesBase64({
+                    action: 'uploadFiles',
                     userEmail: currentUser.email,
                     category: category,
                     description: description
                 }, files);
                 
                 if (result.success) {
-                    showAlert('Arquivo(s) enviado(s) com sucesso!', 'success');
+                    showAlert(`${files.length} arquivo(s) enviado(s) com sucesso!`, 'success');
                     document.getElementById('filesForm').reset();
-                    document.getElementById('uploadFilesValidation').style.display = 'none';
+                    document.getElementById('uploadFilesInfo').style.display = 'none';
                     loadUserData();
                 } else {
                     showAlert('Erro ao enviar arquivos: ' + result.message, 'error');
                 }
             } catch (error) {
-                console.error('[CDR Sul] ❌ Erro ao enviar arquivos:', error);
+                console.error('❌ Erro ao enviar arquivos:', error);
                 showAlert('Erro ao enviar arquivos: ' + error.message, 'error');
             } finally {
                 // Restaurar botão
@@ -1785,14 +1656,76 @@
             }
         }
 
+        // ==================== UPLOAD DE ARQUIVOS VIA BASE64 ====================
+        async function uploadFilesBase64(data, files) {
+            console.log('🚀 Iniciando upload Base64...');
+            
+            // Se não há arquivos, enviar apenas dados
+            if (!files || files.length === 0) {
+                return await sendRequest(data);
+            }
+            
+            // Converter arquivos para Base64
+            const filesBase64 = [];
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
+                // Verificar tamanho
+                if (file.size > CONFIG.MAX_FILE_SIZE) {
+                    throw new Error(`Arquivo ${file.name} é muito grande (${(file.size / 1024 / 1024).toFixed(2)}MB). Máximo: 10MB`);
+                }
+                
+                console.log(`📁 Convertendo ${file.name} para Base64...`);
+                
+                const base64 = await convertFileToBase64(file);
+                
+                filesBase64.push({
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    base64: base64
+                });
+                
+                console.log(`✅ ${file.name} convertido (${base64.length} caracteres)`);
+            }
+            
+            // Adicionar arquivos aos dados
+            data.filesBase64 = JSON.stringify(filesBase64);
+            
+            console.log(`📤 Enviando ${filesBase64.length} arquivo(s) via Base64...`);
+            
+            return await sendRequest(data);
+        }
+
+        // ==================== CONVERTER ARQUIVO PARA BASE64 ====================
+        function convertFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = function() {
+                    // Remover prefixo "data:tipo/mime;base64,"
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                
+                reader.onerror = function() {
+                    reject(new Error('Erro ao ler arquivo para conversão Base64'));
+                };
+                
+                reader.readAsDataURL(file);
+            });
+        }
+
         // ==================== GERAR PDF ====================
         async function generatePDF() {
             if (!currentUser) return;
             
-            console.log('[CDR Sul] Gerando PDF para:', currentUser.email);
+            console.log('📄 Gerando PDF para:', currentUser.email);
             
             try {
-                const result = await makeRequest('generatePDF', {
+                const result = await sendRequest({
+                    action: 'generatePDF',
                     userEmail: currentUser.email
                 });
                 
@@ -1803,7 +1736,7 @@
                     showAlert('Erro ao gerar relatório: ' + (result.message || 'Erro desconhecido'), 'error');
                 }
             } catch (error) {
-                console.error('[CDR Sul] ❌ Erro ao gerar PDF:', error);
+                console.error('❌ Erro ao gerar PDF:', error);
                 showAlert('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
             }
         }
@@ -1812,10 +1745,11 @@
         async function generateAdminPDF(userEmail) {
             if (!currentUser || !currentUser.isAdmin) return;
             
-            console.log('[CDR Sul] Gerando PDF admin para:', userEmail);
+            console.log('📄 Gerando PDF admin para:', userEmail);
             
             try {
-                const result = await makeRequest('generatePDF', {
+                const result = await sendRequest({
+                    action: 'generatePDF',
                     userEmail: userEmail,
                     adminRequest: true
                 });
@@ -1827,7 +1761,7 @@
                     showAlert('Erro ao gerar relatório: ' + (result.message || 'Erro desconhecido'), 'error');
                 }
             } catch (error) {
-                console.error('[CDR Sul] ❌ Erro ao gerar PDF admin:', error);
+                console.error('❌ Erro ao gerar PDF admin:', error);
                 showAlert('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
             }
         }
@@ -1837,7 +1771,8 @@
             if (!currentUser) return;
             
             try {
-                const result = await makeRequest('getUserData', {
+                const result = await sendRequest({
+                    action: 'getUserData',
                     userEmail: currentUser.email
                 });
                 
@@ -1852,10 +1787,10 @@
                     if (statsActivities) statsActivities.textContent = data.activities || 0;
                     if (statsFiles) statsFiles.textContent = data.files || 0;
                     
-                    console.log('[CDR Sul] ✅ Dados do usuário carregados:', data);
+                    console.log('✅ Dados do usuário carregados:', data);
                 }
             } catch (error) {
-                console.error('[CDR Sul] ❌ Erro ao carregar dados do usuário:', error);
+                console.error('❌ Erro ao carregar dados do usuário:', error);
             }
         }
 
@@ -1864,7 +1799,9 @@
             if (!currentUser || !currentUser.isAdmin) return;
             
             try {
-                const result = await makeRequest('getAdminData');
+                const result = await sendRequest({
+                    action: 'getAdminData'
+                });
                 
                 if (result.success) {
                     const data = result.data;
@@ -1940,23 +1877,52 @@
                         filesList.innerHTML = '<p>Nenhum arquivo encontrado</p>';
                     }
                     
-                    console.log('[CDR Sul] ✅ Dados administrativos carregados:', data);
+                    console.log('✅ Dados administrativos carregados:', data);
                 }
             } catch (error) {
-                console.error('[CDR Sul] ❌ Erro ao carregar dados administrativos:', error);
+                console.error('❌ Erro ao carregar dados administrativos:', error);
+            }
+        }
+
+        // ==================== ENVIAR REQUISIÇÃO ====================
+        async function sendRequest(data) {
+            console.log('📡 Enviando requisição:', data);
+            
+            try {
+                const response = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams(data)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                
+                const text = await response.text();
+                const result = JSON.parse(text);
+                console.log('📥 Resposta recebida:', result);
+                return result;
+                
+            } catch (error) {
+                console.error('❌ Erro na requisição:', error);
+                throw error;
             }
         }
 
         // ==================== LOGOUT ====================
         function logout() {
-            console.log('[CDR Sul] Fazendo logout');
+            console.log('👋 Fazendo logout');
             currentUser = null;
             isLoggedIn = false;
             localStorage.removeItem('cdr_user');
             showLoginScreen();
         }
 
-        console.log(`[CDR Sul] Sistema CDR Sul - Versão ${CONFIG.VERSION}`);
+        console.log(`✅ Sistema CDR Sul - ${CONFIG.VERSION}`);
     </script>
 </body>
 </html>
