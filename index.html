@@ -986,12 +986,12 @@
                             </div>
                             
                             <div class="form-group">
-                                <label for="registerPassword">Senha (Letra e Número):</label>
+                                <label for="registerPassword">Senha:</label>
                                 <input type="password" id="registerPassword" required minlength="6">
                             </div>
                             
                             <div class="form-group">
-                                <label for="registerConfirmPassword">Confirmar Senha (Letra e Número):</label>
+                                <label for="registerConfirmPassword">Confirmar Senha:</label>
                                 <input type="password" id="registerConfirmPassword" required minlength="6">
                             </div>
                             
@@ -1729,9 +1729,13 @@
                     userEmail: currentUser.email
                 });
                 
-                if (result.success && result.pdfUrl) {
+                console.log('📥 Resposta do PDF:', result);
+                
+                if (result.success && result.data && result.data.pdfUrl) {
                     showAlert('Relatório PDF gerado com sucesso! Abrindo em nova aba...', 'success');
-                    window.open(result.pdfUrl, '_blank');
+                    window.open(result.data.pdfUrl, '_blank');
+                } else if (result.success) {
+                    showAlert('PDF gerado, mas URL não encontrada. Verifique a pasta Relatórios PDF no Drive.', 'info');
                 } else {
                     showAlert('Erro ao gerar relatório: ' + (result.message || 'Erro desconhecido'), 'error');
                 }
@@ -1754,9 +1758,13 @@
                     adminRequest: true
                 });
                 
-                if (result.success && result.pdfUrl) {
+                console.log('📥 Resposta do PDF admin:', result);
+                
+                if (result.success && result.data && result.data.pdfUrl) {
                     showAlert('Relatório PDF gerado com sucesso! Abrindo em nova aba...', 'success');
-                    window.open(result.pdfUrl, '_blank');
+                    window.open(result.data.pdfUrl, '_blank');
+                } else if (result.success) {
+                    showAlert('PDF gerado, mas URL não encontrada. Verifique a pasta Relatórios PDF no Drive.', 'info');
                 } else {
                     showAlert('Erro ao gerar relatório: ' + (result.message || 'Erro desconhecido'), 'error');
                 }
