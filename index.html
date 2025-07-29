@@ -1212,7 +1212,9 @@
                     <div class="pdf-section">
                         <h4>📄 Relatório Completo em PDF</h4>
                         <p>Gere um relatório completo com todas as suas atividades, relatórios e arquivos enviados.</p>
-                        <button onclick="generatePDF()" class="btn-pdf">Gerar Relatório PDF</button>
+                        <button onclick="generatePDF()" class="btn-pdf" id="pdfBtn">
+                            <span class="btn-text">Gerar Relatório PDF</span>
+                        </button>
                     </div>
                 </div>
             `;
@@ -1721,7 +1723,14 @@
         async function generatePDF() {
             if (!currentUser) return;
             
+            const btn = document.getElementById('pdfBtn');
+            const btnText = btn.querySelector('.btn-text');
+            
             console.log('📄 Gerando PDF para:', currentUser.email);
+            
+            // Mostrar loading
+            btn.disabled = true;
+            btnText.innerHTML = '<div class="spinner"></div> Gerando PDF...';
             
             try {
                 const result = await sendRequest({
@@ -1731,17 +1740,35 @@
                 
                 console.log('📥 Resposta do PDF:', result);
                 
-                if (result.success && result.data && result.data.pdfUrl) {
-                    showAlert('Relatório PDF gerado com sucesso! Abrindo em nova aba...', 'success');
-                    window.open(result.data.pdfUrl, '_blank');
-                } else if (result.success) {
-                    showAlert('PDF gerado, mas URL não encontrada. Verifique a pasta Relatórios PDF no Drive.', 'info');
+                if (result.success) {
+                    // Verificar se há dados retornados
+                    if (result.data && result.data.pdfUrl) {
+                        showAlert('Relatório PDF gerado com sucesso! Abrindo em nova aba...', 'success');
+                        // Tentar abrir em nova aba
+                        const newWindow = window.open(result.data.pdfUrl, '_blank');
+                        if (!newWindow) {
+                            showAlert('Pop-up bloqueado! Clique no link para abrir: ' + result.data.pdfUrl, 'info');
+                        }
+                    } else if (result.pdfUrl) {
+                        // Formato alternativo de resposta
+                        showAlert('Relatório PDF gerado com sucesso! Abrindo em nova aba...', 'success');
+                        const newWindow = window.open(result.pdfUrl, '_blank');
+                        if (!newWindow) {
+                            showAlert('Pop-up bloqueado! Clique no link para abrir: ' + result.pdfUrl, 'info');
+                        }
+                    } else {
+                        showAlert('PDF gerado com sucesso! Verifique a pasta "Relatórios PDF" no Google Drive.', 'success');
+                    }
                 } else {
                     showAlert('Erro ao gerar relatório: ' + (result.message || 'Erro desconhecido'), 'error');
                 }
             } catch (error) {
                 console.error('❌ Erro ao gerar PDF:', error);
                 showAlert('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+            } finally {
+                // Restaurar botão
+                btn.disabled = false;
+                btnText.textContent = 'Gerar Relatório PDF';
             }
         }
 
@@ -1760,11 +1787,22 @@
                 
                 console.log('📥 Resposta do PDF admin:', result);
                 
-                if (result.success && result.data && result.data.pdfUrl) {
-                    showAlert('Relatório PDF gerado com sucesso! Abrindo em nova aba...', 'success');
-                    window.open(result.data.pdfUrl, '_blank');
-                } else if (result.success) {
-                    showAlert('PDF gerado, mas URL não encontrada. Verifique a pasta Relatórios PDF no Drive.', 'info');
+                if (result.success) {
+                    if (result.data && result.data.pdfUrl) {
+                        showAlert('Relatório PDF gerado com sucesso! Abrindo em nova aba...', 'success');
+                        const newWindow = window.open(result.data.pdfUrl, '_blank');
+                        if (!newWindow) {
+                            showAlert('Pop-up bloqueado! Clique no link para abrir: ' + result.data.pdfUrl, 'info');
+                        }
+                    } else if (result.pdfUrl) {
+                        showAlert('Relatório PDF gerado com sucesso! Abrindo em nova aba...', 'success');
+                        const newWindow = window.open(result.pdfUrl, '_blank');
+                        if (!newWindow) {
+                            showAlert('Pop-up bloqueado! Clique no link para abrir: ' + result.pdfUrl, 'info');
+                        }
+                    } else {
+                        showAlert('PDF gerado com sucesso! Verifique a pasta "Relatórios PDF" no Google Drive.', 'success');
+                    }
                 } else {
                     showAlert('Erro ao gerar relatório: ' + (result.message || 'Erro desconhecido'), 'error');
                 }
