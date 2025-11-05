@@ -1813,30 +1813,56 @@
         }
 
         // ==================== CARREGAR DADOS DO USUÁRIO ====================
+// ==================== CARREGAR DADOS DO USUÁRIO ====================
         async function loadUserData() {
             if (!currentUser) return;
             
+            // Buscar os elementos da UI primeiro
+            const statsReports = document.getElementById('statsReports');
+            const statsActivities = document.getElementById('statsActivities');
+            const statsFiles = document.getElementById('statsFiles');
+
             try {
-                const result = await sendRequest({
-                    action: 'getUserData',
-                    userEmail: currentUser.email
-                });
+                let action = '';
+                let params = {};
+
+                if (currentUser.isAdmin) {
+                    // Se for admin, buscar os dados GLOBAIS
+                    console.log('📊 Admin: Carregando dados globais para Visão Geral...');
+                    action = 'getAdminData';
+                    params = { action: action };
+                } else {
+                    // Se for usuário comum, buscar seus dados PESSOAIS
+                    console.log('👤 Usuário: Carregando dados do usuário...');
+                    action = 'getUserData';
+                    params = { action: action, userEmail: currentUser.email };
+                }
+
+                const result = await sendRequest(params);
                 
                 if (result.success) {
                     const data = result.data;
                     
-                    const statsReports = document.getElementById('statsReports');
-                    const statsActivities = document.getElementById('statsActivities');
-                    const statsFiles = document.getElementById('statsFiles');
-                    
-                    if (statsReports) statsReports.textContent = data.reports || 0;
-                    if (statsActivities) statsActivities.textContent = data.activities || 0;
-                    if (statsFiles) statsFiles.textContent = data.files || 0;
-                    
-                    console.log('✅ Dados do usuário carregados:', data);
+                    if (currentUser.isAdmin) {
+                        // Admin usa os totais (totalReports, totalActivities, totalFiles)
+                        if (statsReports) statsReports.textContent = data.totalReports || 0;
+                        if (statsActivities) statsActivities.textContent = data.totalActivities || 0;
+                        if (statsFiles) statsFiles.textContent = data.totalFiles || 0;
+                        console.log('✅ Dados globais carregados:', data);
+                    } else {
+                        // Usuário comum usa seus dados (reports, activities, files)
+                        if (statsReports) statsReports.textContent = data.reports || 0;
+                        if (statsActivities) statsActivities.textContent = data.activities || 0;
+                        if (statsFiles) statsFiles.textContent = data.files || 0;
+                        console.log('✅ Dados do usuário carregados:', data);
+                    }
                 }
             } catch (error) {
-                console.error('❌ Erro ao carregar dados do usuário:', error);
+                console.error('❌ Erro ao carregar dados da Visão Geral:', error);
+                // Definir como 0 em caso de erro para não mostrar "-"
+                if (statsReports) statsReports.textContent = 0;
+                if (statsActivities) statsActivities.textContent = 0;
+                if (statsFiles) statsFiles.textContent = 0;
             }
         }
 
