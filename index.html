@@ -779,6 +779,63 @@
             font-size: 0.8rem;
             margin-top: 4px;
         }
+        /* ===== ESTILOS DAS TABELAS FINANCEIRAS ===== */
+        .finance-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .finance-section h3 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        
+        .finance-table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        .finance-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .finance-table th,
+        .finance-table td {
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        .finance-table th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .finance-table td {
+            color: #2d3748;
+        }
+
+        .finance-table tr:nth-child(even) {
+            background: #fdfdfd;
+        }
+
+        .finance-table td a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .finance-table td a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -1128,13 +1185,18 @@
                         </div>
                         <button onclick="logout()" class="btn-logout">Sair</button>
                     </header>
-                    
+                                   
                     <nav class="dashboard-nav">
                         <button onclick="showTab('overview')" class="nav-btn active" data-tab="overview">Visão Geral</button>
                         <button onclick="showTab('reports')" class="nav-btn" data-tab="reports">Relatórios</button>
-                        <button onclick="showTab('activities')" class="nav-btn" data-tab="activities">Atividades</button>
+  
+                      <button onclick="showTab('activities')" class="nav-btn" data-tab="activities">Atividades</button>
                         <button onclick="showTab('files')" class="nav-btn" data-tab="files">Arquivos</button>
-                        ${user.isAdmin ? '<button onclick="showTab(\'admin\')" class="nav-btn" data-tab="admin">Admin</button>' : ''}
+                        
+                        <button onclick="showTab('finance')" class="nav-btn" data-tab="finance">Prestação de Contas</button>
+                        
+                        ${user.isAdmin ?
+'<button onclick="showTab(\'admin\')" class="nav-btn" data-tab="admin">Admin</button>' : ''}
                     </nav>
                     
                     <main class="dashboard-content" id="dashboardContent">
@@ -1176,6 +1238,9 @@
                     if (currentUser && currentUser.isAdmin) {
                         showAdminTab();
                     }
+                    break;
+                case 'finance':
+                    showFinanceTab();
                     break;
             }
         }
@@ -1391,6 +1456,405 @@
             document.getElementById('filesForm').addEventListener('submit', handleUploadFiles);
         }
 
+        // ==================== MOSTRAR ABA PRESTAÇÃO DE CONTAS ====================
+        function showFinanceTab() {
+            document.getElementById('dashboardContent').innerHTML = `
+                <div class="finance-tab">
+                    
+                    <div class="finance-section">
+                        <h3>Demonstrativo da Aplicação</h3>
+                        <div class="finance-table-container">
+                            <table class="finance-table" id="financeSummaryTable">
+                                <thead>
+                                    <tr>
+                                        <th>Recurso / Elemento de Despesa</th>
+                                        <th>Valor Planejado (A)</th>
+                                        <th>Valor Executado (B)</th>
+                                        <th>Valor Disponível (A-B)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="financeSummaryBody">
+                                    <tr><td colspan="4" class="loading">Carregando resumo...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="finance-section">
+                        <h3>Memória de Cálculo (Orçamento)</h3>
+                        
+                        <form id="budgetItemForm">
+                            <div class="form-group">
+                                <label for="budgetRecurso">Fonte do Recurso (Elemento de Despesa):</label>
+                                <input type="text" id="budgetRecurso" placeholder="Ex: 339018 - Auxílio Financeiro..." required>
+                            </div>
+                            <div class="form-group">
+                                <label for="budgetDescricao">Descrição:</label>
+                                <input type="text" id="budgetDescricao" placeholder="Ex: Bolsa Estudante" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="budgetUnidade">Unidade de Medida:</label>
+                                <input type="text" id="budgetUnidade" placeholder="Ex: Meses, unidade, kit" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="budgetQtd">Quantidade:</label>
+                                <input type="number" id="budgetQtd" value="1" step="any" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="budgetValorUnitario">Valor Unitário (R$):</label>
+                                <input type="number" id="budgetValorUnitario" placeholder="Ex: 700.00" step="0.01" required>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary" id="budgetItemBtn">
+                                    <span class="btn-text">Adicionar Item ao Orçamento</span>
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div class="finance-table-container">
+                            <table class="finance-table" id="budgetItemsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Recurso</th>
+                                        <th>Descrição</th>
+                                        <th>Unidade</th>
+                                        <th>Qtd</th>
+                                        <th>Valor Unitário (R$)</th>
+                                        <th>Total Orçado (R$)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="budgetItemsBody">
+                                    <tr><td colspan="6" class="loading">Carregando itens do orçamento...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="finance-section">
+                        <h3>Lançamento de Gastos (Execução)</h3>
+                        
+                        <form id="expenseForm">
+                            <div class="form-group">
+                                <label for="expenseRecurso">Recurso (Orçamento):</label>
+                                <select id="expenseRecurso" required>
+                                    <option value="">Selecione o recurso do orçamento</option>
+                                    </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="expenseGastoNaoExecutado">
+                                    <input type="checkbox" id="expenseGastoNaoExecutado" style="width: auto; margin-right: 10px;">
+                                    Marque esta opção para registrar que o desembolso planejado não foi executado.
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label for="expenseData">Data do Gasto (Mês/Ano):</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <select id="expenseMes" required>
+                                        <option value="">Mês</option>
+                                        ${Array.from({length: 12}, (_, i) => `<option value="${i + 1}">${String(i + 1).padStart(2, '0')}</option>`).join('')}
+                                    </select>
+                                    <input type="number" id="expenseAno" placeholder="Ano" value="${new Date().getFullYear()}" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="expenseDescricao">Descrição do Gasto:</label>
+                                <textarea id="expenseDescricao" rows="3" placeholder="Ex: Bolsa Extensão - Curso Superior - Isabella C." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="expenseQtd">Quantidade:</label>
+                                <input type="number" id="expenseQtd" value="1" step="any" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="expenseValorUnitario">Valor Unitário (R$):</label>
+                                <input type="number" id="expenseValorUnitario" placeholder="Ex: 700.00" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="expenseObs">Observação / Justificativa:</label>
+                                <textarea id="expenseObs" rows="3" placeholder="Insira alguma informação adicional referente à aquisição..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="expenseNotaFiscal">Nota Fiscal ou Cupom (Opcional):</label>
+                                <input type="file" id="expenseNotaFiscal">
+                                <div id="expenseNotaFiscalInfo" class="file-validation" style="display: none;"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="expenseCotacao">Cotação de Preços (Opcional):</label>
+                                <input type="file" id="expenseCotacao" accept=".zip,.rar,.pdf">
+                                <div id="expenseCotacaoInfo" class="file-validation" style="display: none;"></div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary" id="expenseBtn">
+                                    <span class="btn-text">Adicionar Gasto</span>
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="finance-table-container">
+                            <table class="finance-table" id="expensesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Recurso</th>
+                                        <th>Descrição</th>
+                                        <th>Qtd</th>
+                                        <th>Valor Unit. (R$)</th>
+                                        <th>Total Exec. (R$)</th>
+                                        <th>Arquivos</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expensesBody">
+                                    <tr><td colspan="7" class="loading">Carregando gastos...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            `;
+
+            // Configurar event listeners dos formulários
+            document.getElementById('budgetItemForm').addEventListener('submit', handleSubmitBudgetItem);
+            document.getElementById('expenseForm').addEventListener('submit', handleSubmitExpense);
+
+            // Configurar validação de arquivos
+            document.getElementById('expenseNotaFiscal').addEventListener('change', function() { validateFiles(this); });
+            document.getElementById('expenseCotacao').addEventListener('change', function() { validateFiles(this); });
+
+            // Carregar os dados
+            loadFinanceData();
+        }
+
+        // ==================== CARREGAR DADOS FINANCEIROS ====================
+        async function loadFinanceData() {
+            if (!currentUser) return;
+            
+            console.log('💰 Carregando dados financeiros...');
+            try {
+                const result = await sendRequest({
+                    action: 'getFinanceData',
+                    userEmail: currentUser.email
+                });
+                
+                if (result.success) {
+                    const data = result.data;
+                    console.log('📊 Dados financeiros recebidos:', data);
+
+                    // 1. Popular Resumo (Summary)
+                    const summaryBody = document.getElementById('financeSummaryBody');
+                    summaryBody.innerHTML = '';
+                    if (Object.keys(data.summary).length === 0) {
+                        summaryBody.innerHTML = '<tr><td colspan="4">Nenhum dado de orçamento encontrado.</td></tr>';
+                    } else {
+                        let totalPlanejado = 0;
+                        let totalExecutado = 0;
+                        for (const recurso in data.summary) {
+                            const item = data.summary[recurso];
+                            totalPlanejado += item.planejado;
+                            totalExecutado += item.executado;
+                            summaryBody.innerHTML += `
+                                <tr>
+                                    <td>${recurso}</td>
+                                    <td>R$ ${item.planejado.toFixed(2)}</td>
+                                    <td>R$ ${item.executado.toFixed(2)}</td>
+                                    <td>R$ ${item.disponivel.toFixed(2)}</td>
+                                </tr>
+                            `;
+                        }
+                        // Adicionar linha de Total
+                        summaryBody.innerHTML += `
+                            <tr style="font-weight: bold; background: #f7fafc;">
+                                <td>TOTAL</td>
+                                <td>R$ ${totalPlanejado.toFixed(2)}</td>
+                                <td>R$ ${totalExecutado.toFixed(2)}</td>
+                                <td>R$ ${(totalPlanejado - totalExecutado).toFixed(2)}</td>
+                            </tr>
+                        `;
+                    }
+
+                    // 2. Popular Itens do Orçamento
+                    const budgetBody = document.getElementById('budgetItemsBody');
+                    const expenseRecursoSelect = document.getElementById('expenseRecurso');
+                    budgetBody.innerHTML = '';
+                    // Limpar select (mantendo a primeira opção)
+                    while (expenseRecursoSelect.options.length > 1) {
+                        expenseRecursoSelect.remove(1);
+                    }
+
+                    if (data.budgetItems.length === 0) {
+                        budgetBody.innerHTML = '<tr><td colspan="6">Nenhum item de orçamento cadastrado.</td></tr>';
+                    } else {
+                        data.budgetItems.forEach(item => {
+                            budgetBody.innerHTML += `
+                                <tr>
+                                    <td>${item.recurso}</td>
+                                    <td>${item.descricao}</td>
+                                    <td>${item.unidade}</td>
+                                    <td>${item.qtd}</td>
+                                    <td>R$ ${item.valorUnitario.toFixed(2)}</td>
+                                    <td>R$ ${item.totalOrcado.toFixed(2)}</td>
+                                </tr>
+                            `;
+                            // Adicionar ao <select> do formulário de gastos
+                            const option = document.createElement('option');
+                            option.value = item.recurso; // Usar o nome do recurso como valor
+                            option.textContent = `${item.recurso} (Orçado: R$ ${item.totalOrcado.toFixed(2)})`;
+                            expenseRecursoSelect.appendChild(option);
+                        });
+                    }
+                    
+                    // 3. Popular Gastos (Expenses)
+                    const expensesBody = document.getElementById('expensesBody');
+                    expensesBody.innerHTML = '';
+                    if (data.expenses.length === 0) {
+                        expensesBody.innerHTML = '<tr><td colspan="7">Nenhum gasto lançado.</td></tr>';
+                    } else {
+                        data.expenses.forEach(gasto => {
+                            let arquivosHTML = '';
+                            if (gasto.notaURL) {
+                                arquivosHTML += `<a href="${gasto.notaURL}" target="_blank">Nota Fiscal</a><br>`;
+                            }
+                            if (gasto.cotacaoURL) {
+                                arquivosHTML += `<a href="${gasto.cotacaoURL}" target="_blank">Cotação</a>`;
+                            }
+                            
+                            expensesBody.innerHTML += `
+                                <tr>
+                                    <td>${gasto.dataGasto}</td>
+                                    <td>${gasto.recurso}</td>
+                                    <td>${gasto.descricao}</td>
+                                    <td>${gasto.qtd}</td>
+                                    <td>R$ ${gasto.valorUnitario.toFixed(2)}</td>
+                                    <td>R$ ${gasto.totalExecutado.toFixed(2)}</td>
+                                    <td>${arquivosHTML || 'N/A'}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+
+                } else {
+                    showAlert('Erro ao carregar dados financeiros: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados financeiros:', error);
+                showAlert('Erro de conexão ao carregar dados financeiros.', 'error');
+            }
+        }
+
+        // ==================== PROCESSAR ENVIO DE ITEM DE ORÇAMENTO ====================
+        async function handleSubmitBudgetItem(event) {
+            event.preventDefault();
+            const btn = document.getElementById('budgetItemBtn');
+            const btnText = btn.querySelector('.btn-text');
+
+            const data = {
+                action: 'submitBudgetItem',
+                userEmail: currentUser.email,
+                recurso: document.getElementById('budgetRecurso').value,
+                descricao: document.getElementById('budgetDescricao').value,
+                unidadeMedida: document.getElementById('budgetUnidade').value,
+                quantidade: document.getElementById('budgetQtd').value,
+                valorUnitario: document.getElementById('budgetValorUnitario').value
+            };
+            
+            console.log('💸 Enviando item de orçamento:', data.descricao);
+            
+            btn.disabled = true;
+            btnText.innerHTML = '<div class="spinner"></div> Salvando...';
+
+            try {
+                const result = await sendRequest(data);
+                if (result.success) {
+                    showAlert('Item de orçamento salvo com sucesso!', 'success');
+                    document.getElementById('budgetItemForm').reset();
+                    loadFinanceData(); // Recarregar todos os dados
+                } else {
+                    showAlert('Erro ao salvar item: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao salvar item de orçamento:', error);
+                showAlert('Erro de conexão. Verifique sua internet.', 'error');
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'Adicionar Item ao Orçamento';
+            }
+        }
+
+        // ==================== PROCESSAR ENVIO DE GASTO (EXECUÇÃO) ====================
+        async function handleSubmitExpense(event) {
+            event.preventDefault();
+            const btn = document.getElementById('expenseBtn');
+            const btnText = btn.querySelector('.btn-text');
+
+            const notaFiscalFiles = document.getElementById('expenseNotaFiscal').files;
+            const cotacaoFiles = document.getElementById('expenseCotacao').files;
+
+            const data = {
+                action: 'submitExpense',
+                userEmail: currentUser.email,
+                recurso: document.getElementById('expenseRecurso').value,
+                gastoNaoExecutado: document.getElementById('expenseGastoNaoExecutado').checked,
+                anoGasto: document.getElementById('expenseAno').value,
+                mesGasto: document.getElementById('expenseMes').value,
+                descricao: document.getElementById('expenseDescricao').value,
+                quantidade: document.getElementById('expenseQtd').value,
+                valorUnitario: document.getElementById('expenseValorUnitario').value,
+                observacao: document.getElementById('expenseObs').value
+            };
+
+            console.log('🧾 Enviando gasto:', data.descricao);
+            
+            btn.disabled = true;
+            btnText.innerHTML = '<div class="spinner"></div> Enviando gasto...';
+            
+            try {
+                // Lógica para converter arquivos (se existirem)
+                // Usamos o mesmo método de conversão do script
+                if (notaFiscalFiles.length > 0) {
+                    const file = notaFiscalFiles[0];
+                    console.log(`Buscando base64 para ${file.name}...`);
+                    const base64 = await convertFileToBase64(file);
+                    data.notaFiscalBase64 = JSON.stringify([{
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        base64: base64
+                    }]);
+                }
+
+                if (cotacaoFiles.length > 0) {
+                    const file = cotacaoFiles[0];
+                    console.log(`Buscando base64 para ${file.name}...`);
+                    const base64 = await convertFileToBase64(file);
+                    data.cotacaoBase64 = JSON.stringify([{
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        base64: base64
+                    }]);
+                }
+
+                // Enviar requisição com todos os dados
+                const result = await sendRequest(data);
+                
+                if (result.success) {
+                    showAlert('Gasto salvo com sucesso!', 'success');
+                    document.getElementById('expenseForm').reset();
+                    // Limpar divs de validação de arquivo
+                    document.getElementById('expenseNotaFiscalInfo').style.display = 'none';
+                    document.getElementById('expenseCotacaoInfo').style.display = 'none';
+                    loadFinanceData(); // Recarregar todos os dados
+                } else {
+                    showAlert('Erro ao salvar gasto: ' + result.message, 'error');
+                }
+                
+            } catch (error) {
+                console.error('❌ Erro ao enviar gasto:', error);
+                showAlert('Erro ao enviar gasto: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'Adicionar Gasto';
+            }
+        }
         // ==================== ABA ADMIN ====================
         function showAdminTab() {
             if (!currentUser || !currentUser.isAdmin) return;
