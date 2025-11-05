@@ -480,9 +480,10 @@
         /* ===== FORMULÁRIOS ===== */
         .reports-tab,
         .activities-tab,
-        .files-tab {
+        .files-tab,
+        .finance-tab {
             background: white;
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
             padding: 25px;
             border-radius: 10px;
@@ -1486,9 +1487,15 @@
                         <form id="budgetItemForm">
                             <div class="form-group">
                                 <label for="budgetRecurso">Fonte do Recurso (Elemento de Despesa):</label>
-                                <input type="text" id="budgetRecurso" placeholder="Ex: 339018 - Auxílio Financeiro..." required>
+                                <select id="budgetRecurso" required>
+                                    <option value="">Selecione um recurso</option>
+                                    <option value="Auxílio Financeiro Bolsa">Auxílio Financeiro Bolsa</option>
+                                    <option value="Material de Consumo">Material de Consumo</option>
+                                    <option value="Equipamentos e Material Permanente">Equipamentos e Material Permanente</option>
+                                </select>
                             </div>
-                            <div class="form-group">
+        
+                    <div class="form-group">
                                 <label for="budgetDescricao">Descrição:</label>
                                 <input type="text" id="budgetDescricao" placeholder="Ex: Bolsa Estudante" required>
                             </div>
@@ -1697,7 +1704,7 @@
                             // Adicionar ao <select> do formulário de gastos
                             const option = document.createElement('option');
                             option.value = item.recurso; // Usar o nome do recurso como valor
-                            option.textContent = `${item.recurso} (Orçado: R$ ${item.totalOrcado.toFixed(2)})`;
+                            option.textContent = `${item.recurso} - ${item.descricao} (Orçado: R$ ${item.totalOrcado.toFixed(2)})`;
                             expenseRecursoSelect.appendChild(option);
                         });
                     }
