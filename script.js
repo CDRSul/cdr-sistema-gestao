@@ -1,7 +1,7 @@
 // ==================== CONFIGURAÇÕES ====================
 const CONFIG = {
     GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxTacaMknU6w2LOgLvjeMMxd_431FdlJbQB1XdcJd7xWvJ3JMq_rUz5egmPpvxxySYCjw/exec',
-    VERSION: '4.0 - FINAL FUNCIONANDO COM MELHORIAS',
+    VERSION: '1.0 - FINAL FUNCIONANDO COM MELHORIAS',
     DEBUG: true,
     MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB em bytes
     MAX_TOTAL_SIZE: 50 * 1024 * 1024, // 50MB total
