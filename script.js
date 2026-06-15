@@ -1105,9 +1105,9 @@ async function sendRequest(data) {
             method: 'POST',
             mode: 'cors',
             headers: {
-                'Content-Type': 'text/plain;charset=utf-8'
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: JSON.stringify(data),
+            body: new URLSearchParams(data), // Garante o formato correto para o Google doPost
             redirect: 'follow'
         });
         
